@@ -89,7 +89,9 @@ for (i in 1:4) {
     tcr_ni <- tcr
     coefs_ni <- coefs_tab
     
-    rm(coefs_mat)
+    # rm(coefs_mat)
+
+    rm(coefs_mat, coefs_df)
   
   }
   
@@ -109,8 +111,8 @@ for (i in 1:4) {
   y_pred <- t(y_pred)
   
   ## Again, will plot the temperature prediction at 2100 for all priors and scenariors
-  ## later. However, uncomment if specificaly want to check the results for the noninf.
-  ## priors by themselves.
+  ## later. Uncomment the below only if specificaly want to check the results for the 
+  ## noninf. priors by themselves.
 #   plot(density(y_pred["2100", ]), col = "dodgerblue2", 
 #        main = paste("2100", prior_type, convic_type, rcp_type), xlab = expression(~degree~C),
 #        cex.lab = 1.5, cex.axis = 1.5, cex.main = 1.5, cex.sub = 1.5)
@@ -250,3 +252,17 @@ predictions_plot +
   ggsave(file = paste0("./TablesFigures/predictions-", prior_type, convic_type, "-prop.pdf"),
          width = 10, height = 6.75, 
          device = cairo_pdf) ## Need for Palatino font spacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+
+## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
+## together with the had obs, to the recursive data folder. We'll be using the
+## difference between these series as noise when simulating future "true" temperatures
+## in the recursive section of the paper.
+y_dev <- 
+  predictions %>% 
+  filter(series %in% c("had", "fitted")) %>%
+  select(year:mean) %>%
+  spread(series, mean) %>%
+  mutate(dev = fitted - had) %>%
+  filter(!is.na(dev))
+
+write_csv(y_dev, "./Recursive/Data/y-dev.csv")

@@ -15,6 +15,7 @@ library(jagstools) # For extracting summary statistics from MCMC chain
 library(ggplot2)
 library(cowplot) ## For cowplot ggplot theme
 library(ggthemes) ## For additional (e.g. "few") ggplot2 themes
+require(RColorBrewer)
 library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
 library(gridExtra) ## Facilitates easier labelling in ggplot2
 library(extrafont) ## For additional fonts in ggplot2
@@ -30,7 +31,7 @@ climate <- read_csv("./Data/climate.csv")
 source("sceptic_funcs.R")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-chain_length <- 30000#3000
+chain_length <- 30000
 n_chains <- 3
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
@@ -56,7 +57,6 @@ for (k in 1:3)  {
 
 } ## End of prior loop
 
-timestamp()
 
 ##################################
 ### COMBINED TABLES AND GRAPHS ###
@@ -68,7 +68,8 @@ rm(climate, n_chains, chain_length, prior_type, convic_type,
 
 
 ## Set colours and names for consistency among graphs ##
-prior_cols <- c("dodgerblue2", "limegreen", "orange", "red2", "gray20")
+# prior_cols <- c("dodgerblue2", "limegreen", "orange", "red2", "gray20")
+prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 8, 6)], "#000000")
 prior_names <- c("Strong Denier", "Moderate Denier", 
                  "Strong Lukewarmer", "Moderate Lukewarmer", 
                  "Noninformative")
@@ -121,7 +122,7 @@ stargazer(coefs_tab_all, align = T, header = F,
 pdf(file = "./TablesFigures/tcr-combined-prior.pdf", 
     width = 16, height = 10, family = "Palatino")
 par(las = 1, 
-    mar = c(5.5, 5.5, 4, 2) + 0.1, 
+    mar = c(5.5, 5.7, 4, 2) + 0.1, 
     mgp = c(4, 1.5, 0)) # Change margin and tick labels to give space for different font
 plot(1, type = "n", 
      ylab = "Density", xlab = expression(~degree~C), 
@@ -158,7 +159,7 @@ dev.off()
 ## Now with both priors and posterior TCR densities ##
 pdf(file = "./TablesFigures/tcr-combined.pdf", width = 16, height = 10, family = "Palatino")
 par(las = 1, 
-    mar = c(5.5, 5.5, 4, 2) + 0.1, 
+    mar = c(5.5, 5.7, 4, 2) + 0.1, 
     mgp = c(4, 1.5, 0)) # Change margin and tick labels to give space for different font
 plot(1, type = "n", 
      ylab = "Density", xlab = expression(~degree~C), 
