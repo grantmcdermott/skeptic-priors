@@ -79,7 +79,7 @@ for (i in 1:4) {
   bugs_file <- paste0("./BUGSfiles/", prior_type, "-", convic_type, "-", rcp_type, ".txt")
   writeLines(mod_string, con = bugs_file)
   
-  load.module("lecuyer") ## JAGS module the uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
+  load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
   
   cl <- makeCluster(n_chains, type = "SOCK") # "chain_length" (i.e. 3) clusters, SOCK is simplest cluster
   parLoadModule(cl, "lecuyer", quiet = T)

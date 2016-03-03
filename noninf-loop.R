@@ -159,7 +159,7 @@ for (i in 1:4) {
 rm(theta_sample)
 
 predictions <- 
-  bind_rows(
+  dplyr::bind_rows(
     data.frame(year = climate$year[c(1:N)],
                series = "had",
                stat = "mean",

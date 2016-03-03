@@ -15,7 +15,7 @@ library(jagstools) # For extracting summary statistics from MCMC chain
 library(ggplot2)
 library(cowplot) ## For cowplot ggplot theme
 library(ggthemes) ## For additional (e.g. "few") ggplot2 themes
-require(RColorBrewer)
+library(RColorBrewer)
 library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
 library(gridExtra) ## Facilitates easier labelling in ggplot2
 library(extrafont) ## For additional fonts in ggplot2
