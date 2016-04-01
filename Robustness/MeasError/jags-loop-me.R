@@ -231,7 +231,6 @@ for (i in 1:4) {
              coef = gsub("gamma", "gamma[2]", coef),
              coef = gsub("delta", "delta[3]", coef),
              coef = ifelse(coef=="eta", "eta[4]", coef)) %>%
-      mutate(coef = gsub("beta[4]", "beta", coef)) %>% ## Bug adding a [4] to beta
       mutate(coef = factor(coef, levels = c("alpha[0]", "beta[1]", "gamma[2]",
                                             "delta[3]", "eta[4]", "sigma"))) %>%
       ggplot(aes(x = values, group = coef)) +
@@ -255,20 +254,7 @@ for (i in 1:4) {
              width = 8, height = 10, 
              device = cairo_pdf ## Need for Palatino fontspacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
              )
-  
-    
-    # ggsave(file = paste0("./Robustness/TablesFigures/coefs-", 
-    #                      prior_type, convic_type, "-me.pdf"),
-    #        plot = facet_wrap_labeller(coefs_plot, 
-    #                                   # labeller = label_parsed ## Works, but want to add no. subscripts
-    #                                   expression(alpha[0],beta[1],gamma[2],delta[3],eta[4],sigma)
-    #                                   ),
-    #        width = 8, height = 10, 
-    #        device = cairo_pdf ## Need for Palatino fontspacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-    #        )
-    # 
-    # rm(coefs_plot)
-    
+
     ## Further, only report the noninformative (RCP 2.6) coefficient results for consistency ##
     if (prior_type == "ni") {    
       
@@ -287,40 +273,17 @@ for (i in 1:4) {
   
   ## Summarise temperature predictions over 1866-2100 ##
   
-  pred <- jagsresults(mod_samples, params = "y_pred", exact = F)
+  pred <- jagsresults(mod_samples, params = "y_pred", regex = T)
   pred <- tbl_df(as.data.frame(pred[, c("mean", "2.5%", "97.5%")]))
   colnames(pred) <- c("mean", "q025", "q975")
-  
-  # pred_type <- gsub("\\[|\\]|[0-9]", "", row.names(pred)) ## NEW ME
   
   pred$series <- rcp_type
   # pred$prior <- prior_type
   # pred$conviction <- convic_type
-  pred$year <- seq(from=1866, length.out=nrow(pred)) ## changed
+  pred$year <- seq(from=1866, length.out=nrow(pred))
   pred <- pred %>% 
     gather(stat, temp, -c(year, series)) %>%
     select(year, everything())
-  
-  # pred$series <- "fitted" ## NEW ME
-  # pred <- pred %>%
-  #   #   gather(stat, temp, -c(year, series)) %>%
-  #   select(year, series, everything())
-  
-  
-  # ## NEW ME
-  # pred <- bind_rows(pred,
-  #                   clim_df %>% 
-  #                     filter(year <= max(pred$year)) %>%
-  #                     mutate(series = "had") %>%
-  #                     # dplyr::select(year, series, had, had_025, had_975) %>%
-  #                     # rename(mean = had, q025 = had_025, q975 = had_975)
-  #                     dplyr::select(year, series, had_full, had_025, had_975) %>%
-  #                     rename(mean = had_full, q025 = had_025, q975 = had_975)
-  # )
-  # 
-  # rm(coefs_mat, mod_samples)
-  
-  
   
   df_2100 <- tbl_df(as.data.frame(as.matrix(mod_samples[, "y_pred[235]"])))
   colnames(df_2100) <- "temp"
@@ -335,7 +298,7 @@ for (i in 1:4) {
   
   rm(list = setdiff(ls(), 
                     c("climate", "rf2x", "font_type",
-                      "facet_wrap_labeller", "print.arrange", "decimals",
+                      "match_coefs", "match_priors", "decimals",
                       "chain_length", "n_chains",
                       "prior_type", "convic_type", "N",
                       "coefs_tab", "predictions", "temp_2100",
@@ -376,7 +339,8 @@ ggplot(temp_2100 %>% group_by(rcp),
   geom_density(aes(fill = rcp, linetype = NA), alpha = 0.5) +
   geom_density(aes(col = rcp)) +
   # geom_line(stat = "density", aes(col = rcp)) +
-  labs(x = expression(~degree~C), y = "Density", title = paste("Temp in 2100:", prior_type, convic_type)) +
+  labs(x = expression(~degree*C), y = "Density", 
+       title = paste("Temp in 2100:", prior_type, convic_type)) +
   scale_colour_brewer(palette = "Spectral", breaks = levels(as.factor(temp_2100$rcp)),
                       labels = c("RCP 2.6", "RCP 4.5", "RCP 6.0", "RCP 8.5")
                       ) +
@@ -430,7 +394,8 @@ predictions <-
   arrange(series)
 
 ## predictions plot
-ggplot(data = predictions, aes(x = year, col = series, fill = series, linetype = series)) +
+ggplot(data = predictions, 
+       aes(x = year, col = series, fill = series, linetype = series)) +
   #ggthemes::theme_few() + 
   cowplot::theme_cowplot() +
   ylab(expression(~degree*C)) + xlab("Year") +
@@ -452,21 +417,26 @@ ggplot(data = predictions, aes(x = year, col = series, fill = series, linetype =
     values = c("blue", "black", "darkgreen", "darkorchid", "darkorange2", "darkred"),
     breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
     labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
+               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
     ) +
   scale_fill_manual(
     values = c("blue", NA, "lightgreen", "orchid", "orange", "red"),
     breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
     labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
+               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
     ) +
   scale_linetype_manual(
     values = c(1, 1, 2, 2, 2, 2),
     breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
     labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
+               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
     ) +
   theme(
+    axis.line.x = element_line(linetype = 1), ## Temporary bug(?) in cowplot theme: missing axis line
+    axis.line.y = element_line(linetype = 1), ## Ditto
     text = element_text(family = font_type),
     axis.title.x = element_text(size=20),
     axis.title.y = element_text(size=20, angle = 0),

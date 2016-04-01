@@ -77,7 +77,7 @@ for (i in 1:3) {
                          series = temp_series)
     rm(list = setdiff(ls(), 
                       c("climate", "rf2x", 
-                        "facet_wrap_labeller", "print.arrange", "decimals",
+                        "match_coefs", "match_priors", "decimals",
                         "chain_length", "n_chains",
                         "prior_type", "rcp_type",
                         "tcr")))
