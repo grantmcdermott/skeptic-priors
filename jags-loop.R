@@ -83,7 +83,7 @@ for (i in 1:4) {
   
   load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
   
-  cl <- makeCluster(n_chains, type = "SOCK") # "chain_length" (i.e. 3) clusters, SOCK is simplest cluster
+  cl <- makeCluster(n_chains, type = "SOCK") # no. of clusters (i.e. MCMC chains), SOCK is simplest cluster
   parLoadModule(cl, "lecuyer", quiet = T)
   
   ##------------------------------------------------------------------------------
@@ -105,9 +105,9 @@ for (i in 1:4) {
   parJagsModel(cl, name = "jags_mod", file = bugs_file, 
                data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
   parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-  mod_iters <- chain_length / n_chains
+  mod_iters <- chain_length
   mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
-                                  n.iter = mod_iters, n.chain = n_chains) ## n.chains was 10, but changed to 3
+                                  n.iter = mod_iters, n.chain = n_chains)
   stopCluster(cl)
   
   ##------------------------------------------------------------------------------
@@ -153,7 +153,6 @@ for (i in 1:4) {
                            ) %>%
       tbl_df()
     
-    # rm(coefs_mat)
     
     ### Density plot ###
     coefs_df %>%
@@ -167,20 +166,6 @@ for (i in 1:4) {
              ) %>%
       ggplot(aes(x = values, group = coef)) +
       geom_line(stat = "density") +
-      # cowplot::theme_cowplot() +
-      # theme(
-      #   axis.line.x = element_line(linetype = 1), ## Temporary bug(?) in cowplot theme: missing axis line
-      #   axis.line.y = element_line(linetype = 1), ## Ditto
-      #   text = element_text(family = font_type),
-      #   axis.title.x = element_blank(),
-      #   axis.text.x  = element_text(size=14),
-      #   axis.title.y = element_blank(),
-      #   axis.text.y  = element_text(size=14),
-      #   legend.position = "none",
-      #   strip.text = element_text(size = 18, colour = "black"),
-      #   strip.background = element_rect(fill = "white"), ## Facet strip
-      #   panel.margin = unit(2, "lines") ## Increase gap between facet panels
-      #   ) +
       theme_coefs + 
       facet_wrap(~coef, ncol = 2, scales = "free",
                  labeller = label_parsed) +
@@ -189,6 +174,8 @@ for (i in 1:4) {
              width = 8, height = 10, 
              device = cairo_pdf ## Need for Palatino fontspacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
              )
+    
+    rm(coefs_df)
     
     } ## End of RCP 2.6 "if" clause
   
@@ -204,37 +191,21 @@ for (i in 1:4) {
     gather(stat, temp, -c(year, series)) %>%
     select(year, everything())
   
+  ## Full distribution of temps in 2100 by themselves 
   df_2100 <- tbl_df(as.data.frame(as.matrix(mod_samples[, "y_pred[235]"])))
   colnames(df_2100) <- "temp"
   df_2100$rcp <- rcp_type 
-  
-  rm(mod_samples)
-  
+
   predictions[[i]] <- pred ## add it to the list
   temp_2100[[i]] <- df_2100 # add it to the list
   
-  rm(list = setdiff(ls(), 
-                    c("climate", 
-                      "font_type",
-                      "decimals", "match_coefs", "match_priors", "match_rcps",
-                      "theme_coefs", "theme_pred",
-                      "chain_length", "n_chains",
-                      "prior_type", "convic_type", "N",
-                      "ptm", "l", "all_2100", "tcr",
-                      "coefs_tab", "predictions", "temp_2100")
-                    ))
+  rm(bugs_file, cl, clim_df, data_list, df_2100, i, inits_list, mod_iters,
+     mod_samples, par_inits, parameters, pred, rcp_type)
   
   } ## END OF RCP LOOP FOR JAGS SIMLUATIONS
 
 
-## For later graphs ##
-rcp_names <- c(expression("RCP 2.6 (420 ppmv CO"[2]*")"),
-              expression("RCP 4.5 (540 ppmv CO"[2]*")"),
-              expression("RCP 6.0 (670 ppmv CO"[2]*")"),
-              expression("RCP 8.5 (940 ppmv CO"[2]*")"))  
-rcp_cols <- c("limegreen", "orchid", "orange", "red2")
-
-
+## Combine predictions from RCP loop into one data frame
 predictions <- 
   bind_rows(
     data.frame(year = climate$year[c(1:N)],
@@ -245,30 +216,10 @@ predictions <-
     bind_rows(predictions)
   )
 
+## Ditto for temps in 2100
 all_2100[[l]] <- 
   bind_rows(temp_2100) %>%
   mutate(prior = paste0(prior_type, convic_type))
-
-# ## Won't print in loop unless pipe to print()
-# ## Temperatures only in the year 2100
-# ggplot(temp_2100 %>% group_by(rcp),
-#        aes(x = temp)) +
-#   cowplot::theme_cowplot() +
-#   theme(text = element_text(family = font_type),
-#         legend.title = element_blank()
-#         ) +
-#   geom_density(aes(fill = rcp, linetype = NA), alpha = 0.5) +
-#   geom_density(aes(col = rcp)) +
-#   labs(x = expression(~degree*C), y = "Density",
-#        title = paste("Temp in 2100:", prior_type, convic_type)) +
-#   scale_colour_brewer(palette = "Spectral", breaks = levels(as.factor(temp_2100$rcp)),
-#                       labels = c("RCP 2.6", "RCP 4.5", "RCP 6.0", "RCP 8.5")
-#                       ) +
-#   scale_fill_brewer(palette = "Spectral", breaks = levels(as.factor(temp_2100$rcp)),
-#                     labels = c("RCP 2.6", "RCP 4.5", "RCP 6.0", "RCP 8.5")
-#                     ) %>%
-#   print()
-
 
 ## Tidy the data:
 ## Get rid of duplicate historic (pre-2006) model fits from different RCPs. 
@@ -280,6 +231,16 @@ predictions <-
   filter(!(year > 2005 & series %in% c("fitted"))) %>% 
   spread(stat, temp) %>% 
   arrange(series)
+
+## Lastly, order series as factor and define readable labels for plotting
+predictions <-
+  predictions %>%
+  mutate(series = factor(series, 
+                         levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))) %>%
+  arrange(series)
+series_labs <- c("HadCRUT4", "Model fit", 
+                 "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
+                 "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
 
 ## predictions plot
 ggplot(data = predictions, 
@@ -300,28 +261,22 @@ ggplot(data = predictions,
   annotate("text", x = 1985, y = -0.5, label = "Historic", size = 7, family = font_type) + 
   annotate("text", x = 2025, y = -0.5, label = "Forecast", size = 7, family = font_type) +
   scale_colour_manual(
-    values = c("blue", "black", "darkgreen", "darkorchid", "darkorange2", "darkred"),
-    breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
-    labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    values = c("black", "blue", rcp_cols),
+    labels = series_labs,
+    limits = levels(predictions$series)
     ) +
   scale_fill_manual(
-    values = c("blue", NA, "lightgreen", "orchid", "orange", "red"),
-    breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
-    labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    values = c(NA, "blue", rcp_fills),
+    labels = series_labs,
+    limits = levels(predictions$series)
     ) +
   scale_linetype_manual(
     values = c(1, 1, 2, 2, 2, 2),
-    breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
-    labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    labels = series_labs,
+    limits = levels(predictions$series)
     ) +
   theme_pred +
-  ggsave(file = paste("./TablesFigures/predictions-", 
+  ggsave(file = paste("./TablesFigures/predictions-",
                       prior_type, convic_type, ".pdf", sep = ""),
          width = 10, height = 6.75,
          device = cairo_pdf) ## Need for Palatino font spacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466

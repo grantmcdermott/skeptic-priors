@@ -32,13 +32,14 @@ source("sceptic_funcs.R")
 font_type <- c("Palatino Linotype", "Lato")[1]
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-chain_length <- 9000#30000
+## Total chain length will thus be chain_length * n_chains
+chain_length <- 3000#10000
 n_chains <- 3
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
 ## Length of disbn equals length of MCMC chain for consistency
-rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
+rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
 
 
 ## Loop over prior ##

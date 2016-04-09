@@ -31,13 +31,14 @@ climate <- read_csv("./Data/climate.csv")
 source("sceptic_funcs.R")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-chain_length <- 30000
+## Total chain length will thus be chain_length * n_chains
+chain_length <- 10000
 n_chains <- 3
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
 ## Length of disbn equals length of MCMC chain for consistency
-rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
+rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
 
 
 ## Choose prior, conviction and RCP types
@@ -65,7 +66,7 @@ for (i in 1:3) {
   theta_sample <- blinreg(clim_df$temp, 
                           cbind(alpha = 1, beta = clim_df$trf, gamma = clim_df$volc, 
                                 delta = clim_df$soi, eta = clim_df$amo), 
-                          chain_length)
+                          chain_length * n_chains)
     
     ## Get coefficients MCMC list into separate matrix for later. Combines all chains into one matrix.##
     beta_coef <- theta_sample$beta[, "Xbeta"]

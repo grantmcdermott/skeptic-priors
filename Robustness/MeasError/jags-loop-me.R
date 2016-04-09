@@ -138,7 +138,7 @@ for (i in 1:4) {
   
   load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
   
-  cl <- makeCluster(n_chains, type = "SOCK") # "chain_length" (i.e. 3) clusters, SOCK is simplest cluster
+  cl <- makeCluster(n_chains, type = "SOCK") # no. of clusters (i.e. MCMC chains), SOCK is simplest cluster
   parLoadModule(cl, "lecuyer", quiet = T)
   
   ##------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ for (i in 1:4) {
   parJagsModel(cl, name = "jags_mod", file = bugs_file, 
                data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
   parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-  mod_iters <- chain_length / n_chains
+  mod_iters <- chain_length
   mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
                                 n.iter = mod_iters, n.chain = n_chains) ## n.chains was 10, but changed to 3
   stopCluster(cl)

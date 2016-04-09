@@ -21,7 +21,9 @@ for (i in 1:4) {
     theta_sample <- blinreg(clim_df$had, 
                             cbind(alpha = 1, beta = clim_df$trf, gamma = clim_df$volc, 
                                   delta = clim_df$soi, eta = clim_df$amo), 
-                            chain_length)
+                            chain_length*n_chains)
+    
+    rm(clim_df)
     
     ## Convert coefficients MCMC list into data frame for later. 
     coefs_df <-
@@ -92,13 +94,6 @@ for (i in 1:4) {
   y_pred <- blinregpred(X1, theta_sample)
   colnames(y_pred) <- seq(from = 1866, to = 2100, by = 1)
   y_pred <- t(y_pred)
-  
-  ## Again, will plot the temperature prediction at 2100 for all priors and scenariors
-  ## later. Uncomment the below only if specificaly want to check the results for the 
-  ## noninf. priors by themselves.
-#   plot(density(y_pred["2100", ]), col = "dodgerblue2", 
-#        main = paste("2100", prior_type, convic_type, rcp_type), xlab = expression(~degree~C),
-#        cex.lab = 1.5, cex.axis = 1.5, cex.main = 1.5, cex.sub = 1.5)
 
   pred <- 
     as.data.frame(
@@ -117,28 +112,21 @@ for (i in 1:4) {
     gather(stat, temp, -c(year, series)) %>%
     select(year, everything())
   
+  ## Full distribution of temps in 2100 by themselves 
   df_2100 <-  tbl_df(as.data.frame(y_pred["2100", ])) 
   colnames(df_2100) <- "temp"
   df_2100$rcp <- rcp_type 
   
   predictions[[i]] <- pred ## add it to the list
   temp_2100[[i]] <- df_2100 # add it to the list
-
-  rm(list = setdiff(ls(), 
-                    c("climate", 
-                      "font_type",
-                      "decimals", "match_coefs", "match_priors", "match_rcps",
-                      "theme_coefs", "theme_pred",
-                      "chain_length", "n_chains",
-                      "prior_type", "convic_type", "N", "theta_sample",
-                      "ptm", "l", "all_2100", "tcr",
-                      "coefs_tab", "predictions", "temp_2100")
-                    ))
+  
+  rm(df_2100, i, pred, rcp_type, X1, y_pred)
   
   } ## END OF RCP LOOP FOR MCMC SIMLUATIONS
 
 rm(theta_sample)
 
+## Combine predictions from RCP loop into one data frame
 predictions <- 
   bind_rows(
     data.frame(year = climate$year[c(1:N)],
@@ -149,20 +137,11 @@ predictions <-
     bind_rows(predictions)
     )
 
-# temp_2100 <- bind_rows(temp_2100)
+## Ditto for temps in 2100
 all_2100[[l]] <- 
   bind_rows(temp_2100) %>%
   mutate(prior = paste0(prior_type, convic_type))
 rm(temp_2100)
-
-
-## For later graphs ##
-#     rcp_names <- c("RCP 2.6 (420 ppmv CO2)", "RCP 4.5 (540 ppmv CO2)", "RCP 6.0 (670 ppmv CO2)", "RCP 8.5 (940 ppmv CO2)")
-rcp_names <- c(expression("RCP 2.6 (420 ppmv CO"[2]*")"),
-              expression("RCP 4.5 (540 ppmv CO"[2]*")"),
-              expression("RCP 6.0 (670 ppmv CO"[2]*")"),
-              expression("RCP 8.5 (940 ppmv CO"[2]*")"))  
-rcp_cols <- c("limegreen", "orchid", "orange", "red2")
 
 
 # Tidy the data
@@ -176,6 +155,17 @@ predictions <-
   spread(stat, temp) %>% 
   arrange(series)
 
+## Lastly, order series as factor and define readable labels for plotting
+predictions <-
+  predictions %>%
+  mutate(series = factor(series, 
+                         levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))) %>%
+  arrange(series)
+series_labs <- c("HadCRUT4", "Model fit", 
+                 "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
+                 "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+
+## predictions plot
 ggplot(data = predictions, 
        aes(x = year, col = series, fill = series, linetype = series)) +
   ylab(expression(~degree*C)) + xlab("Year") +
@@ -194,31 +184,26 @@ ggplot(data = predictions,
   annotate("text", x = 1985, y = -0.5, label = "Historic", size = 7, family = font_type) + 
   annotate("text", x = 2025, y = -0.5, label = "Forecast", size = 7, family = font_type) +
   scale_colour_manual(
-    values = c("blue", "black", "darkgreen", "darkorchid", "darkorange2", "darkred"),
-    breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
-    labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    values = c("black", "blue", rcp_cols),
+    labels = series_labs,
+    limits = levels(predictions$series)
     ) +
   scale_fill_manual(
-    values = c("blue", NA, "lightgreen", "orchid", "orange", "red"),
-    breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
-    labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    values = c(NA, "blue", rcp_fills),
+    labels = series_labs,
+    limits = levels(predictions$series)
     ) +
   scale_linetype_manual(
     values = c(1, 1, 2, 2, 2, 2),
-    breaks = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"),
-    labels = c("HadCRUT4", "Model fit", 
-               "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-               "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    labels = series_labs,
+    limits = levels(predictions$series)
     ) +
   theme_pred +
-  ggsave(file = paste0("./TablesFigures/predictions-", 
-                       prior_type, convic_type, "-prop.pdf"),
-         width = 10, height = 6.75, 
+  ggsave(file = paste("./TablesFigures/predictions-",
+                      prior_type, convic_type, ".pdf", sep = ""),
+         width = 10, height = 6.75,
          device = cairo_pdf) ## Need for Palatino font spacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+
 
 ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
 ## together with the had obs, to the recursive data folder. We'll be using the

@@ -2,9 +2,6 @@ rm(list = ls()) # Clear data
 
 ## Load packages used in the below loop (or further down in the code)##
 library(readr) ## For reading in data files
-library(dplyr) ## For manipulating and munging data frames
-library(tidyr) ## For tidying data frames
-library(purrr) ## For manipulating vectors and functions (complements dplyr)
 library(LearnBayes) ## Mostly for simulating noninformative prior (using random multivarite normal command)
 # library(arm)
 library(rjags) ## For running the MCMC (Gibbs) sampler
@@ -14,12 +11,15 @@ library(snow) ## Allows clusters: i.e. subsidiary R programmes running separatel
 library(jagstools) ## devtools::install_github("johnbaums/jagstools") For extracting summary statistics from MCMC chain
 library(ggplot2)
 library(cowplot) ## For cowplot ggplot theme
-library(ggthemes) ## For additional (e.g. "few") ggplot2 themes
+library(ggthemes) ## For additional ggplot2 themes (e.g. "few") 
 library(RColorBrewer)
 library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
-library(gridExtra) ## Facilitates easier labelling in ggplot2
+library(gridExtra) ## Facilitates easier labelling in ggplot2 (e.g. annote with extrafont fonts)
 library(extrafont) ## For additional fonts in ggplot2
 library(stargazer) ## For nice LaTeX tables
+library(dplyr) ## For manipulating and munging data frames
+library(tidyr) ## For tidying data frames
+library(purrr) ## For manipulating vectors and functions (complements dplyr)
 
 ## Optional for replication
 set.seed(123) 
@@ -28,19 +28,24 @@ set.seed(123)
 climate <- read_csv("./Data/climate.csv")
 
 ## Choose font type for graphs (note extrafont package installation instructions)
-font_type <- c("Palatino Linotype", "Lato")[1]
+font_type <- c("Palatino Linotype", "Lato", "Arial")[1]
+## Assign colours and names for later graphs ##
+rcp_names <- c(expression("RCP 2.6 (420 ppmv CO"[2]*")"),
+               expression("RCP 4.5 (540 ppmv CO"[2]*")"),
+               expression("RCP 6.0 (670 ppmv CO"[2]*")"),
+               expression("RCP 8.5 (940 ppmv CO"[2]*")"))  
+# rcp_cols <- c("limegreen", "orchid", "orange", "red2")
+rcp_cols <- c("darkgreen", "darkorchid", "darkorange2", "darkred")
+rcp_fills <- c("lightgreen", "orchid", "orange", "red")
 
 ## Load some helper functions that will be used for plotting and tables
 source("sceptic_funcs.R")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-chain_length <- 30000
-n_chains <- 3
+## Total chain length will thus be chain_length * n_chains
+chain_length <- 10000
+n_chains <- detectCores() - 1 
 
-# ## Set radiative forcing distribution used for calulating TCRs later in code.
-# ## Centered around 3.71 °C +/- 10% (within 95% CI). 
-# ## Length of disbn equals length of MCMC chain for consistency
-# rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
 
 ## Preallocate coefficients, tcr and temperature in 2100 lists for loop
 coefs_tab <- list()
@@ -48,8 +53,9 @@ tcr <- list()
 all_2100 <- list()
 l <- 0 ## count variable for coefs_tab list
 
+
 ptm <- proc.time()
-## Loop over prior ##
+## Loop over priors ##
 for (k in 1:3)  {  
   prior_type <- c("ni", "luke", "den")[k] 
 
@@ -77,7 +83,7 @@ proc.time() - ptm
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
 ## Length of disbn equals length of MCMC chain for consistency
-rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
+rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
 
 ## Remove data unnecessary to further analysis ##
 rm(climate, n_chains, chain_length, prior_type, convic_type,
