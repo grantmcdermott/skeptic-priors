@@ -16,7 +16,7 @@ for (i in 1:4) {
   ##------------------------------------------------------------------------------
   ## THE BUGS/JAGS MODEL.
   
-  N <- 2100 - 1866 + 1
+  N <- nrow(clim_df) #2100 - 1866 + 1
   
   mod_string <- paste(
     "model{
@@ -37,7 +37,6 @@ for (i in 1:4) {
     }else{
     "
     ## Prior on beta: One of four subjective prior, conviction combinations...
-
     # 1) Mod. lukewarmer: TCR ~ N(1, 0.25^2). Mean of 1 °C and uncertainty range of 1.0 °C (95% probability).
     #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.25/3.71)^2 )
     # 2) Strong lukewarmer: TCR ~ N(1, 0.065^2). Mean of 1 °C and uncertainty range of 0.25 °C (95% probability).
@@ -46,23 +45,27 @@ for (i in 1:4) {
     #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.25/3.71)^2 )
     # 4) Strong denier: TCR ~ N(0, 0.065^2). Mean of 0 °C and uncertainty range of 0.25 °C (95% probability).
     #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.065/3.71)^2 )
-      
     "},
     
     if (prior_type == "luke") {
-    "mu_beta <- 1/3.71
-    "},
+    "
+    mu_beta <- 1/3.71"
+    },
     if (prior_type == "den") {
-    "mu_beta <- 0
-    "},
+    "
+    mu_beta <- 0"
+    },
     if (convic_type == "mod") {
-    "sigma_beta <- 0.25/3.71
-    "},
+    "
+    sigma_beta <- 0.25/3.71"
+    },
     if (convic_type == "strong") {
-    "sigma_beta <- 0.065/3.71
-    "}, 
+    "
+    sigma_beta <- 0.065/3.71"
+    }, 
     
     "
+
     ## Priors for all parameters   
     alpha ~ dnorm(0, 0.0001)            ## intercept
     beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
@@ -76,9 +79,9 @@ for (i in 1:4) {
     }" 
     ) 
   
-  bugs_file <- paste0("./BUGSfiles/", prior_type, "-", 
-                      convic_type, "-", rcp_type, ".txt")
-  if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
+  bugs_file <- paste0("./BUGSfiles/", 
+                      prior_type, "-", convic_type, "-", rcp_type, ".txt")
+  if(prior_type == "ni"){bugs_file <- gsub("--", "-", bugs_file)}
   writeLines(mod_string, con = bugs_file)
   
   load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
@@ -92,6 +95,7 @@ for (i in 1:4) {
   data_list <- list("N" = N, "had" = clim_df$had, "trf" = clim_df$trf, 
                     "volc_mean" = clim_df$volc_mean, 
                     "soi_mean" = clim_df$soi_mean, "amo_mean" = clim_df$amo_mean)
+  
   inits_list <- function() {
     list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1)
     }
@@ -113,13 +117,13 @@ for (i in 1:4) {
   ##------------------------------------------------------------------------------
   ## SUMMARY AND DIAGNOSTICS
   
-#   head(mod_samples)
-#   summary(mod_samples)
-#   quantile(mod_samples, probs = c(5, 50, 95)/100)
-#   
-#   geweke.diag(mod_samples)
-#   heidel.diag(mod_samples)
-#   raftery.diag(mod_samples)
+  # head(mod_samples)
+  # summary(mod_samples)
+  # quantile(mod_samples, probs = c(5, 50, 95)/100)
+  # 
+  # geweke.diag(mod_samples)
+  # heidel.diag(mod_samples)
+  # raftery.diag(mod_samples)
 
   ## Extract regression coefficients ##
   ## (NOTE: Use only those from RCP 2.6 for consistency) ##
@@ -148,9 +152,10 @@ for (i in 1:4) {
       arrange(coef)
     
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
-    tcr[[l]] <- data.frame(beta = filter(coefs_df, coef == "beta")$values,
-                           prior = paste0(prior_type, convic_type)
-                           ) %>%
+    tcr[[l]] <- 
+      data.frame(beta = filter(coefs_df, coef == "beta")$values,
+                 prior = paste0(prior_type, convic_type)
+                 ) %>%
       tbl_df()
     
     
@@ -172,7 +177,7 @@ for (i in 1:4) {
       ggsave(file = paste0("./TablesFigures/coefs-", 
                            prior_type, convic_type, ".pdf"),
              width = 8, height = 10, 
-             device = cairo_pdf ## Need for Palatino fontspacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+             device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
              )
     
     rm(coefs_df)
@@ -202,7 +207,7 @@ for (i in 1:4) {
   rm(bugs_file, cl, clim_df, data_list, df_2100, i, inits_list, mod_iters,
      mod_samples, par_inits, parameters, pred, rcp_type)
   
-  } ## END OF RCP LOOP FOR JAGS SIMLUATIONS
+} ## END OF RCP LOOP FOR JAGS SIMLUATIONS
 
 
 ## Combine predictions from RCP loop into one data frame
@@ -212,9 +217,9 @@ predictions <-
                series = "had_full",
                stat = "mean",
                temp = climate$had_full[c(1:N)]
-    ),
+               ),
     bind_rows(predictions)
-  )
+    )
 
 ## Ditto for temps in 2100
 all_2100[[l]] <- 
@@ -236,7 +241,8 @@ predictions <-
 predictions <-
   predictions %>%
   mutate(series = factor(series, 
-                         levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))) %>%
+                         levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))
+         ) %>%
   arrange(series)
 series_labs <- c("HadCRUT4", "Model fit", 
                  "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
@@ -279,6 +285,6 @@ ggplot(data = predictions,
   ggsave(file = paste("./TablesFigures/predictions-",
                       prior_type, convic_type, ".pdf", sep = ""),
          width = 10, height = 6.75,
-         device = cairo_pdf) ## Need for Palatino font spacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+         device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
 
 rm(predictions, temp_2100)

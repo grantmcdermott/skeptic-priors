@@ -66,7 +66,7 @@ for (i in 1:4) {
       ggsave(file = paste0("./TablesFigures/coefs-", 
                            prior_type, convic_type, "-prop.pdf"),
              width = 8, height = 10, 
-             device = cairo_pdf ## Need for Palatino fontspacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+             device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
              )
       
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
@@ -202,7 +202,7 @@ ggplot(data = predictions,
   ggsave(file = paste("./TablesFigures/predictions-",
                       prior_type, convic_type, ".pdf", sep = ""),
          width = 10, height = 6.75,
-         device = cairo_pdf) ## Need for Palatino font spacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+         device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
 
 
 ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),

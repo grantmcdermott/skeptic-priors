@@ -20,7 +20,7 @@ yr_min <- min(clim_df$year)
 theta_sample <- 
   blinreg(clim_df$had_sim, 
           cbind(1, clim_df$trf, clim_df$volc_sim, clim_df$soi_sim, clim_df$amo_sim), 
-          chain_length
+          chain_length * n_chains
           )
 
 ## Get coefficients MCMC list into separate matrix for later. Combines all chains into one matrix.##
@@ -30,13 +30,6 @@ tcr <- coefs_mat[, 2] * rf2x
 
 rm(theta_sample, coefs_mat)
 
-
-## Set colours and names for consistency among graphs ##
-# prior_cols <- c("dodgerblue2", "limegreen", "orange", "red2", "gray20")
-prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 8, 6)], "#000000")
-prior_names <- c("Strong Denier", "Moderate Denier", 
-                 "Strong Lukewarmer", "Moderate Lukewarmer", 
-                 "Noninformative")
 
 A <- A + 1 # For animation figures
 pdf(file = paste0("./Recursive/TablesFigures/Animation/", 
@@ -82,7 +75,7 @@ if(recurse_type == "future"){
 text(1.75,6.5, label = paste("(Sample size =", nrow(clim_df), "years)"), cex = 2)
 
 
-tcr_summ <- 
+tcr_rec[[a]] <- 
   data.frame(year_to = ifelse(recurse_type == "historic", yr_min, max(clim_df$year)),
              samp_size = nrow(clim_df), 
              series = paste0(prior_type, convic_type), 
@@ -93,5 +86,3 @@ tcr_summ <-
              )
 
 rm(tcr, clim_df)
-
-tcr_rec[[a]] <- tcr_summ ## add it to the list

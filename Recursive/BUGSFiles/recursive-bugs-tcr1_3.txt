@@ -1,0 +1,23 @@
+model{
+          
+          for(t in 1:N) {
+          mu[t] <- alpha + beta*trf[t] + gamma*volc_sim[t] + delta*soi_sim[t] + eta*amo_sim[t]
+          had_sim[t]  ~ dnorm(mu[t], tau)
+          # y_pred[t] ~ dnorm(mu[t], tau) ## For predictions into the future
+          }
+           
+          mu_beta <- 0 
+          sigma_beta <- 0.018167115902965 
+          
+          ## Priors for all parameters   
+          alpha ~ dnorm(0, 0.0001)            ## intercept
+          beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
+          tau_beta <- pow(sigma_beta, -2)
+          gamma ~ dnorm(0, 0.0001)            ## volc coef
+          delta ~ dnorm(0, 0.0001)            ## soi coef
+          eta ~ dnorm(0, 0.0001)              ## amo coef
+          sigma ~ dunif(0, 100)               ## Residual std dev
+          tau <- pow(sigma, -2)  	          
+          had0 ~ dnorm(0.0, 1.0E-6)           ## Initialising value
+          
+          }

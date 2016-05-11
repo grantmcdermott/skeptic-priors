@@ -1,27 +1,10 @@
-rm(list=ls()) # Clear data
+rm(list = ls()) # Clear data
 
-library(readr)
-library(tidyr)
-library(dplyr)
-library(ggplot2)
-library(cowplot)
-library(RColorBrewer)
-library(extrafont)
+## Load all packages, as well as some helper functions that will be used for plotting and tables
+source("sceptic_funcs.R")
 library(xtable)
 
 scc <- read_csv("./Data/PAGE09/scc.csv")
-
-## Choose font type for graphs (note extrafont package installation instructions)
-font_type <- c("Palatino Linotype", "Lato")[1]
-
-## Load some helper functions that will be used for plotting and tables
-source("sceptic_funcs.R")
-
-## Set colours and names for consistency among graphs ##
-prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 8, 6)], "#000000")
-prior_names <- c("Strong Denier", "Moderate Denier", 
-                 "Strong Lukewarmer", "Moderate Lukewarmer", 
-                 "Noninformative")
 
 scc %>%
   gather(prior, scc) %>%
@@ -36,8 +19,6 @@ scc %>%
   scale_colour_manual(values = prior_cols) +
   guides(col = guide_legend(nrow = 2)) +
   theme(
-    axis.line.x = element_line(linetype = 1), ## Temporary bug(?) in cowplot theme: missing axis line
-    axis.line.y = element_line(linetype = 1), ## Ditto
     text = element_text(family = font_type),
     legend.position = "bottom",
     legend.title = element_blank()

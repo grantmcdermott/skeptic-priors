@@ -16,6 +16,7 @@ yr_min <- min(clim_df$year)
 
 ##------------------------------------------------------------------------------
 ## THE BUGS/JAGS MODEL.
+## Note: Removing y_pred b/c predictions into the future not needed for recursive regs
 
 N <- nrow(clim_df)
 
@@ -30,38 +31,38 @@ mod_string <- paste(
   ",
   
   if (prior_type == "ni") {
-    "
-    ## Noninformative prior on beta:         
-    mu_beta <- 0
-    sigma_beta <- 100
-    "
+  "
+  ## Noninformative prior on beta:         
+  mu_beta <- 0
+  sigma_beta <- 100
+  "
   }else{
-    "
-    ## Prior on beta: One of four subjective prior, conviction combinations...
+  "
+  ## Prior on beta: One of four subjective prior, conviction combinations...
     
-    # 1) Mod. lukewarmer: TCR ~ N(1, 0.25^2). Mean of 1 °C and uncertainty range of 1.0 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.25/3.71)^2 )
-    # 2) Strong lukewarmer: TCR ~ N(1, 0.065^2). Mean of 1 °C and uncertainty range of 0.25 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.065/3.71)^2 )
-    # 3) Mod. denier: TCR ~ N(0, 0.25^2). Mean of 0 °C and uncertainty range of 1.0 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.25/3.71)^2 )
-    # 4) Strong denier: TCR ~ N(0, 0.065^2). Mean of 0 °C and uncertainty range of 0.25 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.065/3.71)^2 )
-    
-    "},
+  # 1) Mod. lukewarmer: TCR ~ N(1, 0.25^2). Mean of 1 °C and uncertainty range of 1.0 °C (95% probability).
+  #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.25/3.71)^2 )
+  # 2) Strong lukewarmer: TCR ~ N(1, 0.065^2). Mean of 1 °C and uncertainty range of 0.25 °C (95% probability).
+  #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.065/3.71)^2 )
+  # 3) Mod. denier: TCR ~ N(0, 0.25^2). Mean of 0 °C and uncertainty range of 1.0 °C (95% probability).
+  #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.25/3.71)^2 )
+  # 4) Strong denier: TCR ~ N(0, 0.065^2). Mean of 0 °C and uncertainty range of 0.25 °C (95% probability).
+  #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.065/3.71)^2 )
+  
+  "},
   
   if (prior_type == "luke") {
-    "mu_beta <- 1/3.71
-    "},
+  "mu_beta <- 1/3.71
+  "},
   if (prior_type == "den") {
-    "mu_beta <- 0
-    "},
+  "mu_beta <- 0
+  "},
   if (convic_type == "mod") {
-    "sigma_beta <- 0.25/3.71
-    "},
+  "sigma_beta <- 0.25/3.71
+  "},
   if (convic_type == "strong") {
-    "sigma_beta <- 0.065/3.71
-    "}, 
+  "sigma_beta <- 0.065/3.71
+  "}, 
   
   "
   ## Priors for all parameters   
@@ -77,12 +78,14 @@ mod_string <- paste(
   }" 
     ) 
 
-bugs_file <- paste0("./Recursive/BUGSfiles/", prior_type, "-", convic_type, ".txt")
+bugs_file <- paste0("./Recursive/BUGSfiles/", prior_type, "-", 
+                    convic_type, ".txt")
+if(prior_type == "ni"){bugs_file <- gsub("--", "-", bugs_file)}
 writeLines(mod_string, con = bugs_file)
 
-load.module("lecuyer") ## JAGS module the uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
+load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
 
-cl <- makeCluster(n_chains, type = "SOCK") # "chain_length" (i.e. 3) clusters, SOCK is simplest cluster
+cl <- makeCluster(n_chains, type = "SOCK") # no. of clusters (i.e. MCMC chains), SOCK is simplest cluster
 parLoadModule(cl, "lecuyer", quiet = T)
 
 ##------------------------------------------------------------------------------
@@ -105,9 +108,9 @@ par_inits <- parallel.inits(inits_list, n.chains = n_chains) # Initialisation
 parJagsModel(cl, name = "jags_mod", file = bugs_file, 
              data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
 parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-mod_iters <- chain_length / n_chains
+mod_iters <- chain_length
 mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
-                              n.iter = mod_iters, n.chain = n_chains) ## n.chains was 10, but changed to 3
+                              n.iter = mod_iters, n.chain = n_chains) 
 stopCluster(cl)
 
 ##------------------------------------------------------------------------------
@@ -120,11 +123,6 @@ rm(bugs_file, cl, data_list, mod_samples, mod_string, par_inits, parameters)
 
 ## Set figure if haven't done so calling the proportional noninformative prior previously
 if(prior_type == "ni"){
-  # prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 6, 7)], "#000000")
-  prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 8, 6)], "#000000")
-  prior_names <- c("Strong Denier", "Moderate Denier", 
-                   "Strong Lukewarmer", "Moderate Lukewarmer", 
-                   "Noninformative")
   
   A <- A + 1 # For animation figures
   pdf(file = paste0("./Recursive/TablesFigures/Animation/", 
@@ -192,7 +190,7 @@ if(prior_type == "den" & convic_type == "strong"){
   dev.off()
 }
 
-tcr_summ <- 
+tcr_rec[[a]] <- 
   data.frame(year_to = ifelse(recurse_type == "historic", yr_min, max(clim_df$year)),
              samp_size = nrow(clim_df),
              series = paste0(prior_type, convic_type), 
@@ -203,5 +201,3 @@ tcr_summ <-
              )
 
 rm(tcr, clim_df)
-
-tcr_rec[[a]] <- tcr_summ ## add it to the list

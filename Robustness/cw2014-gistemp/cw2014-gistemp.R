@@ -1,34 +1,13 @@
 rm(list = ls()) # Clear data
 
-## Load packages used in the below loop (or further down in the code)##
-library(readr) ## For reading in data files
-library(dplyr) ## For manipulating and munging data frames
-library(tidyr) ## For tidying data frames
-library(purrr) ## For manipulating vectors and functions (complements dplyr)
-library(LearnBayes) ## Mostly for simulating noninformative prior (using random multivarite normal command)
-# # library(arm)
-# library(rjags) ## For running the MCMC (Gibbs) sampler
-# # library(coda) ## For converting MCMC objects and diagnostics. Loads as rjags dependency.
-# library(dclone) ## Allows parallel updating of JAGS models
-# library(snow) ## Allows clusters: i.e. subsidiary R programmes running separately on your computer's different CPUs
-# library(jagstools) # For extracting summary statistics from MCMC chain
-library(ggplot2)
-library(cowplot) ## For cowplot ggplot theme
-# library(ggthemes) ## For additional (e.g. "few") ggplot2 themes
-# library(RColorBrewer)
-# library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
-# library(gridExtra) ## Facilitates easier labelling in ggplot2
-library(extrafont) ## For additional fonts in ggplot2
-library(stargazer) ## For nice LaTeX tables
+## Load all packages, as well as some helper functions that will be used for plotting and tables
+source("sceptic_funcs.R")
 
 ## Optional for replication
 set.seed(123) 
 
 ## Load climate data
 climate <- read_csv("./Data/climate.csv")
-
-## Load some misc functions that will be used for plotting and tables
-source("sceptic_funcs.R")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 ## Total chain length will thus be chain_length * n_chains
@@ -168,7 +147,7 @@ tcr %>%
           ) +
     ggsave(file = "./Robustness/TablesFigures/tcr-other.pdf",
            width = 5, height = 4, 
-           device = cairo_pdf) ## Need for Palatino font spacing to work. See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+           device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
   
   
   
