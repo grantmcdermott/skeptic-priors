@@ -206,9 +206,9 @@ ggplot(data = predictions,
 
 
 ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
-## together with the had obs, to the recursive data folder. We'll be using the
+## together with the had obs, to the Evidence data folder. We'll be using the
 ## difference between these series as noise when simulating future "true" temperatures
-## in the recursive section of the paper.
+## in the evidence section of the paper.
 y_dev <- 
   predictions %>% 
   filter(series %in% c("had_full", "fitted")) %>%
@@ -217,6 +217,6 @@ y_dev <-
   mutate(dev = fitted - had_full) %>%
   filter(!is.na(dev))
 
-write_csv(y_dev, "./Recursive/Data/y-dev.csv")
+write_csv(y_dev, "./Evidence/Data/y-dev.csv")
 
 rm(y_dev, predictions)

@@ -60,7 +60,8 @@ cw <-
 giss <- 
   tbl_df(
     read.csv("http://data.giss.nasa.gov/gistemp/tabledata_v3/GLB.Ts+dSST.csv",
-             na.strings = c("***", "****"))
+             na.strings = c("***", "****"), stringsAsFactors = F,
+             colClasses = rep("numeric", 20))
     )
 
 ## Subset data
@@ -120,23 +121,6 @@ abline(h = mean((gmst %>% filter(year >= 1851 & year <= 1880))$had), lty = 2, co
 ### RADIATIVE FORCINGS (RCP) ###
 ################################
 
-# furl <- "./Data/RCP3PD_MIDYR_CONC.zip"
-# f <- "RCP3PD_MIDYR_CONC.DAT"
-# ## Works, but want temp file?
-# # temp <- tempfile()
-# # download.file("http://tntcat.iiasa.ac.at:8787/RcpDb/download/CMIP5RECOMMENDATIONS/RCP3PD_MIDYR_CONC.zip",
-# #               temp)
-# # d_temp <- tbl_df(read.table(unz(temp, f), skip = 38, header = T))
-# # unlink(temp)
-# download.file("http://tntcat.iiasa.ac.at:8787/RcpDb/download/CMIP5RECOMMENDATIONS/RCP3PD_MIDYR_CONC.zip",
-#               furl)
-# d <- tbl_df(read.table(unz(furl, f), skip = 38, header = T))
-
-## Radiative forcings instead of concentrations
-## http://www.pik-potsdam.de/~mmalte/rcps/
-## NOTE: Fix RCP URL in paper and make sure reference is correct (Meinshausen et al)
-
-
 ## Download and combine the four different RCP forcing scenarios
 
 url1 <- "http://www.pik-potsdam.de/~mmalte/rcps/data/RCP"
@@ -156,7 +140,7 @@ rcps <-
 
 colnames(rcps) <- gsub("_rf", "", tolower(colnames(rcps)))
 
-## Will only be using a handfull of the RCP variables, so subset the data
+## Will only be using some variables, so select revelant columns
 rcps <-
   rcps %>%
   rename(year = years, trf_inclvolc = total_inclvolcanic, 
