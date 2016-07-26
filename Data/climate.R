@@ -60,15 +60,15 @@ cw <-
 giss <- 
   tbl_df(
     read.csv("http://data.giss.nasa.gov/gistemp/tabledata_v3/GLB.Ts+dSST.csv",
-             na.strings = c("***", "****"), stringsAsFactors = F,
-             colClasses = rep("numeric", 20))
+             na.strings = c("***", "****"), stringsAsFactors = F, skip = 1
+             )
     )
 
 ## Subset data
 giss <- 
   giss %>%
   rename(year = Year, giss = J.D) %>%
-  mutate(giss = 0.01 * giss) %>%
+  # mutate(giss = 0.01 * giss) %>%
   filter(year <= max(had$year)) %>%
   select(year, giss)
 
@@ -107,14 +107,12 @@ lines(gmst$year, gmst$cw, col = "red")
 lines(gmst$year, gmst$giss, col = "blue")
 abline(v = 1961, lty = 4)
 abline(v = 1990, lty = 4)
-# abline(h = 0, lty = 2)
 abline(v = 1871, lty = 4, col = "green")
 abline(v = 1900, lty = 4, col = "green")
 abline(h = 0, lty = 2, col = "green")
-
-abline(v = 1851, lty = 4, col = "grey")
-abline(v = 1880, lty = 4, col = "grey")
-abline(h = mean((gmst %>% filter(year >= 1851 & year <= 1880))$had), lty = 2, col = "grey")
+# abline(v = 1851, lty = 4, col = "grey")
+# abline(v = 1880, lty = 4, col = "grey")
+# abline(h = mean((gmst %>% filter(year >= 1851 & year <= 1880))$had), lty = 2, col = "grey")
 
 
 ################################
@@ -140,13 +138,21 @@ rcps <-
 
 colnames(rcps) <- gsub("_rf", "", tolower(colnames(rcps)))
 
-## Will only be using some variables, so select revelant columns
+## Will only be using some variables, so select the revelant columns plus a few
+## extra. (Also, see the RCP flowchart in the ./Data folder to get a sense of how 
+## the individual forcings add up to the total radiative forcings column.)
 rcps <-
   rcps %>%
-  rename(year = years, trf_inclvolc = total_inclvolcanic, 
-         volc = volcanic_annual, anthro = total_anthro) %>%
-  mutate(trf = trf_inclvolc - volc) %>%
-  select(year, trf, volc, solar, anthro, co2, rcp) %>%
+  rename(year = years, 
+         trf_inclvolc = total_inclvolcanic, 
+         volc = volcanic_annual, 
+         anthro = total_anthro,
+         aerosols = totaer_dir) %>%
+  mutate(trf = trf_inclvolc - volc,
+         other = cloud_tot + stratoz + tropoz + ch4oxstrath2o + landuse + bcsnow) %>%
+  select(year, trf, volc, solar, anthro, ghg, co2ch4n2o, 
+         fgassum, mhalosum, aerosols, other, rcp) %>% 
+  # select(year, trf, volc, solar, anthro, co2, rcp) %>%
   group_by(rcp)
 
 
@@ -197,8 +203,8 @@ climate <-
   full_join(rcps) %>%
   left_join(soi) %>%
   left_join(amo) %>% 
-  select(year, had, had_025, had_975, cw, cw_1sigma, giss, 
-         trf, volc, solar, anthro, co2, soi, amo, rcp) 
+  select(year, rcp, had, had_025, had_975, cw, cw_1sigma, giss, everything()) %>%
+  arrange(rcp, year)
 
 ## Subset the data to a common period for analysis
 climate <-
@@ -221,14 +227,6 @@ climate <-
   mutate(volc_mean = ifelse(year <= 2006, volc_mean, mean(volc_mean, na.rm = T)), ## Note: not 2005
          soi_mean = ifelse(!is.na(soi), soi, mean(soi, na.rm = T)),
          amo_mean = ifelse(!is.na(amo), amo, mean(amo, na.rm = T)))
-
-climate <-
-  climate %>%
-  group_by(rcp) %>% 
-  arrange(year) %>%
-  select(rcp, everything()) %>%
-  ungroup()
-
 
 ## Finally, write to disk
 write_csv(climate, "./Data/climate.csv")
