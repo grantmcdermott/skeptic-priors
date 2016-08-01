@@ -10,8 +10,9 @@ library(viridis)
 ## Optional for replication
 set.seed(123) 
 
+
 ## Load climate data
-climate <- read_csv("./Data/climate.csv")
+climate <- read_csv("Data/climate.csv")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 chain_length <- 3000
@@ -24,8 +25,7 @@ rcp_type <- "rcp26"
 ## Load climate data and deviation DF for simulating "true" future values
 climate <- 
   read_csv("./Data/climate.csv") %>%
-  filter(rcp == rcp_type) #%>%
-  # filter(year <= yr_max) 
+  filter(rcp == rcp_type) 
 
 y_dev <- read_csv("./Evidence/Data/y-dev.csv")
 
@@ -37,16 +37,14 @@ climate$volc_noise <- rnorm(nrow(climate), sd = .1)
 climate$soi_noise <- rnorm(nrow(climate), sd = .1)
 climate$amo_noise <- rnorm(nrow(climate), sd = .1)
 
+## Simulate climate data based on noninformative parameters
 climate <- 
   climate %>% 
   mutate(volc_sim = ifelse(year <= 2005, volc_mean, volc_mean + volc_noise),
          soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
          amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
          ) %>%
-  mutate(had_sim = 
-           ifelse(year <= 2005, had,
-                  -0.110 + 0.415*trf + 0.047*volc_sim + -0.028*soi_sim + 0.481*amo_sim + noise
-                  ))
+  mutate(had_sim = -0.110 + 0.415*trf + 0.047*volc_sim + -0.028*soi_sim + 0.481*amo_sim + noise)
 
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
@@ -54,13 +52,15 @@ climate <-
 ## Length of disbn equals length of MCMC chain for consistency
 rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
 
-
-######################
 ## EVIDENCE FUNCTION
-
+## DESCRIPTION:
 ## The function loops along a sequence of (decreasing) sigma values for a given 
 ## mu. Once it reaches the end of the sequence for that mu, it moves on to the  
-## next, lower mu value and repeats the procedure.
+## next, lower mu value and repeats the procedure. It does this for two TCR
+## threshold levels: 1.3 °C and 1.5°C. (Note that the function will need to be 
+## adjusted  if different thresholds are chosen.) The mean posterior TCR values  
+## must be at least as big as the relevant threshold to qualify as fully converged  
+## with mainstream. 
 evid_func <- 
   function(d){
     pblapply(1:nrow(d), function(x){
@@ -68,19 +68,17 @@ evid_func <-
       m <- d[x, ]$mu
       s <- d[x, ]$sigma
       max_m <- d[x, ]$max_mu
+      thresh <- d[x, ]$threshold
       
-      if(d[1, ]$rec == "historic"){yr_max <- 2005}
-      if(d[1, ]$rec == "future"){yr_max <- 2100}
-      
-      if(d[1, ]$rec == "historic"){
-        yrs <<- ifelse(thresh == 1.5 & x == 1, 95,
-                       ifelse(thresh == 1.3 & x == 1, 45, 
-                              ifelse(max_m != 1, yrs - 1, yrs_j))) 
-      }
-      
-      if(d[1, ]$rec == "future"){
-        yrs <<- ifelse(x == 1, 140, ifelse(max_m != 1, yrs - 1, yrs_j)) 
-      }
+      yr_max <- 2100
+
+      yrs <<- ifelse(thresh == 1.5 & round(m, 1) == 1.0 & round(s, 3) == 0.250, #x == 122, ## i.e. first row where thresh == 1.5
+                     100, 
+                     ifelse(thresh == 1.3 & x == 1, 
+                            65, 
+                            ifelse(max_m != 1, 
+                                   yrs - 1, 
+                                   yrs_j))) 
       
       tcr_mean <- 0 ## Place holder value
       
@@ -90,21 +88,10 @@ evid_func <-
         ## NB: Use "<<-" to assign value to global workspace for next iteration
         yrs <<- yrs + 1 
         
-        ## For historic regressions, we go backwards one year at a time
-        if(d[1, ]$rec == "historic"){
-          clim_df <-
-            climate %>%
-            filter(year <= yr_max) %>%
-            filter(year >= max(year) - yrs)
-        }
+        clim_df <-
+          climate %>%
+          filter(year <= min(year) + yrs)
         
-        ## For future regressions, we go forwards one year at a time
-        if(d[1, ]$rec == "future"){
-          clim_df <-
-            climate %>%
-            filter(year <= min(year) + yrs)
-        }
-      
         ##----------------------------------------------------------------------
         ## THE BUGS/JAGS MODEL.
         ## Note: Removing y_pred b/c predictions into the future not needed for
@@ -124,11 +111,11 @@ evid_func <-
           }
           ", 
           paste0(
-          "
-          mu_beta <- ", mu_beta),
+            "
+            mu_beta <- ", mu_beta),
           paste0(
-          "
-          sigma_beta <- ", sigma_beta),
+            "
+            sigma_beta <- ", sigma_beta),
           "
           
           ## Priors for all parameters   
@@ -142,7 +129,7 @@ evid_func <-
           tau <- pow(sigma, -2)  	          
           had0 ~ dnorm(0.0, 1.0E-6)           ## Initialising value
           
-          }" 
+      }" 
         ) 
         
         bugs_file <- paste("Evidence/BUGSFiles/evidence-bugs.txt")
@@ -200,241 +187,71 @@ evid_func <-
                    sigma = s,
                    tcr_mean = tcr_mean,
                    yrs = yrs,
-                   thresh = thresh
-                   )
+                   thresh = thresh)
       
       return(df)
       
     } ## end of pblapply function
-  ) %>% ## end of pbapply
-  bind_rows()
-    
-} ## end of entire evid_func function
+    ) %>% ## end of pbapply
+      bind_rows()
+  } ## end of entire evid_func function
 
 
-#########################################################
-
-
-## Choose posterior TCR threshold. 
-## Mean TCR values must be at least this big to qualify as fully converged with 
-## mainstream. 
-thresh <- c(1.3, 1.5)[1]
-
-
-####
-## NOTE: SKIP TO LINE 278 ONCE THE BELOW CODE HAS ALREADY BEEN RUN ONCE. TAKES 
-## QUITE A WHILE TO EXECUTE AND NO NEED TO REPEAT ONCE THE TARGET DATA HAS 
-## ALREADY BEEN PRODUCED AND EXPORTED.
-
-################################
-## Historic evidence estimates
+###################################
+## Sceptic prior range (data frame)
 
 mu <- seq(1, 0, length = 11)
-sigma <- seq(.25, .0674, length = 11)
+sigma <- seq(.25, .065, length = 11)
+threshold <- c(1.3, 1.5)
 
-hist <- 
-  expand.grid(mu = mu, sigma = sigma) %>%
-  group_by(sigma) %>% 
+df <- 
+  expand.grid(mu = mu, sigma = sigma, threshold = threshold) %>%
+  group_by(threshold, sigma) %>% 
   mutate(max_mu = ifelse(mu == max(mu), 1, 0)) %>%
-  ungroup() %>%
-  mutate(rec = "historic")
+  ungroup() 
 
-hevid <- evid_func(hist)
-## For TCR = 1.3
-# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 34m 14s
-## For TCR = 1.5
-# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 22m 51s
+####
+## Run the function over the full range of sceptic priors
+## NOTE: Takes about an hour to run on my laptop (16 GB RAM), so skip to line 230
+## once it has already been run and the data exported to file.
+evid <- evid_func(df)
+# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 56m 32s
+
+## Arrange by threshold, mu and sigma
+evid <-
+  evid %>%
+  arrange(thresh, desc(mu), desc(sigma))
+
 rm(yrs, yrs_j)
 
 ## Write data
-write_csv(hevid, paste0("./Evidence/Data/tcr",
-                         gsub("\\.", "_", thresh),
-                         "-evidence-historic.csv"))
-
-
-################################
-## Future evidence estimates
-
-futr <-
-  hevid %>%
-  filter(round(tcr_mean, digits = 1) < thresh) %>%
-  select(mu, sigma) %>%
-  group_by(sigma) %>% 
-  mutate(max_mu = ifelse(mu == max(mu), 1, 0)) %>%
-  ungroup() %>%
-  mutate(rec = "future")
-
-fevid <- evid_func(futr)
-## For TCR = 1.3
-# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 04m 34s
-## For TCR = 1.5
-# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 19m 05s
-rm(yrs)
-
-## Write data
-write_csv(fevid, paste0("./Evidence/Data/tcr",
-                         gsub("\\.", "_", thresh),
-                         "-evidence-future.csv"))
-
-
-#####################################################
-## Combined evidence estimates and remove duplicates
-evid <-
-  bind_rows(hevid, fevid) %>%
-  group_by(mu, sigma) %>% 
-  arrange(mu, sigma, desc(tcr_mean)) %>% ## We want to keep the larger values b/c those need future evidence
-  distinct(.keep_all = T) %>%
-  ungroup() %>%
-  arrange(thresh, desc(mu), desc(sigma))
-
-## Write data
-write_csv(evid, paste0("./Evidence/Data/tcr",
-                       gsub("\\.", "_", thresh),
-                       "-evidence-comb.csv"))
-
-
-
-###########################################################################
-## Now compare combined evidence estimates from both 1.3 and 1.5 mean TCR
+write_csv(evid, "Evidence/Data/tcr-evidence.csv")
 
 ## Read data
-evid <-
-  bind_rows(
-    lapply(c("1_3", "1_5"), function(x){
-      read_csv(paste0("./Evidence/Data/tcr", x, "-evidence-comb.csv"))
-    })
-  )
-  
+evid <- read_csv("Evidence/Data/tcr-evidence.csv")
+
+## Adjust the data slightly for plotting (only obs where no convergence by 2100)
 evid <-
   evid %>%
-  mutate(yrs_dash = yrs) %>% 
+  mutate(yrs_dash = ifelse(yrs == 235, yrs - 1, yrs)) %>% 
   mutate(yrs = ifelse(round(tcr_mean, 1) < thresh, NA, yrs)) %>%
-  mutate(sigma_dash = ifelse(round(tcr_mean, 1) < thresh, (0.08566-mu/30)^1.05 + .003, sigma)) %>%
+  mutate(sigma_dash = ifelse(round(tcr_mean, 1) < thresh, (0.0674+(.2-mu)/30)^1.2+0.03, sigma)) %>%
   mutate(thresh_lab = paste0(thresh, " °C")) %>%
   mutate(thresh_lab = ifelse(thresh == 1.3, 
                              paste0("(a) ", thresh_lab), 
                              paste0("(b) ", thresh_lab)))
 
-## Contour plot
-# evid %>%
-#   ggplot(aes(x = mu, y = sigma, z = yrs_dash)) +
-#   geom_contour(binwidth = 20) + geom_contour(binwidth = 140, col = "red") +
-#   labs(x = expression(mu), y = expression(sigma)) +
-#   facet_wrap(~thresh_lab#, labeller = label_parsed
-#   ) +
-#   theme(text = element_text(family = font_type, size = 16),
-#         axis.text = element_text(size = 16),
-#         strip.text = element_text(size = 16),
-#         axis.title.y = element_text(angle=0),
-#         strip.background = element_rect(fill = "white"), ## Facet strip
-#         panel.margin = unit(2, "lines"))
-
-p <-
-  evid %>%
-  ggplot(aes(x = mu, y = sigma)) +
-  # geom_raster(aes(fill = yrs - 140)) +
-  # scale_fill_gradient2(name = "Years from\npresent", 
-  #                      limits = c(-100, 100)) +
-  # guides(fill = guide_colorbar(reverse = TRUE)) +
-  geom_raster(aes(fill = yrs)) +
-  scale_fill_viridis(name = "Years",
-                     direction = -1,
-                     guide = guide_colourbar(reverse = TRUE)) +
-  labs(x = expression(mu), y = expression(sigma)) +
-  facet_wrap(~thresh_lab#, labeller = label_parsed
-             ) +
-  theme(text = element_text(family = font_type, size = 16),
-        axis.text = element_text(size = 16),
-        strip.text = element_text(size = 16),
-        axis.title.y = element_text(angle=0),
-        strip.background = element_rect(fill = "white"), ## Facet strip
-        panel.margin = unit(2, "lines"))
-
-
-## Place bounds around future and historic values
-bounds <-
-  bind_rows(
-    lapply(c("1_3", "1_5"), function(x){
-      read_csv(paste0("./Evidence/Data/tcr", x, "-evidence-historic.csv")) %>%
-        filter(yrs == 140) %>%
-      # read_csv(paste0("./Evidence/Data/tcr", x, "-evidence-future.csv")) %>%
-      #   filter(yrs > 141) %>%
-        distinct(sigma, .keep_all = T) %>%
-        mutate(mu_1 = mu - .05, sigma_1 = sigma + 0.01826/2,
-               mu_2 = mu + .05, sigma_2 = sigma + 0.01826/2,
-               mu_3 = mu + .05, sigma_3 = sigma - 0.01826/2) %>%
-        select(mu_1:sigma_3) %>%
-        mutate(grp = row_number()) %>%
-        gather(key, value, -grp) %>%
-        separate(key, into = c("key", "suff")) %>%
-        mutate(grp = paste0(grp, "_", suff)) %>%
-        select(-suff) %>%
-        spread(key, value) %>% 
-        select(-grp) %>% 
-        mutate(mu = round(mu, 2)) %>%
-        distinct(mu, sigma) %>%
-        filter(sigma > ifelse(gsub("_", ".", x) == 1.5, 0.07653, 0)) %>%
-        arrange(mu, desc(sigma)) %>%
-        mutate(thresh = gsub("_", ".", x))
-    })
-  ) %>%
-  mutate(thresh_lab = paste0(thresh, " °C")) %>%
-  mutate(thresh_lab = ifelse(thresh == 1.3, 
-                             paste0("(a) ", thresh_lab), 
-                             paste0("(b) ", thresh_lab))) 
-## Manual adjustment to make plot look nicer
-bounds <-
-  bounds %>% group_by(thresh) %>% #filter(mu == min(mu)) %>%
-  mutate(mu = ifelse(mu == min(mu) & mu != -.05, -.05, mu))
-
-p +
-  geom_line(data = bounds, col = "red", lwd = 1.25) +
-  # geom_text(aes(label = yrs), family = font_type) +
-  ggsave(file = "./Evidence/TablesFigures/evidence-grid.pdf",
-         width = 8, height = 4,
-         device = cairo_pdf)
-
-p +
-  geom_line(data = bounds, col = "red", lwd = 1.25) +
-  geom_text(data = evid %>% filter(yrs >= 140),
-            aes(label = yrs+1866), size = 2.75, family = font_type) +
-  ggsave(file = "./Evidence/TablesFigures/evidence-grid-labs.pdf",
-         width = 8, height = 4,
-         device = cairo_pdf)
-
-
-## Years from present with red-white-blue colour scheme
-evid %>%
-  ggplot(aes(x = mu, y = sigma)) +
-  geom_raster(aes(fill = yrs - 140)) +
-  scale_fill_gradient2(name = "Year beliefs\nconverge\n(relative to\npresent)",
-                       low=scales::muted("blue"), high=scales::muted("red")#,
-                       # limits = c(-95, 95)
-                       ) +
-  guides(fill = guide_colorbar(reverse = TRUE)) +
-  # geom_line(data = bounds, col = "white", lwd = 1.25) +
-  labs(x = expression(mu), y = expression(sigma)) +
-  facet_wrap(~thresh_lab) +
-  theme(text = element_text(family = font_type, size = 16),
-        axis.text = element_text(size = 16),
-        strip.text = element_text(size = 16),
-        axis.title.y = element_text(angle=0),
-        strip.background = element_rect(fill = "white"), ## Facet strip
-        panel.margin = unit(2, "lines")) +
-  ggsave(file = "./Evidence/TablesFigures/evidence-grid-years-present.pdf",
-         width = 8, height = 4,
-         device = cairo_pdf)
-
-evid %>%
+## Plot the data
+## Years with red-white-blue colour scheme
+evid %>% 
   ggplot(aes(x = mu, y = sigma)) +
   geom_raster(aes(fill = yrs + 1866 -1)) +
   scale_fill_gradient2(name = "Year beliefs\nconverge",
-                       midpoint = 2005,
+                       midpoint = 2015, 
                        low=scales::muted("blue"), high=scales::muted("red"),
-                       limits = c(1920, 2100)
+                       limits = c(1935, 2100)
                        ) +
   guides(fill = guide_colorbar(reverse = TRUE)) +
-  # geom_line(data = bounds, col = "white", lwd = 1.25) +
   labs(x = expression(mu), y = expression(sigma)) +
   facet_wrap(~thresh_lab) +
   theme(text = element_text(family = font_type, size = 16),
@@ -443,12 +260,11 @@ evid %>%
         axis.title.y = element_text(angle=0),
         strip.background = element_rect(fill = "white"), ## Facet strip
         panel.margin = unit(2, "lines")) +
-  ggsave(file = "./Evidence/TablesFigures/evidence-grid-years.pdf",
+  ggsave(file = "Evidence/TablesFigures/evidence-grid.pdf",
          width = 8, height = 4,
          device = cairo_pdf)
 
-
-## Lines instead of grids
+## Lines instead of grid
 evid %>%
   filter(round(mu, 1) %in% round(seq(0, 1, by = .2), 1)) %>%
   ggplot(aes(x = sigma, y = yrs + 1866 - 1, group = factor(mu))) +
@@ -458,36 +274,31 @@ evid %>%
               filter(is.na(yrs) | is.na(lead(yrs))) %>% 
               filter(mu < .5) %>%
               filter(mu %in% seq(0, 1, by = .2)),
-            aes(x = sigma_dash, y = yrs_dash + 1866 - 1), lty = 5) +
+            aes(x = sigma_dash - .001, y = yrs_dash + 1866), lty = 5) +
   geom_hline(yintercept = 2005, col = "red", lty = 2) + 
   geom_hline(yintercept = 2016, col = "red", lty = 2) +
   geom_hline(yintercept = 2100, col = "red", lty = 1) +
   geom_label(data = evid %>% 
-              filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
-              filter(sigma == min(sigma)), 
-            aes(label = sprintf('mu == "%1.1f"', mu)), 
-            hjust = 0, nudge_x = .001, #check_overlap = T, 
-            label.padding = unit(0, "lines"), col = NA) +
-  geom_text(data = evid %>% 
                filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
                filter(sigma == min(sigma)), 
              aes(label = sprintf('mu == "%1.1f"', mu)), 
              hjust = 0, nudge_x = .001, #check_overlap = T, 
-             parse = T, family = font_type, size = 3) +
-  geom_text(data = evid %>% filter(is.na(yrs) & mu == .4),
-            aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
-            vjust = 0, #nudge_y = 2, 
-            hjust = 0, nudge_x = .001, #check_overlap = T, 
+             label.padding = unit(1, "lines"), col = NA) +
+  geom_text(data = evid %>% 
+              filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
+              filter(sigma == min(sigma)), 
+            aes(label = sprintf('mu == "%1.1f"', mu)), 
+            hjust = 0, nudge_x = .001, 
             parse = T, family = font_type, size = 3) +
-  geom_text(data = evid %>% filter(is.na(yrs) & mu == .2), 
+  geom_text(data = evid %>% filter(is.na(yrs) & mu == .2),
+            aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
+            vjust = 0, 
+            hjust = 0, nudge_x = .001,  
+            parse = T, family = font_type, size = 3) +
+  geom_text(data = evid %>% filter(is.na(yrs) & mu == .0), 
             aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
             vjust = 0, nudge_y = 10, 
-            hjust = 0, nudge_x = .001, #check_overlap = T, 
-            parse = T, family = font_type, size = 3) +
-  geom_text(data = evid %>% filter(is.na(yrs) & mu == 0),
-            aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
-            vjust = 0, nudge_y = 20, 
-            hjust = 0, nudge_x = .001, #check_overlap = T,
+            hjust = 0, nudge_x = .001, 
             parse = T, family = font_type, size = 3) +
   labs(x = expression(paste("Prior convinction (", sigma, ")")), 
        y = "Year beliefs converge") +
@@ -499,7 +310,6 @@ evid %>%
         #axis.title.y = element_text(angle=0),
         strip.background = element_rect(fill = "white"), ## Facet strip
         panel.margin = unit(2, "lines")) +
-  ggsave(file = "./Evidence/TablesFigures/evidence-lines.pdf",
+  ggsave(file = "Evidence/TablesFigures/evidence-lines.pdf",
          width = 8, height = 4,
          device = cairo_pdf)
-

@@ -6,8 +6,8 @@ model{
           # y_pred[t] ~ dnorm(mu[t], tau) ## For predictions into the future
           }
            
-          mu_beta <- 0.269541778975741 
-          sigma_beta <- 0.0673854447439353 
+          mu_beta <- 0 
+          sigma_beta <- 0.0175202156334232 
           
           ## Priors for all parameters   
           alpha ~ dnorm(0, 0.0001)            ## intercept
@@ -20,4 +20,4 @@ model{
           tau <- pow(sigma, -2)  	          
           had0 ~ dnorm(0.0, 1.0E-6)           ## Initialising value
           
-          }
+      }
