@@ -72,7 +72,7 @@ for (i in 1:4) {
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
     tcr[[l]] <- 
       data.frame(beta = filter(coefs_df, coef == "beta")$values,
-                           prior = paste0(prior_type, convic_type)
+                 prior = paste0(prior_type, convic_type)
                  ) %>%
       tbl_df()
 

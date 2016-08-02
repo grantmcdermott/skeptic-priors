@@ -6,7 +6,7 @@ temp_2100 <- list()
 ## Loop over all four RCPs ##
 for (i in 1:4) {
   
-  rcp_type <- c("rcp26" , "rcp45" , "rcp60" , "rcp85")[i]
+  rcp_type <- c("rcp26", "rcp45", "rcp60", "rcp85")[i]
   
   ## Subset the data to the relevant RCP ##
   clim_df <- 
@@ -79,8 +79,7 @@ for (i in 1:4) {
     }" 
     ) 
   
-  bugs_file <- paste0("./BUGSfiles/", 
-                      prior_type, "-", convic_type, "-", rcp_type, ".txt")
+  bugs_file <- paste0("BUGSFiles/", prior_type, "-", convic_type, "-", rcp_type, ".txt")
   if(prior_type == "ni"){bugs_file <- gsub("--", "-", bugs_file)}
   writeLines(mod_string, con = bugs_file)
   

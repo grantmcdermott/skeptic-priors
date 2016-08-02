@@ -102,7 +102,7 @@ for (i in 1:4) {
     }" 
     ) 
   
-  bugs_file <- paste0("./Robustness/MeasError/BUGSfiles/", 
+  bugs_file <- paste0("./Robustness/MeasError/BUGSFiles/", 
                       prior_type, "-", convic_type, "-", rcp_type, "-me.txt")
   if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
   writeLines(mod_string, con = bugs_file)

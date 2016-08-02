@@ -42,7 +42,7 @@ for (k in 1:3)  {
 } ## End of prior loop
 proc.time() - ptm
 # user  system elapsed 
-# 38.19    5.25  133.73 
+# 28.140   2.912 118.166 
 
 
 ##################################

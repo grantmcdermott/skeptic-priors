@@ -69,14 +69,33 @@ tcr <-
   group_by(series)
 
 tcr %>%
+  ungroup() %>%
+  mutate(series = gsub("cw", "CW2014", series),
+         series = gsub("giss", "GISTEMP", series),
+         series = gsub("had", "HadCRUT4", series)) %>% 
+  mutate(series = factor(series, levels = c("HadCRUT4", "CW2014", "GISTEMP"))) %>%
   ggplot(aes(x = tcr, group = series, col = series)) +
-  geom_density() #+
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
+           alpha = .2) +
+  labs(x = expression(~degree*C), y = "Density") +
+  xlim(-1, 3) +
+  geom_line(stat = "density") +
+  labs(x = expression(~degree*C), y = "Density") +
+  theme(text = element_text(family = "Palatino Linotype"),
+        legend.title=element_blank(),
+        legend.position="bottom"
+        ) +
+  ggsave(file = "./Robustness/TablesFigures/tcr-other.pdf",
+         width = 5, height = 4, 
+         device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+
   
 
 tcr %>%
-  summarise(mean = mean(tcr),
-            q025 = quantile(tcr, .025),
-            q975 = quantile(tcr, .975))
+  summarise(mean = round(mean(tcr), 2),
+            q025 = round(quantile(tcr, .025), 2),
+            q975 = round(quantile(tcr, .975), 2)) %>%
+  arrange(mean)
 
 ## Use own function to help pull desired data in summary form for table ##
 clean_func <- function(x) {
@@ -102,8 +121,8 @@ tcr_other <-
   mutate(Series = gsub("cw", "CW2014", Series),
          Series = gsub("giss", "GISTEMP", Series),
          Series = gsub("had", "HadCRUT4", Series)) %>%
-  select(Series, everything()) %>%
-  arrange(as.numeric(Mean))
+  select(Series, everything()) %>% 
+  slice(c(3,1,2))
 tcr_other$"Effective sample period" <- c(rep("1866-2005", 2), "1880-2005")
 
 ## Requires some addtional; tinkering in LaTeX (threeparttable package, etc)
@@ -118,36 +137,13 @@ stargazer(tcr_other,
           notes = c("\\footnotesize All estimates are computed using noninformative priors."),
           # type = "text" 
           out = "./Robustness/TablesFigures/tcr-other.tex"
-)
+          )
 
-tcr_other %>%
-  xtable::xtable() %>%
-  print(caption = "Transient climate response (TCR), $^\\circ$C: Results from different temperature series", 
-        caption.placement = 'top',
-        label = "tab:tcr-other",
-        include.rownames=F,
-        booktabs = T)
+# tcr_other %>%
+#   xtable::xtable() %>%
+#   print(caption = "Transient climate response (TCR), $^\\circ$C: Results from different temperature series", 
+#         caption.placement = 'top',
+#         label = "tab:tcr-other",
+#         include.rownames=F,
+#         booktabs = T)
 
-tcr %>%
-  ungroup() %>%
-  mutate(series = gsub("cw", "CW2014", series),
-         series = gsub("giss", "GISTEMP", series),
-         series = gsub("had", "HadCRUT4", series)) %>% 
-  mutate(series = factor(series, levels = c("HadCRUT4", "CW2014", "GISTEMP"))) %>%
-  ggplot(aes(x = tcr, group = series, col = series)) +
-    # geom_density() + ## Leaves extra baseline and also square legend. Better to use next line.
-    geom_line(stat = "density") +
-    labs(x = expression(~degree*C), y = "Density") +
-    theme(text = element_text(family = "Palatino Linotype"),
-          legend.title=element_blank(),
-          legend.position="bottom"#,
-          # legend.key.width = unit(2, "line"),
-          # legend.key.height = unit(2.25, "line"),
-          # legend.key.size = unit(2, "line")
-          ) +
-    ggsave(file = "./Robustness/TablesFigures/tcr-other.pdf",
-           width = 5, height = 4, 
-           device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-  
-  
-  

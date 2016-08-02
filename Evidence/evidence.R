@@ -275,8 +275,7 @@ evid %>%
               filter(mu < .5) %>%
               filter(mu %in% seq(0, 1, by = .2)),
             aes(x = sigma_dash - .001, y = yrs_dash + 1866), lty = 5) +
-  geom_hline(yintercept = 2005, col = "red", lty = 2) + 
-  geom_hline(yintercept = 2016, col = "red", lty = 2) +
+  geom_hline(yintercept = 2015, col = "red", lty = 2) +
   geom_hline(yintercept = 2100, col = "red", lty = 1) +
   geom_label(data = evid %>% 
                filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
@@ -289,20 +288,21 @@ evid %>%
               filter(sigma == min(sigma)), 
             aes(label = sprintf('mu == "%1.1f"', mu)), 
             hjust = 0, nudge_x = .001, 
-            parse = T, family = font_type, size = 3) +
+            parse = T, family = font_type, size = 3.5) +
   geom_text(data = evid %>% filter(is.na(yrs) & mu == .2),
             aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
             vjust = 0, 
             hjust = 0, nudge_x = .001,  
-            parse = T, family = font_type, size = 3) +
+            parse = T, family = font_type, size = 3.5) +
   geom_text(data = evid %>% filter(is.na(yrs) & mu == .0), 
             aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
             vjust = 0, nudge_y = 10, 
             hjust = 0, nudge_x = .001, 
-            parse = T, family = font_type, size = 3) +
+            parse = T, family = font_type, size = 3.5) +
   labs(x = expression(paste("Prior convinction (", sigma, ")")), 
        y = "Year beliefs converge") +
-  scale_x_reverse(expand = c(0.15, 0)) +
+  scale_x_reverse(expand = c(0.2, 0)) +
+  scale_y_continuous(expand = c(0.1, 0)) +
   facet_wrap(~thresh_lab) +
   theme(text = element_text(family = font_type, size = 16),
         axis.text = element_text(size = 12),
