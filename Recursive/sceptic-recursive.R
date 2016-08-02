@@ -30,28 +30,28 @@ climate <- read_csv("./Data/climate.csv") %>%
   filter(rcp == rcp_type) %>%
   filter(year <= yr_max) 
 
-y_dev <- read_csv("./Recursive/Data/y-dev.csv")
+y_dev <- read_csv("./Evidence/Data/y-dev.csv")
 
 climate$noise <- sample(y_dev$dev, nrow(climate), replace = T)
 
-## Also add noise to future "mean" covariate values; otherwise collinearity problems for some
-## regressions.
-climate$volc_noise <- rnorm(nrow(climate))
-climate$soi_noise <- rnorm(nrow(climate))
-climate$amo_noise <- rnorm(nrow(climate))
+## Also add noise to future "mean" covariate values; otherwise collinearity 
+## problems for future regressions b/c values stay constant.
+climate$volc_noise <- rnorm(nrow(climate), sd = .1)
+climate$soi_noise <- rnorm(nrow(climate), sd = .1)
+climate$amo_noise <- rnorm(nrow(climate), sd = .1)
 
 climate <- 
   climate %>% 
   mutate(volc_sim = ifelse(year <= 2005, volc_mean, volc_mean + volc_noise),
          soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
          amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
-  ) %>%
+         ) %>%
   mutate(had_sim = 
            ifelse(year <= 2005, 
                   had,
-                  -0.110 + 0.415*trf + 0.047*volc_sim + -0.028*soi_sim + 0.481*amo_sim + noise
-           )
-  )
+                  -0.102 + 0.418*trf + 0.051*volc_sim + -0.028*soi_sim + 0.473*amo_sim + noise
+                  )
+         )
 
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
@@ -69,13 +69,10 @@ if (recurse_type == "historic") {recurse_seq <- seq(from = yr_max - 15, to = 186
 if (recurse_type == "future") {recurse_seq <- seq(from = 1880, to = yr_max, by = 1)}
 
 ptm <- proc.time()
-
 for (n in recurse_seq) {
-  
   ## Loop over prior ##
   for (k in 1:3)  {  
     prior_type <- c("ni", "luke", "den")[k] 
-    
     ## Loop over conviction strength ##
     if(prior_type == "ni")  {
       convic_type <- ""
@@ -86,15 +83,12 @@ for (n in recurse_seq) {
       convic_type <- c("mod", "strong")[j]
       source("./Recursive/jags-recursive.R")   
     } } ## End of conviction loop
-    
   } ## End of prior loop
-  
 } ## End of recursive loop
-
 proc.time() - ptm
 ## Historic
-# user   system  elapsed 
-# 49.39   15.50  1472.46 
+#   user   system  elapsed 
+# 42.004   28.320 1438.644
 ## Same for Future set until 2005. But then, e.g., going then from 2006 to 2050...
 # user  system elapsed 
 # 18.55    5.07  752.94 
@@ -123,10 +117,8 @@ tcr_rec <-
                              tcr_rec %>%
                                filter(series == "ni") %>%
                                mutate(serieslab = x)
-                           }
-                    )
-            )
-  )
+                             }
+                           )))
 
 tcr_rec$serieslab <- 
   ifelse(tcr_rec$serieslab == "lukemod",
@@ -136,9 +128,7 @@ tcr_rec$serieslab <-
                 ifelse(tcr_rec$serieslab == "denmod",
                        "(C) Moderate Denier",
                        "(D) Strong Denier"
-                       )
-                )
-         )
+                       )))
 
 tcr_plot <- 
   ggplot(tcr_rec, aes(x = year_to, #x = samp_size,
@@ -155,17 +145,7 @@ tcr_plot <-
                     labels = prior_names) +
   background_grid(major = "y", minor = "none", colour.major = "gray90") +
   facet_wrap(~ serieslab, ncol = 2) +
-  theme_cowplot() +
-  theme(
-    text = element_text(family = "Palatino Linotype"),
-    axis.title.x = element_text(size=18),
-    axis.title.y = element_text(size=18, angle = 0),
-    axis.text  = element_text(size=17),
-    legend.position = "none",
-    strip.text = element_text(size = 17, colour = "black"),
-    strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.margin = unit(2, "lines") ## Increase gap between facet panels
-  ) 
+  theme_recursive 
 
 if(recurse_type == "historic"){
   tcr_plot <- 
@@ -196,17 +176,7 @@ tcr_plot_lines <-
                     labels = prior_names) +
   background_grid(major = "y", minor = "none", colour.major = "gray90") +
   facet_wrap(~ serieslab, ncol = 2) +
-  theme_cowplot() +
-  theme(
-    text = element_text(family = "Palatino Linotype"),
-    axis.title.x = element_text(size=18),
-    axis.title.y = element_text(size=18, angle = 0),
-    axis.text  = element_text(size=17),
-    legend.position = "none",
-    strip.text = element_text(size = 17, colour = "black"),
-    strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.margin = unit(2, "lines") ## Increase gap between facet panels
-  ) 
+  theme_recursive 
 
 if(recurse_type == "historic"){
   tcr_plot_lines <- 

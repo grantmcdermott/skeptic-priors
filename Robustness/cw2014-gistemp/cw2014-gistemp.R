@@ -89,8 +89,6 @@ tcr %>%
          width = 5, height = 4, 
          device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
 
-  
-
 tcr %>%
   summarise(mean = round(mean(tcr), 2),
             q025 = round(quantile(tcr, .025), 2),

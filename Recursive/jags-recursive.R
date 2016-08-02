@@ -121,7 +121,7 @@ tcr <- as.matrix(mod_samples[, "beta"], iters = F) * rf2x
 rm(bugs_file, cl, data_list, mod_samples, mod_string, par_inits, parameters)
 
 
-## Set figure if haven't done so calling the proportional noninformative prior previously
+## Set figure if haven't done so by calling the proportional noninformative prior previously
 if(prior_type == "ni"){
   
   A <- A + 1 # For animation figures

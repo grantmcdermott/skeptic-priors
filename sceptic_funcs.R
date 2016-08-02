@@ -99,7 +99,6 @@ match_rcps <- function(x) {
 ### GGPLOT2 themes
 
 theme_coefs <-
-  # cowplot::theme_cowplot() +
   theme(
     text = element_text(family = font_type),
     axis.title.x = element_blank(),
@@ -113,7 +112,6 @@ theme_coefs <-
     ) 
 
 theme_pred <-
-  # cowplot::theme_cowplot() +
   theme(
     text = element_text(family = font_type),
     axis.title.x = element_text(size=20),
@@ -132,7 +130,6 @@ theme_pred <-
   ) 
 
 theme_2100 <-
-  # cowplot::theme_cowplot() +
   theme(
     text = element_text(family = font_type),
     legend.position = "bottom",
@@ -147,4 +144,16 @@ theme_tcr <-
     text = element_text(family = font_type),
     legend.position = "bottom",
     legend.title = element_blank()
+  )
+
+theme_recursive <-
+  theme(
+    text = element_text(family = font_type),
+    axis.title.x = element_text(size=18),
+    axis.title.y = element_text(size=18, angle = 0),
+    axis.text  = element_text(size=17),
+    legend.position = "none",
+    strip.text = element_text(size = 17, colour = "black"),
+    strip.background = element_rect(fill = "white"), ## Facet strip
+    panel.margin = unit(2, "lines") ## Increase gap between facet panels
   )
