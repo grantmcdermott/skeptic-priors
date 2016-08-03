@@ -44,7 +44,7 @@ climate <-
          soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
          amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
          ) %>%
-  mutate(had_sim = -0.110 + 0.415*trf + 0.047*volc_sim + -0.028*soi_sim + 0.481*amo_sim + noise)
+  mutate(had_sim = -0.102 + 0.418*trf + 0.051*volc_sim + -0.028*soi_sim + 0.473*amo_sim + noise)
 
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
@@ -200,8 +200,8 @@ evid_func <-
 ###################################
 ## Sceptic prior range (data frame)
 
-mu <- seq(1, 0, length = 11)
-sigma <- seq(.25, .065, length = 11)
+mu <- round(seq(1, 0, length = 11), 1)
+sigma <- round( seq(.25, .065, length = 11), 4)
 threshold <- c(1.3, 1.5)
 
 df <- 
@@ -212,16 +212,10 @@ df <-
 
 ####
 ## Run the function over the full range of sceptic priors
-## NOTE: Takes about an hour to run on my laptop (16 GB RAM), so skip to line 230
+## NOTE: Takes about an hour to run on my laptop (16 GB RAM), so skip to line 225
 ## once it has already been run and the data exported to file.
 evid <- evid_func(df)
-# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 56m 32s
-
-## Arrange by threshold, mu and sigma
-evid <-
-  evid %>%
-  arrange(thresh, desc(mu), desc(sigma))
-
+# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 55m 09s
 rm(yrs, yrs_j)
 
 ## Write data
@@ -230,7 +224,8 @@ write_csv(evid, "Evidence/Data/tcr-evidence.csv")
 ## Read data
 evid <- read_csv("Evidence/Data/tcr-evidence.csv")
 
-## Adjust the data slightly for plotting (only obs where no convergence by 2100)
+## Include labels for facetting and manually adjust some parts of the data for
+## plotting (only applies to obs where no convergence by 2100)
 evid <-
   evid %>%
   mutate(yrs_dash = ifelse(yrs == 235, yrs - 1, yrs)) %>% 
@@ -266,7 +261,7 @@ evid %>%
 
 ## Lines instead of grid
 evid %>%
-  filter(round(mu, 1) %in% round(seq(0, 1, by = .2), 1)) %>%
+  filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
   ggplot(aes(x = sigma, y = yrs + 1866 - 1, group = factor(mu))) +
   geom_line() + 
   geom_line(data = evid %>% 
@@ -289,15 +284,10 @@ evid %>%
             aes(label = sprintf('mu == "%1.1f"', mu)), 
             hjust = 0, nudge_x = .001, 
             parse = T, family = font_type, size = 3.5) +
-  geom_text(data = evid %>% filter(is.na(yrs) & mu == .2),
+  geom_text(data = evid %>% filter(is.na(yrs) & mu == 0),
             aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
-            vjust = 0, 
+            vjust = 0, nudge_y = 2, 
             hjust = 0, nudge_x = .001,  
-            parse = T, family = font_type, size = 3.5) +
-  geom_text(data = evid %>% filter(is.na(yrs) & mu == .0), 
-            aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
-            vjust = 0, nudge_y = 10, 
-            hjust = 0, nudge_x = .001, 
             parse = T, family = font_type, size = 3.5) +
   labs(x = expression(paste("Prior convinction (", sigma, ")")), 
        y = "Year beliefs converge") +
