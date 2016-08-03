@@ -68,6 +68,10 @@ A <- 0 ## Count variable for (combined TCR) animation figures
 if (recurse_type == "historic") {recurse_seq <- seq(from = yr_max - 15, to = 1866, by = -1)} 
 if (recurse_type == "future") {recurse_seq <- seq(from = 1880, to = yr_max, by = 1)}
 
+## Run the recursive regression for each prior type
+## NOTE: This takes about 25min to complete on my system. If you don't feel like
+## waiting that long (or even longer for older machines) then skip to line 105
+## and read in the saved results from a previous session.
 ptm <- proc.time()
 for (n in recurse_seq) {
   ## Loop over prior ##

@@ -5,7 +5,6 @@ rm(list = ls()) # Clear data
 source("sceptic_funcs.R")
 library(tibble)
 library(pbapply) ## Add progress bar to *apply functions
-library(viridis)
 
 ## Optional for replication
 set.seed(123) 
@@ -212,7 +211,7 @@ df <-
 
 ####
 ## Run the function over the full range of sceptic priors
-## NOTE: Takes about an hour to run on my laptop (16 GB RAM), so skip to line 225
+## NOTE: Takes about an hour to run on my laptop (16 GB RAM), so skip to line 224
 ## once it has already been run and the data exported to file.
 evid <- evid_func(df)
 # |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 55m 09s
