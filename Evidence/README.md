@@ -12,4 +12,4 @@ The entire code for executing this section of the analysis is contained with the
 
  --
 
-<a name="myfootnote1"><sup>[1]</sup></a> Of course, it is possible to iterate over the observed data and then switch to simulated data only in cases where the historical record is not sufficient. However, the code becomes clunky and potentially confusing (due you iterate backwards over the historical data and then forwards for the simulated future data?). More importantly, the results are very similar regardless of which approach you take. Email me if you would like to see for yourself.
+<a name="myfootnote1"><sup>[1]</sup></a> Of course, it is possible to iterate over the observed data and then switch to simulated data only in cases where the historical record is not sufficient. However, the code becomes clunky and potentially confusing. (Do you iterate backwards from the present day for the historical data, but forwards for the simulated future data?) More importantly, the results are very similar regardless of which approach you take. Email me if you would like to see for yourself.

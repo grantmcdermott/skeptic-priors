@@ -16,6 +16,7 @@ library(stargazer) ## For nice LaTeX tables
 library(dplyr) ## For manipulating and munging data frames
 library(tidyr) ## For tidying data frames
 library(purrr) ## For manipulating vectors and functions (complements dplyr)
+library(pbapply) ## Add progress bar to apply functions
 
 
 #######################################
