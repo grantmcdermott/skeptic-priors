@@ -14,10 +14,8 @@ model{
     y_pred[t] ~ dnorm(mu[t], tau_tot[t]) 
     }
      
-    ## Noninformative prior on beta:         
-    mu_beta <- 0
-    sigma_beta <- 100
-         
+            mu_beta <- 0 
+            sigma_beta <- 26.9541778975741 
 
     ## Priors for all parameters   
     alpha ~ dnorm(0, 0.0001)            ## intercept

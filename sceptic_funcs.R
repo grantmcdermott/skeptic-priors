@@ -75,9 +75,10 @@ match_priors <- function(x) {
 match_coefs <- function(x) {
   x <- gsub("alpha", "Constant", x)
   x <- gsub("beta", "Total radiative forcing", x)
-  x <- gsub("gamma", "Stratospheric aerosols", x)
+  x <- gsub("gamma", "Volcanic aerosols", x)
   x <- gsub("delta", "SOI", x)
   x <- gsub("eta", "AMO", x)
+  x <- gsub("tcr", "Implied TCR", x)
   return(x)
 }
 

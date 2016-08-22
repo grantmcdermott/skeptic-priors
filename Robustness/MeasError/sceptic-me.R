@@ -7,7 +7,7 @@ source("sceptic_funcs.R")
 set.seed(123) 
 
 ## Load climate data
-climate <- read_csv("./Data/climate.csv")
+climate <- read_csv("Data/climate.csv")
 
 ## The 95% measurement error bounds are not quite symmetrical, but very close. 
 # We can also compare the measurement error with model uncertainty i.e. sigma 
@@ -28,52 +28,60 @@ ggplot(climate %>%
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 ## Total chain length will thus be chain_length * n_chains
-chain_length <- 5000
+chain_length <- 10000
 n_chains <- detectCores() - 1 
 
-## Preallocate coefficients, tcr and temperature in 2100 lists for loop
-coefs_tab <- list()
-l <- 0 ## count variable for coefs_tab list
-tcr <- list()
-all_2100 <- list()
+## Set radiative forcing distribution used for calulating TCRs later in code.
+## Centered around 3.71 °C +/- 10% (within 95% CI). 
+## Length of disbn equals length of MCMC chain for consistency
+rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
 
-ptm <- proc.time()
-## Loop over prior ##
-for (k in 1:3)  {  
-  prior_type <- c("ni", "luke", "den")[k] 
-  
-  ## Loop over conviction strength ##
-  if(prior_type == "ni")  {
-    convic_type <- ""
-    source("./Robustness/MeasError/jags-loop-me.R") ## For vague noninformative riors using the rjags package
-    # source("./Robustness/MeasError/noninf-loop-me.R") ## For "proportional" noninformative prors using the LearnBayes package
-  }
-  else{for (j in 1:2)  {   
-    convic_type <- c("mod", "strong")[j]
-    source("./Robustness/MeasError/jags-loop-me.R")   
-  } } ## End of conviction loop
-  
-} ## End of prior loop
-ptm <- proc.time() - ptm
-# user  system elapsed 
-# 19.44    1.95  122.73 
+## Priors data frame
+priors_df <- 
+  data_frame(mu = c(0, 1, 1, 0, 0),
+             sigma = c(100, 0.25, 0.065, 0.25, 0.065),
+             prior_type = c("ni", "luke", "luke", "den", "den"),
+             convic_type = c("", "mod", "strong", "mod", "strong")
+             )
+priors_df
 
-tcr %>%
-  bind_rows() %>%
-  
-  
-  mutate(series = "me") %>%
-  summarise(mean = round(mean(tcr), 2),
-            q025 = round(quantile(tcr, .025), 2),
-            q975 = round(quantile(tcr, .975), 2)) %>%
-  arrange(mean)
-tcr_secondary_tab
+# Run the nested loop (takes about two and a half minutes on my laptop)
+## Outer: Loop over priors ##
+priors_loop <-
+  pblapply(1:nrow(priors_df), function(j){
+    
+    m <- priors_df[j, ]$mu
+    s <- priors_df[j, ]$sigma
+    prior_type <- priors_df[j, ]$prior_type
+    convic_type <- priors_df[j, ]$convic_type 
+    
+    mu_beta <- m/3.71
+    sigma_beta <- s/3.71
+    
+    ## Inner: Loop over climate scenarios
+    source("Robustness/MeasError/jags-loop-me.R", local = T)
+    
+  })
+
+priors_loop
+
+## Extract only the .$value elements (drop surplus .$visibility element)
+priors_loop <- 
+  lapply(1:length(priors_loop), function(x) priors_loop[[x]]$value)
+
+priors_loop <- 
+  do.call(function(...) mapply(bind_rows, ..., SIMPLIFY = F), args = priors_loop)
+
+## Extract/copy the data frames within the priors_loop list to the (local) global 
+# environment and then delete the list itself.
+list2env(priors_loop, .GlobalEnv) ## will take extract all the data frames
+rm(priors_loop)
 
 
 ##################################
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
-pref <- "./Robustness/TablesFigures/"
+pref <- "Robustness/TablesFigures/"
 suff <- "-me"
 
 source("sceptic_tablesfigures.R")

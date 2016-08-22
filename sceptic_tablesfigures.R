@@ -1,33 +1,40 @@
-## Set radiative forcing distribution used for calulating TCRs later in code.
-## Centered around 3.71 °C +/- 10% (within 95% CI). 
-## Length of disbn equals length of MCMC chain for consistency
-rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
+##########################
+### COEFFICIENTS TABLE ###
+##########################
 
-## Remove data unnecessary to further analysis ##
-rm(climate, n_chains, chain_length, prior_type, convic_type,
-   theme_coefs, theme_pred)
+## Add TCR summary info to coefficents table
+coefs_tab <-
+  bind_rows(coefs_tab,
+            tcr %>%
+              group_by(prior) %>%
+              summarise(mean = mean(tcr),
+                        q025 = quantile(tcr, .025),
+                        q975 = quantile(tcr, .975)) %>%
+              mutate(coef = "tcr") %>%
+              select(coef, mean, q025, q975, prior)
+            )
 
-
-####################
-### COEFFICIENTS ###
-####################
-
-## Unlist coefficents list
-coefs_tab <- bind_rows(coefs_tab) 
-## Convert into nice table format for the paper
+## Convert table into nicer format for the paper. Requires some minor tinkering in
+## in LaTeX afterwards (e.g. not all vars have 3 decimals), but close enough.
 coefs_tab <- 
   coefs_tab %>%
   filter(coef != "sigma") %>%
-  mutate(mean = decimals(mean, 3),
-         ci = paste0("[", decimals(q025, 3), ", ", decimals(q975, 3), "]")
+  mutate(mean = ifelse(coef=="tcr", decimals(mean, 1), decimals(mean, 3)),
+         ci = ifelse(coef=="tcr",  
+                     paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]"),
+                     paste0("[", decimals(q025, 3), ", ", decimals(q975, 3), "]")
+                     )
          ) %>%
   select(prior, coef, mean, ci) %>%
-  gather(key, value, -c(prior, coef)) %>%
+  gather(key, value, -c(prior, coef)) %>% ## This step causes some values to drop the (zero) 3rd decimal
   mutate(prior = factor(prior, levels = c("ni", "lukemod", 
                                           "lukestrong", "denmod", "denstrong")),
          key = factor(key, levels = c("mean", "ci"))) %>%
   arrange(prior, coef) %>%
-  spread(prior, value) %>%
+  spread(prior, value) %>% 
+  mutate(coef = factor(coef, levels = c("beta", "gamma", 
+                                        "delta", "eta", "alpha", "tcr"))) %>%
+  arrange(coef) %>% 
   mutate(coef = ifelse(key == "mean", paste(coef), "")) %>%
   select(-key) %>%
   as.matrix()
@@ -49,19 +56,6 @@ coefs_tab[, 2:ncol(coefs_tab)] %>%
 ###     TCR     ###
 ###################
 
-## Unlist tcr list and generate values
-tcr <-
-  bind_rows(
-    mapply(
-      function(x) {
-        tcr[[x]]$tcr <- tcr[[x]]$beta * rf2x
-        return(tcr[[x]])
-        },
-      seq(1:5), 
-      SIMPLIFY = F
-      )
-    ) 
-
 ## TCR Density plot
 tcr %>%
   mutate(prior = factor(match_priors(prior),
@@ -69,17 +63,17 @@ tcr %>%
   ggplot(aes(x = tcr, col = prior)) +
   geom_line(stat = "density") +
   labs(x = expression(~degree*C), y = "Density") +
-  xlim(-1, 3) + 
+  xlim(-1, 3) +
   annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
            alpha = .2) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .065), 
+  stat_function(fun = dnorm, args = list(mean = 0, sd = .065),
                 lty=2, col=prior_cols[1]) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .25), 
-                lty=2, col=prior_cols[2]) + 
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .065), 
+  stat_function(fun = dnorm, args = list(mean = 0, sd = .25),
+                lty=2, col=prior_cols[2]) +
+  stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
                 lty=2, col=prior_cols[3]) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .25), 
-                lty=2, col=prior_cols[4]) + 
+  stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
+                lty=2, col=prior_cols[4]) +
   scale_colour_manual(values = prior_cols) +
   guides(col = guide_legend(nrow = 2)) +
   theme_tcr +
@@ -105,7 +99,7 @@ tcr %>%
   stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
                 lty=2, aes(col=prior_names[3])) +
   stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
-                lty=2, aes(col=prior_names[4])) + 
+                lty=2, aes(col=prior_names[4])) +
   scale_colour_manual(values = prior_cols,
                       limits = prior_names) +
   guides(col = guide_legend(nrow = 2)) +
@@ -114,56 +108,21 @@ tcr %>%
          width = 6, height = 4,
          device = cairo_pdf)
 
-## Table summary of the above ##
-tcr_tab <-
-  tcr %>%
+## Summarise in tabular form
+tcr %>%
   group_by(prior) %>%
-  summarise(mean = mean(tcr),
-            q025 = quantile(tcr, .025),
-            q975 = quantile(tcr, .975)) 
-## Format for nice looking table in LaTeX
-tcr_tab <-
-  tcr_tab %>%
-  mutate(mean = round(mean, 1),
-         ci = paste0("[", round(q025, 1), ", ", round(q975, 1), "]")
+  summarise(tcr_mean = decimals(mean(tcr), 1),
+            q025 = decimals(quantile(tcr, .025), 1),
+            q975 = decimals(quantile(tcr, .975), 1)) %>%
+  mutate(prior =
+           factor(prior,
+                  levels = c("ni", "lukemod", "lukestrong", "denmod", "denstrong"))
          ) %>%
-  select(prior, mean, ci) %>%
-  gather(key, Posterior, -prior) %>%
-  mutate(prior = factor(prior, levels = c("ni", "lukemod", 
-                                          "lukestrong", "denmod", "denstrong")),
-         key = factor(key, levels = c("mean", "ci"))) %>%
-  arrange(prior) %>%
-  mutate(prior = ifelse(key == "mean", paste(prior), "")) %>%
-  select(-key) %>%
-  rename(Prior = prior) %>%
-  as.matrix()
-rownames(tcr_tab) <- match_priors(tcr_tab[, "Prior"])
-tcr_tab[, "Prior"] <- c("-", "",
-                        "1.0","[0.5, 1.5]",
-                        "1.0","[0.9, 1.1]",
-                        "0.0","[-0.5, 0.5]",
-                        "0.0","[-0.1, 0.1]")
-
-stargazer(tcr_tab,
-          title ="Transient climate response (TCR), $^\\circ$C",
-          header = F,
-          label = paste0("tab:tcr-tab", suff),
-          # align = T,
-          notes.align = "l",
-          notes = c(paste0("\\footnotesize Mean estimates are given, with square ",
-                           "brackets denoting 95\\% probability interval.")),
-          out = paste0(pref, "tcr-tab", suff, ".tex")
-          )
-
+  arrange(prior)
 
 ####################
 ### TEMP IN 2100 ###
 ####################
-
-## Combined temperature prediction in 2100 by scenario ###
-## Unlist temperature in 2100 list
-all_2100 <-
-  bind_rows(all_2100) 
 
 ## All 2100 density plot
 all_2100 %>%
@@ -184,7 +143,7 @@ all_2100 %>%
 ## Summarise in tabular form
 all_2100 %>%
   group_by(rcp, prior) %>%
-  summarise(mean = decimals(mean(temp), 1),
+  summarise(mean_2100 = decimals(mean(temp), 1),
             q025 = decimals(quantile(temp, .025), 1),
             q975 = decimals(quantile(temp, .975), 1)) %>%
   mutate(prior = factor(prior, levels = c("ni", "lukemod", "lukestrong",

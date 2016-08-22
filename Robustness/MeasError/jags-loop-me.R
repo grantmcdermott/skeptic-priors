@@ -1,18 +1,13 @@
-## Preallocate lists for loop
-predictions <- list()
-temp_2100 <- list()
-
-
 ## Loop over all four RCPs ##
-for (i in 1:4) {
+rcp_loop <-
   
-  rcp_type <- c("rcp26" , "rcp45" , "rcp60" , "rcp85")[i]
+  pblapply(c("rcp26" , "rcp45" , "rcp60" , "rcp85"), function(i){
   
   ## Subset the data to the relevant RCP ##
   ## NEW: Add omega columns for measurement error
   clim_df <- 
     climate %>%
-    filter(rcp == rcp_type) %>%
+    filter(rcp == i) %>%
     mutate(had_omega = (had_975 - had_full)/2, ## Currently 95% bound, i.e. 2*sigma.
            cw_omega = cw_1sigma)
   
@@ -23,8 +18,7 @@ for (i in 1:4) {
        filter(!is.na(had_full)) %>% 
        tail(20))$had_omega %>% 
     mean()
-  #0.045275
-  #
+
   clim_df$had_omega <- ifelse(is.na(clim_df$had_omega), omega_had_recent, clim_df$had_omega)
   
   
@@ -49,44 +43,13 @@ for (i in 1:4) {
     had[t]  ~ dnorm(mu[t], tau_tot[t])
     y_pred[t] ~ dnorm(mu[t], tau_tot[t]) 
     }
-    ",
-    
-    if (prior_type == "ni") {
-    "
-    ## Noninformative prior on beta:         
-    mu_beta <- 0
-    sigma_beta <- 100
-    "
-    }else{
-    "
-    ## Prior on beta: One of four subjective prior, conviction combinations...
-    # 1) Mod. lukewarmer: TCR ~ N(1, 0.25^2). Mean of 1 °C and uncertainty range of 1.0 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.25/3.71)^2 )
-    # 2) Strong lukewarmer: TCR ~ N(1, 0.065^2). Mean of 1 °C and uncertainty range of 0.25 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 1/3.71, (0.065/3.71)^2 )
-    # 3) Mod. denier: TCR ~ N(0, 0.25^2). Mean of 0 °C and uncertainty range of 1.0 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.25/3.71)^2 )
-    # 4) Strong denier: TCR ~ N(0, 0.065^2). Mean of 0 °C and uncertainty range of 0.25 °C (95% probability).
-    #    Converting to beta (= TCR/3.71): B ~ N( 0/3.71, (0.065/3.71)^2 )
-    "},
-    
-    if (prior_type == "luke") {
-    "
-    mu_beta <- 1/3.71"
-    },
-    if (prior_type == "den") {
-    "
-    mu_beta <- 0"
-    },
-    if (convic_type == "mod") {
-    "
-    sigma_beta <- 0.25/3.71"
-    },
-    if (convic_type == "strong") {
-    "
-    sigma_beta <- 0.065/3.71"
-    }, 
-    
+    ", 
+    paste0(
+      "
+            mu_beta <- ", mu_beta),
+    paste0(
+      "
+            sigma_beta <- ", sigma_beta),
     "
 
     ## Priors for all parameters   
@@ -103,7 +66,8 @@ for (i in 1:4) {
     ) 
   
   bugs_file <- paste0("./Robustness/MeasError/BUGSFiles/", 
-                      prior_type, "-", convic_type, "-", rcp_type, "-me.txt")
+                      prior_type, "-", convic_type, "-", i, #rcp_type, 
+                      "-me.txt")
   if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
   writeLines(mod_string, con = bugs_file)
   
@@ -153,7 +117,7 @@ for (i in 1:4) {
   
   ## Extract regression coefficients ##
   ## (NOTE: Use only those from RCP 2.6 for consistency) ##
-  if (rcp_type == "rcp26") {
+  if (i == "rcp26") {
     
     ## Convert coefficients MCMC list into data frame for later. First combines
     ## all chains into one matrix.
@@ -164,8 +128,7 @@ for (i in 1:4) {
       gather(coef, values)
     
     ## Get summary statistics for tables ##
-    l <- l + 1
-    coefs_tab[[l]] <-
+    coefs_tab <-
       coefs_df %>% 
       group_by(coef) %>% 
       summarise(mean = mean(values), 
@@ -178,11 +141,11 @@ for (i in 1:4) {
       arrange(coef)
     
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
-    tcr[[l]] <- 
-      data.frame(beta = filter(coefs_df, coef == "beta")$values,
+    tcr <- 
+      data_frame(beta = filter(coefs_df, coef == "beta")$values,
                  prior = paste0(prior_type, convic_type)
-                 ) %>%
-      tbl_df()
+                 ) 
+    tcr$tcr <- tcr$beta * rf2x
     
   
     ### Density plot ###
@@ -210,66 +173,71 @@ for (i in 1:4) {
     
   } ## End of RCP 2.6 "if" clause
   
+  if (i != "rcp26") {
+    coefs_tab <- NULL
+    tcr <- NULL
+  }
+  
   ## Summarise temperature predictions over 1866-2100 ##
   
-  pred <- jagsresults(mod_samples, params = "y_pred", regex = T)
-  pred <- tbl_df(as.data.frame(pred[, c("mean", "2.5%", "97.5%")]))
-  colnames(pred) <- c("mean", "q025", "q975")
+  predictions <- jagsresults(mod_samples, params = "y_pred", regex = T)
+  # predictions <- tbl_df(as.data.frame(predictions[, c("mean", "2.5%", "97.5%")]))
+  predictions <- as_data_frame(predictions[, c("mean", "2.5%", "97.5%")])
+  colnames(predictions) <- c("mean", "q025", "q975")
   
-  pred$series <- rcp_type
-  pred$year <- seq(from=1866, length.out=nrow(pred))
-  pred <- pred %>% 
+  predictions$series <- i #rcp_type
+  predictions$year <- seq(from=1866, length.out=nrow(predictions))
+  predictions <- 
+    predictions %>% 
     gather(stat, temp, -c(year, series)) %>%
     select(year, everything())
   
   ## Full distribution of temps in 2100 by themselves 
-  df_2100 <- tbl_df(as.data.frame(as.matrix(mod_samples[, "y_pred[235]"])))
-  colnames(df_2100) <- "temp"
-  df_2100$rcp <- rcp_type 
+  all_2100 <- as_data_frame(as.matrix(mod_samples[, "y_pred[235]"]))
+  colnames(all_2100) <- "temp"
+  all_2100$rcp <- i #rcp_type 
+  all_2100$prior <- paste0(prior_type, convic_type) 
   
-  predictions[[i]] <- pred ## add it to the list
-  temp_2100[[i]] <- df_2100 # add it to the list
+  return(list(tcr=tcr, coefs_tab=coefs_tab,
+              predictions=predictions, all_2100=all_2100, 
+              N=data.frame(N))) 
   
-  rm(bugs_file, cl, clim_df, data_list, df_2100, i, inits_list, mod_iters,
-     mod_samples, par_inits, parameters, pred, rcp_type)
-  
-} ## END OF RCP LOOP FOR JAGS SIMLUATIONS
+  }) ## END OF RCP LOOP FOR JAGS SIMLUATIONS
 
+## Recombine the sub-elements of the list based on their common indexes
+rcp_loop <- 
+  do.call(function(...) mapply(bind_rows, ..., SIMPLIFY = F), args = rcp_loop)
 
-## Combine predictions from RCP loop into one data frame
+## Extract/copy some data frames within the rcp_loop list to the (local) global environment
+predictions <- rcp_loop$predictions
+N <- rcp_loop$N[1,"N"]
+
+## Add historic temperature obs to predictions data frame
 predictions <- 
   bind_rows(
-    data.frame(year = climate$year[c(1:N)],
+    data_frame(year = climate$year[1:N],
                series = "had_full",
                stat = "mean",
-               temp = climate$had_full[c(1:N)]
+               temp = climate$had_full[1:N]
                ),
-    bind_rows(predictions)
-    )
-
-## Ditto for temps in 2100
-all_2100[[l]] <- 
-  bind_rows(temp_2100) %>%
-  mutate(prior = paste0(prior_type, convic_type))
-
+    predictions
+    ) 
+ 
 ## Tidy the data:
 ## Get rid of duplicate historic (pre-2006) model fits from different RCPs. 
 ## Simultaneously rename historic RCP 2.6 series as "fitted".
+## Lastly, order series as factor and define readable labels for plotting
 predictions <- 
   predictions %>%
   mutate(series = ifelse(year <= 2005, gsub("rcp26", "fitted", series), series)) %>%
   filter(year >= 2005 | series %in% c("had_full", "fitted")) %>%
   filter(!(year > 2005 & series %in% c("fitted"))) %>% 
   spread(stat, temp) %>% 
-  arrange(series)
-
-## Lastly, order series as factor and define readable labels for plotting
-predictions <-
-  predictions %>%
+  arrange(series) %>%
   mutate(series = factor(series, 
                          levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))
-         ) %>%
-  arrange(series)
+         ) 
+
 series_labs <- c("HadCRUT4", "Model fit", 
                  "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
                  "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
@@ -345,4 +313,9 @@ bind_rows(
          width = 10, height = 6.75,
          device = cairo_pdf)
 
-rm(predictions, temp_2100)
+## Remove data frames no longer needed
+rm(N, predictions)
+## Similarly, subset rcp_loop list to relevant variables for outer (prior) loop
+rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "all_2100")]
+
+return(rcp_loop=rcp_loop)
