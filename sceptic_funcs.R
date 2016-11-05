@@ -110,7 +110,7 @@ theme_coefs <-
     legend.position = "none",
     strip.text = element_text(size = 18, colour = "black"),
     strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.margin = unit(2, "lines") ## Increase gap between facet panels
+    panel.spacing = unit(2, "lines") ## Increase gap between facet panels
     ) 
 
 theme_pred <-
@@ -138,7 +138,7 @@ theme_2100 <-
     legend.title = element_blank(),
     # strip.text = element_text(size = 18, colour = "black"),
     strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.margin = unit(2, "lines") ## Increase gap between facet panels
+    panel.spacing = unit(2, "lines") ## Increase gap between facet panels
   ) 
 
 theme_tcr <-
@@ -157,5 +157,5 @@ theme_recursive <-
     legend.position = "none",
     strip.text = element_text(size = 17, colour = "black"),
     strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.margin = unit(2, "lines") ## Increase gap between facet panels
+    panel.spacing = unit(2, "lines") ## Increase gap between facet panels
   )
