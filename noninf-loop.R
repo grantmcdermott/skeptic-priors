@@ -14,7 +14,7 @@ rcp_loop <-
     theta_sample <- blinreg(clim_df$had, 
                             cbind(alpha = 1, beta = clim_df$trf, gamma = clim_df$volc, 
                                   delta = clim_df$soi, eta = clim_df$amo), 
-                            chain_length*n_chains)
+                            chain_length)
     
     if (i == "rcp26") {
     

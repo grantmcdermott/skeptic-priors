@@ -81,6 +81,32 @@ tcr %>%
          width = 6, height = 4,
          device = cairo_pdf)
 
+## As above, but fill only
+tcr %>%
+  mutate(prior = factor(match_priors(prior),
+                        levels = prior_names)) %>%
+  ggplot(aes(x = tcr, fill = prior)) +
+  labs(x = expression(~degree*C), y = "Density") +
+  xlim(-1, 3) +
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
+           alpha = .2) +
+  stat_function(fun = dnorm, args = list(mean = 0, sd = .065),
+                lty=2, col=prior_cols[1]) +
+  stat_function(fun = dnorm, args = list(mean = 0, sd = .25),
+                lty=2, col=prior_cols[2]) +
+  stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
+                lty=2, col=prior_cols[3]) +
+  stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
+                lty=2, col=prior_cols[4]) +
+  geom_area(stat = "density", position = "dodge", alpha = .5) +
+  scale_colour_manual(values = prior_cols) +
+  scale_fill_manual(values = prior_cols) +
+  guides(col = guide_legend(nrow = 2), fill = guide_legend(nrow = 2)) +
+  theme_tcr +
+  ggsave(file = paste0(pref, "tcr-combined", suff, "-fill.pdf"),
+         width = 6, height = 4,
+         device = cairo_pdf)
+
 ## Just the priors this time (plus ni posterior for comparison) for presentations
 tcr %>%
   filter(prior == "ni") %>%
@@ -137,6 +163,22 @@ all_2100 %>%
   facet_wrap(~ rcp, labeller = label_parsed) +
   theme_2100 +
   ggsave(file = paste0(pref, "all-2100", suff, ".pdf"),
+         width = 6, height = 5.5,
+         device = cairo_pdf)
+
+## As above, but fill only
+all_2100 %>%
+  mutate(prior = factor(match_priors(prior),
+                        levels = prior_names)) %>%
+  mutate(rcp = match_rcps(rcp)) %>%
+  ggplot(aes(x = temp, fill = prior)) +
+  geom_area(stat = "density", position = "dodge", alpha = .5) +
+  labs(x = expression(~degree*C), y = "Density") +
+  scale_fill_manual(values = prior_cols) +
+  guides(col = guide_legend(nrow = 2), fill = guide_legend(nrow = 2)) +
+  facet_wrap(~ rcp, labeller = label_parsed) +
+  theme_2100 +
+  ggsave(file = paste0(pref, "all-2100", suff, "-fill.pdf"),
          width = 6, height = 5.5,
          device = cairo_pdf)
 

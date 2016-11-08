@@ -44,8 +44,7 @@ rcp_loop <-
     }" 
     ) 
   
-  bugs_file <- paste0("BUGSFiles/", prior_type, "-", convic_type, "-", i, #rcp_type, 
-                      ".txt")
+  bugs_file <- paste0("BUGSFiles/", prior_type, "-", convic_type, "-", i, ".txt")
   if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
   writeLines(mod_string, con = bugs_file)
   
@@ -74,7 +73,7 @@ rcp_loop <-
   parJagsModel(cl, name = "jags_mod", file = bugs_file, 
                data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
   parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-  mod_iters <- chain_length
+  mod_iters <- chain_length/n_chains
   mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
                                 n.iter = mod_iters, n.chain = n_chains)
   stopCluster(cl)
@@ -140,7 +139,7 @@ rcp_loop <-
       facet_wrap(~coef, ncol = 2, scales = "free",
                  labeller = label_parsed) +
       ggsave(file = paste0("TablesFigures/coefs-",
-                           prior_type, convic_type, ".pdf"),
+                           prior_type, convic_type, "-sans.pdf"),
              width = 8, height = 10, 
              device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
              )
@@ -251,7 +250,7 @@ ggplot(data = predictions,
     ) +
   theme_pred +
   ggsave(file = paste0("TablesFigures/predictions-", 
-                      prior_type, convic_type, ".pdf"),
+                      prior_type, convic_type, "-sans.pdf"),
          width = 10, height = 6.75,
          device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
 
@@ -260,14 +259,14 @@ if(prior_type == "ni"){
   ## together with the had obs, to the Evidence data folder. We'll be using the
   ## difference between these series as noise when simulating future "true" temperatures
   ## in the evidence section of the paper.
-  y_dev <- 
-    predictions %>% 
+  y_dev <-
+    predictions %>%
     filter(series %in% c("had_full", "fitted")) %>%
     select(year:mean) %>%
     spread(series, mean) %>%
     mutate(dev = fitted - had_full) %>%
     filter(!is.na(dev))
-  
+
   write_csv(y_dev, "Evidence/Data/y-dev.csv")
   rm(y_dev)
 }

@@ -98,7 +98,7 @@ rcp_loop <-
   parJagsModel(cl, name = "jags_mod", file = bugs_file, 
                data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
   parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-  mod_iters <- chain_length
+  mod_iters <- chain_length/n_chains
   mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
                                 n.iter = mod_iters, n.chain = n_chains)
   stopCluster(cl)

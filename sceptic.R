@@ -9,15 +9,20 @@ set.seed(123)
 ## Load climate data
 climate <- read_csv("Data/climate.csv")
 
-## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-## Total chain length will thus be chain_length * n_chains
-chain_length <- 10000
-n_chains <- detectCores() - 1 
+## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
+## Each individual chain will thus be chain_length/n_chains.
+chain_length <- 30000
+## Function below ensures that the individual chains sum exactly to the desired
+## total chain length, whilst still making full use of the available CPUs for
+## for parallel processing power. (Note: If you want to use less than your full
+## CPU allotment, use e.g. "...sapply(1:(detectCores-1)), ...)". The extra 
+## parentheses is important.)
+n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
 ## Length of disbn equals length of MCMC chain for consistency
-rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
+rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
 
 ## Priors data frame
 priors_df <- 
@@ -71,6 +76,6 @@ rm(priors_loop)
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
 pref <- "TablesFigures/"
-suff <- ""
+suff <- paste0("", suff)
 
 source("sceptic_tablesfigures.R")

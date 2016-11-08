@@ -16,19 +16,21 @@ library(stargazer) ## For nice LaTeX tables
 library(dplyr) ## For manipulating and munging data frames
 library(tidyr) ## For tidying data frames
 library(purrr) ## For manipulating vectors and functions (complements dplyr)
-library(pbapply) ## Add progress bar to apply functions
+library(tibble)
+library(pbapply) ## Add progress bar to *apply functions
 
 
 #######################################
 #######################################
 ## Choose font type for graphs (note extrafont package installation instructions)
-font_type <- choose_font("Palatino Linotype") ## Will use ggplot2 default font if not available
+font_type <- choose_font(c("Palatino Linotype", "Open Sans")[1]) ## Will use ggplot2 default font if not available
+suff <- ifelse(font_type=="Palatino Linotype", "", "-sans") ## For keeping track of exported files.
 
 ## Assign colours and names for later graphs ##
-rcp_names <- c(expression("RCP 2.6 (420 ppmv CO"[2]*")"),
-               expression("RCP 4.5 (540 ppmv CO"[2]*")"),
-               expression("RCP 6.0 (670 ppmv CO"[2]*")"),
-               expression("RCP 8.5 (940 ppmv CO"[2]*")"))  
+rcp_names <- c(expression("(a) RCP 2.6 (420 ppmv CO"[2]*")"),
+               expression("(b) RCP 4.5 (540 ppmv CO"[2]*")"),
+               expression("(c) RCP 6.0 (670 ppmv CO"[2]*")"),
+               expression("(d) RCP 8.5 (940 ppmv CO"[2]*")"))  
 # rcp_cols <- c("limegreen", "orchid", "orange", "red2")
 rcp_cols <- c("darkgreen", "darkorchid", "darkorange2", "darkred")
 rcp_fills <- c("lightgreen", "orchid", "orange", "red")
@@ -39,9 +41,17 @@ prior_names <- c("Strong Denier", "Moderate Denier",
                  "Strong Lukewarmer", "Moderate Lukewarmer", 
                  "Noninformative")
 
-#######################################
-#######################################
+######################################
+######################################
+## Global (highest) common denominator
+gcd <- 
+  function(x,y) {
+    r <- x%%y
+    return(ifelse(r, gcd(y, r), y))
+  }
 
+#######################################
+#######################################
 ## Negate version of %in% function
 "%nin%" <- Negate("%in%")
 

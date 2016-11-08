@@ -3,8 +3,6 @@ rm(list = ls()) # Clear data
 ## Load all packages, as well as some helper functions that will be used for 
 ## plotting and tables
 source("sceptic_funcs.R")
-library(tibble)
-library(pbapply) ## Add progress bar to *apply functions
 
 ## Optional for replication
 set.seed(123) 
@@ -14,8 +12,8 @@ set.seed(123)
 climate <- read_csv("Data/climate.csv")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-chain_length <- 3000
-n_chains <- detectCores() - 1 
+chain_length <- 9000
+n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 
 ## Only need to compare forcings and (relevant) predicted temps, so which RCP  
 ## doesn't really matter.
@@ -23,10 +21,10 @@ rcp_type <- "rcp26"
 
 ## Load climate data and deviation DF for simulating "true" future values
 climate <- 
-  read_csv("./Data/climate.csv") %>%
+  read_csv("Data/climate.csv") %>%
   filter(rcp == rcp_type) 
 
-y_dev <- read_csv("./Evidence/Data/y-dev.csv")
+y_dev <- read_csv("Evidence/Data/y-dev.csv")
 
 climate$noise <- sample(y_dev$dev, nrow(climate), replace = T)
 
@@ -49,7 +47,7 @@ climate <-
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
 ## Length of disbn equals length of MCMC chain for consistency
-rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855) 
+rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
 
 ## EVIDENCE FUNCTION
 ## DESCRIPTION:
@@ -159,7 +157,7 @@ evid_func <-
         parJagsModel(cl, name = "jags_mod", file = bugs_file, 
                      data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
         parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-        mod_iters <- chain_length
+        mod_iters <- chain_length/n_chains
         mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
                                       n.iter = mod_iters, n.chain = n_chains) 
         stopCluster(cl)

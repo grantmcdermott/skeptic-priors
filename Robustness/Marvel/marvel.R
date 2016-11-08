@@ -9,12 +9,17 @@ set.seed(123)
 ## Load climate data
 climate <- read_csv("./Data/climate.csv")
 
-## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
-## Total chain length will thus be chain_length * n_chains
-chain_length <- 10000
-n_chains <- detectCores() - 1 
+## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
+## Each individual chain will thus be chain_length/n_chains.
+chain_length <- 30000
+## Function below ensures that the individual chains sum exactly to the desired
+## total chain length, whilst still making full use of the available CPUs for
+## for parallel processing power. (Note: If you want to use less than your full
+## CPU allotment, use e.g. "...sapply(1:(detectCores-1)), ...)". The extra 
+## parentheses is important.)
+n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 
-rf2x <- rnorm(chain_length * n_chains, mean = 3.71, sd = 0.1855)
+rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855)
 
 ##### 
 ## Marvel et al. (2016), hereafter MEA2016, provide the following scaled 
@@ -142,7 +147,7 @@ tcr_eff1 <-
                                         gamma = clim_df$volc_eff, 
                                         delta = clim_df$soi, 
                                         eta = clim_df$amo), 
-                                  chain_length*n_chains)
+                                  chain_length)
       
       tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
       
@@ -207,10 +212,10 @@ eff_func(1.55, 1.05)
 ## Load climate data
 # climate <- read_csv("./Data/climate.csv")
 
-## Rest chain (and rf2x) length to reduce time needed for large loop over the
+## Set chain (and rf2x) length to reduce time needed for large loop over the
 ## t-distribution sampling below
-chain_length <- 3000
-rf2x <- rf2x[1:chain_length * n_chains]
+chain_length <- 9000
+rf2x <- rf2x[1:chain_length]
 
 tcr_eff2 <-
   pblapply(1:10000, function(x){
@@ -250,7 +255,7 @@ tcr_eff2 <-
                                       gamma = clim_df$volc_eff, 
                                       delta = clim_df$soi, 
                                       eta = clim_df$amo), 
-                                chain_length*n_chains)
+                                chain_length)
     
     tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
     
@@ -262,7 +267,9 @@ tcr_eff2 <-
     
     return(tcr_df)
     
-  }) %>%
+  },
+  cl = n_chains ## parallel option for pbapply package
+  ) %>%
   bind_rows()
 
 tcr_eff2 %>%
