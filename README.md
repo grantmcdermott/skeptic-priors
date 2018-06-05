@@ -19,6 +19,7 @@ install.packages(c("readr", "LearnBayes", "rjags", "dclone", "snow", "devtools",
 
 
 devtools::install_github("tidyverse/ggplot2")
+devtools::install_github("johnbaums/jagstools")
 ```
 
 A brief note on fonts and figures: The figures in this paper are produced using the `ggplot2` package, but incorporating [Palatino Linotype](http://www.myfontfree.com/palatino-linotype-myfontfreecom126f31679.htm) (or [Open Sans](https://fonts.google.com/specimen/Open+Sans)) fonts to match the paper's overall style. Most users will likely have the Palatino TFFs installed on their systems already. However, you will still need to register them to your *R* instance using the `extrafont` package. See [here](https://github.com/wch/extrafont) for instructions. If that all sounds like too much work, don't worry: The figures will revert to the ggplot2 default, as long as the `extrafont` package has been installed and loaded.

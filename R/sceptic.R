@@ -7,7 +7,7 @@ source("sceptic_funcs.R")
 set.seed(123) 
 
 ## Load climate data
-climate <- read_csv("Data/climate.csv")
+climate <- read_csv("../Data/climate.csv")
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
