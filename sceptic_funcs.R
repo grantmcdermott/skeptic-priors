@@ -1,45 +1,60 @@
 ## Load packages ##
-library(readr) ## For reading in data files
 library(LearnBayes) ## For simulating noninformative prior (using random multivarite normal command)
 library(rjags) ## For running the MCMC (Gibbs) sampler
 library(dclone) ## Allows parallel updating of JAGS models
 library(snow) ## Allows clusters: i.e. subsidiary R programmes running separately on your computer's different CPUs
 library(jagstools) ## devtools::install_github("johnbaums/jagstools") For extracting summary statistics from MCMC chain
-library(ggplot2)
+library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
+library(gridExtra) ## Facilitates easier labelling in ggplot2 (e.g. annote with extrafont fonts)
+library(tidyverse)
+library(hrbrthemes)
 library(cowplot) ## For cowplot ggplot theme
 library(ggthemes) ## For additional ggplot2 themes (e.g. "few") 
 library(RColorBrewer)
-library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
-library(gridExtra) ## Facilitates easier labelling in ggplot2 (e.g. annote with extrafont fonts)
 library(extrafont) ## For additional fonts in ggplot2
 library(stargazer) ## For nice LaTeX tables
-library(dplyr) ## For manipulating and munging data frames
-library(tidyr) ## For tidying data frames
-library(purrr) ## For manipulating vectors and functions (complements dplyr)
-library(tibble)
 library(pbapply) ## Add progress bar to *apply functions
 
 
-#######################################
-#######################################
-## Choose font type for graphs (note extrafont package installation instructions)
-font_type <- choose_font(c("Palatino Linotype", "Open Sans")[1]) ## Will use ggplot2 default font if not available
-suff <- ifelse(font_type=="Palatino Linotype", "", "-sans") ## For keeping track of exported files.
+##################################
+### GLOBAL ELEMENTS AND THEMES ###
+##################################
+
+## Choose non-standard font for plots. Installation: https://github.com/wch/extrafont 
+## Will revert to ggplot2 default if not available.
+font_type <- choose_font(c("Fira Sans", "Palatino Linotype")[1])
+suff <- ifelse(font_type=="Palatino Linotype", "-ppl", "") ## For keeping track of exported files.
+
+## Set global plot theme 
+## Note: Specific themes for various plots at the bottom of this document
+theme_set(
+  theme_ipsum(
+    base_size = 12,
+    axis_title_size = 14,
+    axis_title_just = "c"
+    ) +
+    theme(
+      text = element_text(family = font_type),
+      strip.text = element_text(hjust = 0.5)
+      )
+  )
 
 ## Assign colours and names for later graphs ##
-rcp_names <- c(expression("(a) RCP 2.6 (420 ppmv CO"[2]*")"),
-               expression("(b) RCP 4.5 (540 ppmv CO"[2]*")"),
-               expression("(c) RCP 6.0 (670 ppmv CO"[2]*")"),
-               expression("(d) RCP 8.5 (940 ppmv CO"[2]*")"))  
-# rcp_cols <- c("limegreen", "orchid", "orange", "red2")
+rcp_names <- c("(a) RCP 2.6", "(b) RCP 4.5", "(c) RCP 6.0", "(d) RCP 8.5")
 rcp_cols <- c("darkgreen", "darkorchid", "darkorange2", "darkred")
 rcp_fills <- c("lightgreen", "orchid", "orange", "red")
 
-# prior_cols <- c("dodgerblue2", "limegreen", "orange", "red2", "gray20")
-prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 8, 6)], "#000000")
 prior_names <- c("Strong Denier", "Moderate Denier", 
-                 "Strong Lukewarmer", "Moderate Lukewarmer", 
-                 "Noninformative")
+                "Strong Lukewarmer", "Moderate Lukewarmer", "Noninformative")
+# prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 6, 8)], "#000000")
+prior_cols <- c("Strong Denier"="#1F78B4", "Moderate Denier"="#33A02C", 
+                 "Strong Lukewarmer"="#E31A1C", "Moderate Lukewarmer"="#FF7F00", 
+                 "Noninformative"="#000000")
+
+
+#################
+### FUNCTIONS ###
+#################
 
 ######################################
 ######################################
@@ -57,9 +72,8 @@ gcd <-
 
 #######################################
 #######################################
-
-### Decimal function (to make sure, e.g. three decimals places are 
-### always printed in tables) ###
+### Decimal function 
+### (To make sure, e.g. three decimals places are always printed in tables)
 
 decimals <- function(x, k) {
   as.double(format(round(x, k), nsmall = k))
@@ -67,8 +81,7 @@ decimals <- function(x, k) {
 
 #######################################
 #######################################
-
-### Match short prior names to long prior names
+## Match short prior names to long prior names
 match_priors <- function(x) {
   x <- gsub("ni", "Noninformative", x)
   x <- gsub("lukemod", "Moderate Lukewarmer", x)
@@ -80,8 +93,7 @@ match_priors <- function(x) {
 
 #######################################
 #######################################
-
-### Match short coeficient names to long coeficient names
+## Match short coeficient names to long coeficient names
 match_coefs <- function(x) {
   x <- gsub("alpha", "Constant", x)
   x <- gsub("beta", "Total radiative forcing", x)
@@ -95,8 +107,7 @@ match_coefs <- function(x) {
 
 #######################################
 #######################################
-
-### Match short RCP names to long RCP names
+## Match short RCP names to long RCP names
 match_rcps <- function(x) {
   x <- gsub("rcp26", rcp_names[1], x)
   x <- gsub("rcp45", rcp_names[2], x)
@@ -107,8 +118,7 @@ match_rcps <- function(x) {
 
 #######################################
 #######################################
-
-### GGPLOT2 themes
+## Specific plot themes
 
 theme_coefs <-
   theme(
@@ -123,23 +133,69 @@ theme_coefs <-
     panel.spacing = unit(2, "lines") ## Increase gap between facet panels
     ) 
 
-theme_pred <-
-  theme(
-    text = element_text(family = font_type),
-    axis.title.x = element_text(size=20),
-    axis.title.y = element_text(size=20, angle = 0),
-    axis.text  = element_text(size=18),
-    # panel.grid.major.x = element_blank(),
-    # panel.grid.major.y = element_line(colour = "grey90", size = 1),
-    # legend.position = c(.16, .81),
-    legend.position = c(.2, .75),
-    legend.title = element_blank(), # switch off the legend title
-    legend.text = element_text(size=18),
-    legend.key = element_blank(), # switch off the rectangle around symbols in the legend
-    legend.key.width = unit(3.75, "line"),
-    legend.key.height = unit(2.25, "line"),
-    legend.key.size = unit(2, "line")
-  ) 
+pred_plot_func <-
+  function(predictions) {
+    ggplot(
+      data = predictions, 
+      aes(x = year, col = series, fill = series, linetype = series)
+      ) +
+      ylab("Temperature anomaly (°C)\n") + xlab("Year") +
+      geom_line(
+        data = predictions %>% filter(series %in% c("rcp26","rcp45","rcp60","rcp85")),
+        aes(y = mean), lwd = 0.5
+        ) + 
+      geom_ribbon(
+        aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.3
+        ) +
+      geom_line(
+        data = predictions %>% filter(series %in% c("had_full", "fitted")),
+        aes(y = mean), lwd = 0.5
+        ) + 
+      ## Historic vs Forecast period
+      geom_vline(xintercept = 2005, colour = "black", linetype = "longdash") +
+      annotate(
+        "text", x = 1985, y = max(predictions$q975, na.rm=T), 
+        label = "Hindcast", size = 4.5, family = font_type
+        ) + 
+      annotate(
+        "text", x = 2025, y = max(predictions$q975, na.rm=T), 
+        label = "Forecast", size = 4.5, family = font_type
+        ) +
+      scale_colour_manual(
+        values = c("#0066ff", "black", rcp_cols),
+        labels = c("HadCRUT4 ", "Model fit"),
+        breaks = c("had_full", "fitted"),
+        limits = levels(predictions$series)
+        ) +
+      scale_fill_manual(
+        values = c(NA, "black", rcp_fills),
+        labels = c("HadCRUT4 ", "Model fit"),
+        breaks = c("had_full", "fitted"),
+        limits = levels(predictions$series)
+        ) +
+      scale_linetype_manual(
+        values = c(1, 2, 2, 2, 2, 2),
+        labels = c("HadCRUT4 ", "Model fit"),
+        breaks = c("had_full", "fitted"),
+        limits = levels(predictions$series)
+        ) +
+      ## "Fake" secondary y-axis for line labels
+      scale_y_continuous(
+        sec.axis = dup_axis(
+          breaks = predictions %>% filter(year==2100, grepl("rcp", series)) %>% pull(mean),
+          labels = gsub(" \\(forecast\\)","",series_labs[3:6]),
+          name = NULL)
+        ) +
+      theme(
+        axis.title.x = element_blank(),
+        axis.text  = element_text(size=18), 
+        axis.text.y.right = element_text(color=rcp_cols, margin=margin(t=0, r=0, b=0, l=-20)),
+        legend.title = element_blank(), 
+        legend.position = "bottom",
+        legend.text = element_text(size=12),
+        legend.key.width = unit(2, "line")
+      )  
+    }
 
 theme_2100 <-
   theme(

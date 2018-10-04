@@ -62,7 +62,7 @@ tcr %>%
                         levels = prior_names)) %>%
   ggplot(aes(x = tcr, col = prior)) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   xlim(-1, 3) +
   annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
            alpha = .2) +
@@ -85,8 +85,9 @@ tcr %>%
 tcr %>%
   mutate(prior = factor(match_priors(prior),
                         levels = prior_names)) %>%
-  ggplot(aes(x = tcr, fill = prior)) +
-  labs(x = expression(~degree*C), y = "Density") +
+  ggplot(aes(x = tcr, col = prior)) +
+  geom_line(stat = "density", show.legend = F) +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   xlim(-1, 3) +
   annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
            alpha = .2) +
@@ -98,7 +99,7 @@ tcr %>%
                 lty=2, col=prior_cols[3]) +
   stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
                 lty=2, col=prior_cols[4]) +
-  geom_area(stat = "density", position = "dodge", alpha = .5) +
+  geom_density(aes(fill=prior), alpha = .5, col=NA) +
   scale_colour_manual(values = prior_cols) +
   scale_fill_manual(values = prior_cols) +
   guides(col = guide_legend(nrow = 2), fill = guide_legend(nrow = 2)) +
@@ -114,7 +115,7 @@ tcr %>%
                         levels = prior_names)) %>%
   ggplot(aes(x = tcr, col = prior)) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   xlim(-1, 3) +
   annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
            alpha = .2) +
@@ -156,7 +157,7 @@ all_2100 %>%
                         levels = prior_names)) %>%
   mutate(rcp = match_rcps(rcp)) %>%
   ggplot(aes(x = temp, col = prior)) +
-  geom_line(stat = "density") +
+  geom_line(stat = "density") + 
   labs(x = expression(~degree*C), y = "Density") +
   scale_colour_manual(values = prior_cols) +
   guides(col = guide_legend(nrow = 2)) +

@@ -215,44 +215,20 @@ series_labs <- c("HadCRUT4", "Model fit",
                  "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
                  "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
 
-## predictions plot
-ggplot(data = predictions, 
-       aes(x = year, col = series, fill = series, linetype = series)) +
-  ylab(expression(~degree*C)) + xlab("Year") +
-  geom_line(data = predictions %>% 
-              filter(series %in% c("rcp26", "rcp45", "rcp60", "rcp85") ),
-            aes(y = mean),
-            lwd = 1) + 
-  geom_ribbon(aes(ymin = q025, ymax = q975), 
-              lty = 0, alpha = 0.3) +
-  geom_line(data = predictions %>% 
-              filter(series %in% c("had_full", "fitted")),
-            aes(y = mean),
-            lwd = 1) + 
-  ## Historic vs Forecast period
-  geom_vline(xintercept = 2005, colour = "gray50", linetype = "longdash") +
-  annotate("text", x = 1985, y = -0.5, label = "Historic", size = 7, family = font_type) + 
-  annotate("text", x = 2025, y = -0.5, label = "Forecast", size = 7, family = font_type) +
-  scale_colour_manual(
-    values = c("black", "blue", rcp_cols),
-    labels = series_labs,
-    limits = levels(predictions$series)
-    ) +
-  scale_fill_manual(
-    values = c(NA, "blue", rcp_fills),
-    labels = series_labs,
-    limits = levels(predictions$series)
-    ) +
-  scale_linetype_manual(
-    values = c(1, 1, 2, 2, 2, 2),
-    labels = series_labs,
-    limits = levels(predictions$series)
-    ) +
-  theme_pred +
-  ggsave(file = paste0("TablesFigures/predictions-", 
-                      prior_type, convic_type, "-sans.pdf"),
-         width = 10, height = 6.75,
-         device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+## Predictions plot
+pred_plot <- pred_plot_func(predictions)
+pred_plot +
+  ggsave(
+    file = paste0("TablesFigures/PNGs/predictions-", prior_type, convic_type, ".png"),
+    width = 8, height = 6
+    )
+pred_plot +
+  ggsave(
+    file = paste0("TablesFigures/predictions-", prior_type, convic_type, ".pdf"),
+    width = 8, height = 6,
+    device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+    )
+rm(pred_plot)
 
 if(prior_type == "ni"){
   ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
