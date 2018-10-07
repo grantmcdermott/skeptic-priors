@@ -41,8 +41,8 @@ theme_set(
 
 ## Assign colours and names for later graphs ##
 rcp_names <- c("(a) RCP 2.6", "(b) RCP 4.5", "(c) RCP 6.0", "(d) RCP 8.5")
-rcp_cols <- c("darkgreen", "darkorchid", "darkorange2", "darkred")
-rcp_fills <- c("lightgreen", "orchid", "orange", "red")
+rcp_cols <- scales::viridis_pal(option="plasma")(9)[c(1,3,5,7)] 
+rcp_fills <- scales::viridis_pal(option="plasma")(9)[c(1,3,5,7)] 
 
 prior_names <- c("Strong Denier", "Moderate Denier", 
                 "Strong Lukewarmer", "Moderate Lukewarmer", "Noninformative")
@@ -141,38 +141,38 @@ pred_plot_func <-
       ) +
       ylab("Temperature anomaly (°C)\n") + xlab("Year") +
       geom_line(
-        data = predictions %>% filter(series %in% c("rcp26","rcp45","rcp60","rcp85")),
+        data = predictions %>% filter(series %in% c("fitted","rcp26","rcp45","rcp60","rcp85")),
         aes(y = mean), lwd = 0.5
         ) + 
       geom_ribbon(
         aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.3
         ) +
       geom_line(
-        data = predictions %>% filter(series %in% c("had_full", "fitted")),
+        data = predictions %>% filter(series %in% c("had_full")),
         aes(y = mean), lwd = 0.5
         ) + 
       ## Historic vs Forecast period
-      geom_vline(xintercept = 2005, colour = "black", linetype = "longdash") +
+      geom_vline(xintercept = 2005, colour = "gray35", linetype = 6) +
       annotate(
         "text", x = 1985, y = max(predictions$q975, na.rm=T), 
-        label = "Hindcast", size = 4.5, family = font_type
+        label = "Hindcast", size = 4.5, family = font_type, colour = "gray35"
         ) + 
       annotate(
         "text", x = 2025, y = max(predictions$q975, na.rm=T), 
-        label = "Forecast", size = 4.5, family = font_type
+        label = "Forecast", size = 4.5, family = font_type, colour = "gray35"
         ) +
       scale_colour_manual(
-        values = c("#0066ff", "black", rcp_cols),
+        values = c("black", "#377EB8", rcp_cols),
         labels = c("HadCRUT4 ", "Model fit"),
         breaks = c("had_full", "fitted"),
         limits = levels(predictions$series)
-        ) +
+      ) +
       scale_fill_manual(
-        values = c(NA, "black", rcp_fills),
+        values = c(NA, "#377EB8", rcp_fills),
         labels = c("HadCRUT4 ", "Model fit"),
         breaks = c("had_full", "fitted"),
         limits = levels(predictions$series)
-        ) +
+      ) +
       scale_linetype_manual(
         values = c(1, 2, 2, 2, 2, 2),
         labels = c("HadCRUT4 ", "Model fit"),
