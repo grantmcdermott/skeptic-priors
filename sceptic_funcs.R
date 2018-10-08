@@ -42,7 +42,6 @@ theme_set(
 ## Assign colours and names for later graphs ##
 rcp_names <- c("(a) RCP 2.6", "(b) RCP 4.5", "(c) RCP 6.0", "(d) RCP 8.5")
 rcp_cols <- scales::viridis_pal(option="plasma")(9)[c(1,3,5,7)] 
-rcp_fills <- scales::viridis_pal(option="plasma")(9)[c(1,3,5,7)] 
 
 prior_names <- c("Strong Denier", "Moderate Denier", 
                 "Strong Lukewarmer", "Moderate Lukewarmer", "Noninformative")
@@ -168,7 +167,7 @@ pred_plot_func <-
         limits = levels(predictions$series)
       ) +
       scale_fill_manual(
-        values = c(NA, "#377EB8", rcp_fills),
+        values = c(NA, "#377EB8", rcp_cols),
         labels = c("HadCRUT4 ", "Model fit"),
         breaks = c("had_full", "fitted"),
         limits = levels(predictions$series)
