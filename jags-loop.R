@@ -124,27 +124,20 @@ rcp_loop <-
     
   
     ### Density plot ###
-    coefs_df %>%
-      mutate(coef = gsub("alpha", "alpha[0]", coef),
-             coef = gsub("beta", "beta[1]", coef),
-             coef = gsub("gamma", "gamma[2]", coef),
-             coef = gsub("delta", "delta[3]", coef),
-             coef = ifelse(coef=="eta", "eta[4]", coef)) %>%
-      mutate(coef = factor(coef, levels = c("alpha[0]", "beta[1]", "gamma[2]",
-                                            "delta[3]", "eta[4]", "sigma"))
-             ) %>%
-      ggplot(aes(x = values, group = coef)) +
-      geom_line(stat = "density") +
-      theme_coefs + 
-      facet_wrap(~coef, ncol = 2, scales = "free",
-                 labeller = label_parsed) +
-      ggsave(file = paste0("TablesFigures/coefs-",
-                           prior_type, convic_type, "-sans.pdf"),
-             width = 8, height = 10, 
-             device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-             )
+    coefs_plot <- coef_plot_func(coefs_df)
+    coefs_plot +
+      ggsave(
+        file = paste0("TablesFigures/PNGs/coefs-", prior_type, convic_type, ".png"),
+        width = 8, height = 10
+        )
+    coefs_plot +
+      ggsave(
+        file = paste0("TablesFigures/coefs-", prior_type, convic_type, ".pdf"),
+        width = 8, height = 10, 
+        device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+        )
     
-    rm(coefs_df)
+    rm(coefs_df, coefs_plot)
     
   } ## End of RCP 2.6 "if" clause
   

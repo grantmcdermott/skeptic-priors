@@ -121,6 +121,19 @@ match_rcps <- function(x) {
 ### PLOT FUNCTIONS ###
 ######################
 
+coef_plot_func <-
+  function(coefs_df) {
+    coefs_df %>%
+      mutate(coef = factor(coef, levels=c("alpha","beta","gamma", "delta","eta","sigma"))) %>%
+      ggplot(aes(x = values, group = coef)) +
+      geom_density(alpha=0.2, fill="black") +
+      facet_wrap(~coef, ncol = 2, scales = "free", labeller = label_parsed) +
+      theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank()
+        )
+  }
+
 theme_coefs <-
   theme(
     text = element_text(family = font_type),
