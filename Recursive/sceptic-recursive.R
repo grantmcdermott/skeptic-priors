@@ -131,32 +131,17 @@ tcr_rec <-
         )
 
     ## TCR Density plot
-    tcr_df %>%
-      mutate(prior = factor(match_priors(prior),
-                            levels = prior_names)) %>%
-      ggplot(aes(x = tcr, col = prior)) +
-      geom_line(stat = "density") +
-      labs(x = expression(~degree*C), y = "Density") +
-      xlim(-1, 3) +
-      annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-               alpha = .2) +
-      stat_function(fun = dnorm, args = list(mean = 0, sd = .065),
-                    lty=2, col=prior_cols[1]) +
-      stat_function(fun = dnorm, args = list(mean = 0, sd = .25),
-                    lty=2, col=prior_cols[2]) +
-      stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
-                    lty=2, col=prior_cols[3]) +
-      stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
-                    lty=2, col=prior_cols[4]) +
-      annotate("text", x = 1.75, y = 5.75, label = year_tracker_lab, size = 3.5) +
-      scale_colour_manual(values = prior_cols) +
-      guides(col = guide_legend(nrow = 2)) +
-      theme_tcr +
-      ggsave(file = paste0("Recursive/TablesFigures/Animation/", recurse_type,
-                           "/rec-tcr-", suff, 1000 + n, ".pdf"),
-             width = 6, height = 4,
-             device = cairo_pdf)
-
+    tcr_plot <- 
+      tcr_plot_func(tcr_df) +
+      annotate("text", x = 1.75, y = 1, label = year_tracker_lab, size = 3.5)
+    
+    tcr_plot +
+      ggsave(
+        file = paste0("Recursive/TablesFigures/Animation/", recurse_type, "/rec-tcr-", 1000 + n, ".png"),
+        width = 8, height = 4.5
+        )
+    
+    ## Save the summary data frame (95 CI) for the recursive plot
     tcr_rec <-
       tcr_df %>% 
       group_by(prior, year_to) %>%
@@ -211,31 +196,22 @@ tcr_rec$priorlab <-
                        "(d) Strong Denier"
                        )))
 
-tcr_plot <- 
-  tcr_rec %>%
-  ggplot(aes(x = year_to, y = mean, col = prior)) +
-  geom_line(lwd = .85) +
-  geom_ribbon(aes(ymin = q025, ymax = q975, fill = prior), lty = 0, alpha = 0.4) +
-  ylab(expression(~degree~C)) + xlab("Year") + #xlab("Sample size (years)") +
-  ## scale_y_continuous(limits = c(-1, 3)) +
-  scale_colour_manual(values = prior_cols, 
-                      limits = c("denstrong","denmod","lukestrong","lukemod","ni"),
-                      labels = prior_names) +
-  scale_fill_manual(values = c(prior_cols[1:4], "gray60"), 
-                    limits = c("denstrong","denmod","lukestrong","lukemod","ni"),
-                    labels = prior_names) +
-  background_grid(major = "y", minor = "none", colour.major = "gray90") +
-  facet_wrap(~ priorlab, ncol = 2) +
-  theme_recursive 
-
+## Plot the recursive estimates
+tcr_rec_plot <- recursive_plot_func(tcr_rec)
 if(recurse_type == "historic"){
-  tcr_plot <- 
-    tcr_plot + 
-    scale_x_reverse(breaks = seq(max(tcr_rec$year_to), min(tcr_rec$year_to), by = -30)) +
-    xlab("Year")
+  tcr_rec_plot <- 
+    tcr_rec_plot + 
+    scale_x_reverse(breaks = seq(max(tcr_rec$year_to), min(tcr_rec$year_to), by = -30))
   }
-
-tcr_plot +
-  ggsave(file = paste0("Recursive/TablesFigures/rec-tcr-all-", recurse_type, suff, ".pdf"),
-         width = 8, height = 7, 
-         device = cairo_pdf)
+tcr_rec_plot +
+  ggsave(
+    file = paste0("Recursive/TablesFigures/PNGs/rec-tcr-all-", recurse_type, ".png"),
+    width = 8, height = 7
+    )
+tcr_rec_plot +
+  ggsave(
+    file = paste0("Recursive/TablesFigures/rec-tcr-all-", recurse_type, ".pdf"),
+    width = 8, height = 7,
+    device = cairo_pdf
+    )
+rm(tcr_rec_plot)

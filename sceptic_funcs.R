@@ -116,9 +116,10 @@ match_rcps <- function(x) {
   return(x)
 }
 
-#######################################
-#######################################
-## Specific plot themes
+
+######################
+### PLOT FUNCTIONS ###
+######################
 
 theme_coefs <-
   theme(
@@ -133,6 +134,9 @@ theme_coefs <-
     panel.spacing = unit(2, "lines") ## Increase gap between facet panels
     ) 
 
+
+################################################
+################################################
 ## Temperature prediction plot function (by RCP)
 pred_plot_func <-
   function(predictions) {
@@ -199,7 +203,10 @@ pred_plot_func <-
     }
 
 
+############################
+############################
 ## TCR density plot function
+
 tcr_plot_func <-
   function(tcr) {
     
@@ -260,6 +267,9 @@ tcr_plot_func <-
       ) 
   }
 
+
+#################################################
+#################################################
 ## Temperature's in 2100 pointrange plot function
 all_2100_plot_func <-
   function(all_2100) {
@@ -286,15 +296,34 @@ all_2100_plot_func <-
   }
 
 
-
-theme_recursive <-
-  theme(
-    text = element_text(family = font_type),
-    axis.title.x = element_text(size=18),
-    axis.title.y = element_text(size=18, angle = 0),
-    axis.text  = element_text(size=17),
-    legend.position = "none",
-    strip.text = element_text(size = 17, colour = "black"),
-    strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.spacing = unit(2, "lines") ## Increase gap between facet panels
-  )
+##############################
+##############################
+## RECURSIVE TCR PLOT FUNCTION
+recursive_plot_func <-
+  function(tcr_rec) {
+    tcr_rec %>%
+      mutate(prior = factor(match_priors(prior), levels=prior_names[c(5,1:4)])) %>% ## Plot NI first
+      ggplot(aes(x = year_to, y = mean, col = prior, fill = prior), lwd=0.5) +
+      geom_line(aes(y=q025, lty=prior)) +
+      geom_line(aes(y=q975, lty=prior)) +
+      geom_ribbon(
+        data= tcr_rec %>%
+          filter(prior!="Noninformative") %>%
+          mutate(prior = factor(match_priors(prior), levels=prior_names)),
+        aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.5
+        ) +
+      geom_line(lwd = .75) +
+      labs(y = "Temperature anomaly (°C)\n") + 
+      ## scale_y_continuous(limits = c(-1, 3)) +
+      scale_colour_manual(values = rep(prior_cols, 2)) +
+      scale_fill_manual(values = rep(c(prior_cols[1:4], "Noninformative"=NA), 2)) +
+      scale_linetype_manual(
+        values = c(0, 0, 0, 0, 2),
+        limits = prior_names) +
+      background_grid(major = "xy", minor = "none") +
+      facet_wrap(~ priorlab, ncol = 2) +
+      theme(
+        axis.title.x = element_blank(),
+        legend.position = "none"
+        )
+    }
