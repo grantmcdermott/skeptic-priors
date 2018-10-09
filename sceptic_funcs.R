@@ -9,6 +9,7 @@ library(gridExtra) ## Facilitates easier labelling in ggplot2 (e.g. annote with 
 library(tidyverse)
 library(hrbrthemes)
 library(cowplot) ## For cowplot ggplot theme
+library(ggridges)
 library(ggthemes) ## For additional ggplot2 themes (e.g. "few") 
 library(RColorBrewer)
 library(extrafont) ## For additional fonts in ggplot2
@@ -45,10 +46,10 @@ rcp_cols <- scales::viridis_pal(option="plasma")(9)[c(1,3,5,7)]
 
 prior_names <- c("Strong Denier", "Moderate Denier", 
                 "Strong Lukewarmer", "Moderate Lukewarmer", "Noninformative")
-# prior_cols <- c(brewer.pal(12, "Paired")[c(2, 4, 6, 8)], "#000000")
-prior_cols <- c("Strong Denier"="#1F78B4", "Moderate Denier"="#33A02C", 
-                 "Strong Lukewarmer"="#E31A1C", "Moderate Lukewarmer"="#FF7F00", 
-                 "Noninformative"="#000000")
+# c(brewer.pal(12, "Paired")[c(2, 1, 6, 5)], "#000000") ## Want slightly darker for light pairs
+prior_cols <- c("Strong Denier"="#1F78B4", "Moderate Denier"="#8BBDDA",
+                "Strong Lukewarmer"="#E31A1C", "Moderate Lukewarmer"="#F68080",
+                "Noninformative"="#000000")
 
 
 #################
@@ -132,6 +133,7 @@ theme_coefs <-
     panel.spacing = unit(2, "lines") ## Increase gap between facet panels
     ) 
 
+## Temperature prediction plot function (by RCP)
 pred_plot_func <-
   function(predictions) {
     ggplot(
@@ -165,13 +167,13 @@ pred_plot_func <-
         labels = c("HadCRUT4 ", "Model fit"),
         breaks = c("had_full", "fitted"),
         limits = levels(predictions$series)
-      ) +
+        ) +
       scale_fill_manual(
         values = c(NA, "#377EB8", rcp_cols),
         labels = c("HadCRUT4 ", "Model fit"),
         breaks = c("had_full", "fitted"),
         limits = levels(predictions$series)
-      ) +
+        ) +
       scale_linetype_manual(
         values = c(1, 2, 2, 2, 2, 2),
         labels = c("HadCRUT4 ", "Model fit"),
@@ -196,22 +198,94 @@ pred_plot_func <-
       )  
     }
 
-theme_2100 <-
-  theme(
-    text = element_text(family = font_type),
-    legend.position = "bottom",
-    legend.title = element_blank(),
-    # strip.text = element_text(size = 18, colour = "black"),
-    strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.spacing = unit(2, "lines") ## Increase gap between facet panels
-  ) 
 
-theme_tcr <-
-  theme(
-    text = element_text(family = font_type),
-    legend.position = "bottom",
-    legend.title = element_blank()
-  )
+## TCR density plot function
+tcr_plot_func <-
+  function(tcr) {
+    
+    ## Can't use stat_function() that maps to facets, ridges or other aesthetic elements.
+    ## So have to create the data manually instead.
+    ## See: https://github.com/tidyverse/ggplot2/issues/2357
+    p_df <- 
+      priors_df %>%
+      mutate(prior = paste0(prior_type, convic_type)) %>%
+      mutate(prior = factor(match_priors(prior), levels=prior_names)) %>% 
+      filter(prior_type!="ni")
+    prior_dens <- 
+      lapply(prior_names[1:4], function(x){
+        df <- p_df %>% filter(prior==x)
+        tcr_grid <- seq(from=qnorm(0.0001,df$mu,df$sigma), to=qnorm(0.9999,df$mu,df$sigma), length=100)
+        data_frame(
+          tcr = tcr_grid,
+          height = dnorm(tcr_grid, mean=df$mu, sd=df$sigma),
+          prior = x
+        )
+      }) %>%
+      bind_rows()
+    
+    tcr_density <- 
+      lapply(unique(tcr$prior), function(x){
+        tcr_df <- filter(tcr, prior==x)
+        tcr_df <- density(tcr_df$tcr)
+        out <- 
+          data_frame(
+            tcr=tcr_df$x, 
+            height=tcr_df$y,
+            prior = x
+          )
+      }) %>%
+      bind_rows()
+    
+    tcr_density %>%
+      mutate(prior = factor(match_priors(prior), levels=prior_names)) %>%
+      ggplot(aes(x=tcr, y =fct_reorder(prior, tcr), height=height, group=prior, col=prior, fill=prior)) +
+      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0, lwd = 0.25) +
+      annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
+      ## Priors
+      geom_density_ridges(
+        stat = "identity", scale = 1.75, 
+        data = prior_dens,
+        lty = 2, fill = NA
+      ) +
+      ## Posteriors
+      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0.4) +
+      labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
+      xlim(-1, 3) +
+      scale_colour_manual(values = prior_cols) +
+      scale_fill_manual(values = prior_cols) +
+      theme(
+        axis.text.y = element_text(vjust = 0),
+        axis.title.y = element_blank(),
+        legend.position = "none"
+      ) 
+  }
+
+## Temperature's in 2100 pointrange plot function
+all_2100_plot_func <-
+  function(all_2100) {
+    all_2100 %>%
+      group_by(rcp, prior) %>%
+      summarise(
+        temp_mean = mean(temp, na.rm=T),
+        temp_q025 = quantile(temp, p=0.025, na.rm=T),
+        temp_q975 = quantile(temp, p=0.975, na.rm=T)
+      ) %>%
+      ungroup %>%
+      mutate(prior = factor(match_priors(prior))) %>%
+      mutate(rcp = match_rcps(rcp)) %>%
+      ggplot(aes(x=fct_reorder(prior, temp_mean), y=temp_mean, ymin=temp_q025, ymax=temp_q975, col=prior)) +
+      geom_pointrange() + 
+      coord_flip() +
+      scale_colour_manual(values = prior_cols) +
+      facet_wrap(~ rcp) +
+      labs(x = "Prior", y = "Temperature anomaly by 2100 (°C)") +
+      theme(
+        legend.position = "none",
+        axis.title.y = element_blank()
+      ) 
+  }
+
+
 
 theme_recursive <-
   theme(
