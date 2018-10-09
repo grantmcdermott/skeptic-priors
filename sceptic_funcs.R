@@ -298,7 +298,7 @@ all_2100_plot_func <-
 
 ##############################
 ##############################
-## RECURSIVE TCR PLOT FUNCTION
+## Recursive TCR plot function
 recursive_plot_func <-
   function(tcr_rec) {
     tcr_rec %>%
@@ -327,3 +327,70 @@ recursive_plot_func <-
         legend.position = "none"
         )
     }
+
+
+#########################
+#########################
+## Evidence plot function 
+
+## Grid
+evid_plot_func <-
+  function(evid) {
+    evid %>% 
+      mutate(yrs = ifelse(is.na(yrs), 2100-1866, yrs)) %>%
+      ggplot(aes(x = mu, y = sigma)) +
+      geom_raster(aes(fill = yrs + 1866 -1)) +
+      scale_fill_gradient2(
+        name = "Year beliefs\nconverge",
+        midpoint = 2015,
+        labels = c("1950"="1950", "2000"="2000", "2050"="2050", "2100"="> 2100"),
+        low="#377EB8", high="#E41A1C",
+        limits = c(min(evid$yrs)+1866-1, 2100)
+        ) +
+      guides(fill = guide_colorbar(reverse = TRUE)) +
+      # labs(x = expression(mu), y = expression(sigma)) +
+      labs(x = "Prior mean (μ)", y = "Prior standard deviation (σ)") +
+      facet_wrap(~thresh_lab)
+  }
+
+## Using lines instead of a grid
+evid_plot_lines_func <-
+  function(evid) {
+    evid %>%
+      filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
+      ggplot(aes(x = sigma, y = yrs + 1866 - 1, group = factor(mu), col = factor(mu))) +
+      geom_line() + 
+      geom_line(
+        data = evid %>% 
+          group_by(mu) %>% 
+          filter(is.na(yrs) | is.na(lead(yrs))) %>% 
+          filter(mu < .5) %>%
+          filter(mu %in% seq(0, 1, by = .2)),
+        aes(x = sigma_dash - .001, y = yrs_dash + 1866), lty = 5
+        ) +
+      geom_hline(yintercept = 2015, col = "red", lty = 2) +
+      geom_hline(yintercept = 2100, col = "red", lty = 1) +
+      geom_text(
+        data = evid %>% 
+          filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
+          filter(sigma == min(sigma)), 
+        aes(label = sprintf('mu == "%1.1f"', mu)), 
+        hjust = 0, nudge_x = .001, 
+        parse = T, family = font_type, size = 3.5
+        ) +
+      geom_text(
+        data = evid %>% filter(is.na(yrs) & mu == 0),
+        aes(x = sigma, y = yrs_dash + 1866 - 1, label = sprintf('mu == "%1.1f"', mu)), 
+        vjust = 0, nudge_y = 2, 
+        hjust = 0, nudge_x = .001,  
+        parse = T, family = font_type, size = 3.5
+        ) +
+      labs(
+        x = expression(paste("Prior convinction (", sigma, ")")), 
+        y = "Year beliefs converge"
+        ) +
+      scale_colour_manual(values = brewer.pal(9, "Blues")[4:9]) +
+      scale_x_reverse(expand = c(0.2, 0)) +
+      scale_y_continuous(expand = c(0.1, 0)) +
+      facet_wrap(~thresh_lab) + theme(legend.position = "none")
+  }
