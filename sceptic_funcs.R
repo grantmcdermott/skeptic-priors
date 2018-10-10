@@ -10,10 +10,10 @@ library(tidyverse)
 library(hrbrthemes)
 library(cowplot) ## For cowplot ggplot theme
 library(ggridges)
-library(ggthemes) ## For additional ggplot2 themes (e.g. "few") 
 library(RColorBrewer)
 library(extrafont) ## For additional fonts in ggplot2
 library(stargazer) ## For nice LaTeX tables
+library(xtable)
 library(pbapply) ## Add progress bar to *apply functions
 
 
@@ -24,7 +24,6 @@ library(pbapply) ## Add progress bar to *apply functions
 ## Choose non-standard font for plots. Installation: https://github.com/wch/extrafont 
 ## Will revert to ggplot2 default if not available.
 font_type <- choose_font(c("Fira Sans", "Palatino Linotype")[1])
-suff <- ifelse(font_type=="Palatino Linotype", "-ppl", "") ## For keeping track of exported files.
 
 ## Set global plot theme 
 ## Note: Specific themes for various plots at the bottom of this document
@@ -121,6 +120,10 @@ match_rcps <- function(x) {
 ### PLOT FUNCTIONS ###
 ######################
 
+######################################
+######################################
+## Coeficients densities plot function
+
 coef_plot_func <-
   function(coefs_df) {
     coefs_df %>%
@@ -134,23 +137,11 @@ coef_plot_func <-
         )
   }
 
-theme_coefs <-
-  theme(
-    text = element_text(family = font_type),
-    axis.title.x = element_blank(),
-    axis.text.x  = element_text(size=14),
-    axis.title.y = element_blank(),
-    axis.text.y  = element_text(size=14),
-    legend.position = "none",
-    strip.text = element_text(size = 18, colour = "black"),
-    strip.background = element_rect(fill = "white"), ## Facet strip
-    panel.spacing = unit(2, "lines") ## Increase gap between facet panels
-    ) 
-
 
 ################################################
 ################################################
 ## Temperature prediction plot function (by RCP)
+
 pred_plot_func <-
   function(predictions) {
     ggplot(
@@ -406,4 +397,30 @@ evid_plot_lines_func <-
       scale_x_reverse(expand = c(0.2, 0)) +
       scale_y_continuous(expand = c(0.1, 0)) +
       facet_wrap(~thresh_lab) + theme(legend.position = "none")
+  }
+
+
+############################
+############################
+## SCC density plot function
+
+scc_plot_func <-
+  function(scc) {
+    
+    scc %>%
+      gather(prior, scc) %>%
+      mutate(prior = factor(match_priors(prior), levels=prior_names)) %>%
+      ggplot(aes(x = scc, col = prior)) +
+      geom_line(stat = "density") +
+      xlim(-10, 100) + ## NB: x-axis is truncated to aid visual inspection!
+      labs(
+        # x = expression("Social cost of CO"[2]*" (US$2005)"), 
+        x = "US$ (2005)", 
+        y = "Density") + 
+      scale_colour_manual(values = prior_cols) +
+      guides(col = guide_legend(nrow = 2)) +
+      theme(
+        legend.position = "bottom",
+        legend.title = element_blank()
+      )
   }

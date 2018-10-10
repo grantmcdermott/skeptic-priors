@@ -74,6 +74,6 @@ rm(priors_loop)
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
 pref <- "TablesFigures/"
-suff <- paste0("", suff)
+suff <- ""
 
 source("sceptic_tablesfigures.R")

@@ -149,27 +149,15 @@ rcp_loop <-
     
   
     ### Density plot ###
-    coefs_df %>%
-      mutate(coef = gsub("alpha", "alpha[0]", coef),
-             coef = gsub("beta", "beta[1]", coef),
-             coef = gsub("gamma", "gamma[2]", coef),
-             coef = gsub("delta", "delta[3]", coef),
-             coef = ifelse(coef=="eta", "eta[4]", coef)) %>%
-      mutate(coef = factor(coef, levels = c("alpha[0]", "beta[1]", "gamma[2]",
-                                            "delta[3]", "eta[4]", "sigma"))
-             ) %>%
-      ggplot(aes(x = values, group = coef)) +
-      geom_line(stat = "density") +
-      theme_coefs + 
-      facet_wrap(~coef, ncol = 2, scales = "free",
-                 labeller = label_parsed) +
-      ggsave(file = paste0("./Robustness/TablesFigures/coefs-",
-                           prior_type, convic_type, "-me.pdf"),
-             width = 8, height = 10, 
-             device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-             )
+    coefs_plot <- coef_plot_func(coefs_df)
+    coefs_plot +
+      ggsave(
+        file = paste0("./Robustness/TablesFigures/coefs-", prior_type, convic_type, "-me.pdf"),
+        width = 8, height = 10, 
+        device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+      )
     
-    rm(coefs_df)
+    rm(coefs_df, coefs_plot)
     
   } ## End of RCP 2.6 "if" clause
   
@@ -243,43 +231,14 @@ series_labs <- c("HadCRUT4", "Model fit",
                  "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
 
 ## predictions plot
-ggplot(data = predictions, 
-       aes(x = year, col = series, fill = series, linetype = series)) +
-  ylab(expression(~degree*C)) + xlab("Year") +
-  geom_line(data = predictions %>% 
-              filter(series %in% c("rcp26", "rcp45", "rcp60", "rcp85") ),
-            aes(y = mean),
-            lwd = 1) + 
-  geom_ribbon(aes(ymin = q025, ymax = q975), 
-              lty = 0, alpha = 0.3) +
-  geom_line(data = predictions %>% 
-              filter(series %in% c("had_full", "fitted")),
-            aes(y = mean),
-            lwd = 1) + 
-  ## Historic vs Forecast period
-  geom_vline(xintercept = 2005, colour = "gray50", linetype = "longdash") +
-  annotate("text", x = 1985, y = -0.5, label = "Historic", size = 7, family = font_type) + 
-  annotate("text", x = 2025, y = -0.5, label = "Forecast", size = 7, family = font_type) +
-  scale_colour_manual(
-    values = c("black", "blue", rcp_cols),
-    labels = series_labs,
-    limits = levels(predictions$series)
-    ) +
-  scale_fill_manual(
-    values = c(NA, "blue", rcp_fills),
-    labels = series_labs,
-    limits = levels(predictions$series)
-    ) +
-  scale_linetype_manual(
-    values = c(1, 1, 2, 2, 2, 2),
-    labels = series_labs,
-    limits = levels(predictions$series)
-    ) +
-  theme_pred +
-  ggsave(file = paste0("./Robustness/TablesFigures/predictions-", 
-                      prior_type, convic_type, "-me.pdf"),
-         width = 10, height = 6.75,
-         device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+pred_plot <- pred_plot_func(predictions)
+pred_plot +
+  ggsave(
+    file = paste0("./Robustness/TablesFigures/predictions-", prior_type, convic_type, "-me.pdf"),
+    width = 8, height = 6,
+    device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+  )
+rm(pred_plot)
 
 
 ## Zoom in on historic record with comparison between model and measurement error

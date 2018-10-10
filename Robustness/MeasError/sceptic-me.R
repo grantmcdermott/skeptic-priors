@@ -87,7 +87,7 @@ rm(priors_loop)
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
 pref <- "Robustness/TablesFigures/"
-suff <- paste0("", suff)
+suff <- "-me"
 
 source("sceptic_tablesfigures.R")
 

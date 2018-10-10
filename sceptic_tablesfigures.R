@@ -60,12 +60,12 @@ coefs_tab[, 2:ncol(coefs_tab)] %>%
 tcr_plot <- tcr_plot_func(tcr)
 tcr_plot +
   ggsave(
-    file = paste0(pref, "PNGs/tcr-combined.png"),
+    file = paste0(pref, "PNGs/tcr-combined", suff, ".png"),
     width = 8, height = 4.5
     )
 tcr_plot +
   ggsave(
-    file = paste0(pref, "tcr-combined.pdf"),
+    file = paste0(pref, "tcr-combined", suff, ".pdf"),
     width = 6, height = 4,
     device = cairo_pdf
     )
@@ -94,7 +94,7 @@ tcr %>%
                       limits = prior_names) +
   guides(col = guide_legend(nrow = 2)) +
   theme_tcr +
-  ggsave(file = paste0(pref, "tcr-combined-prior.pdf"),
+  ggsave(file = paste0(pref, "tcr-combined-prior", suff, ".pdf"),
          width = 6, height = 4,
          device = cairo_pdf)
 
@@ -116,12 +116,12 @@ tcr %>%
 all_2100_plot <- all_2100_plot_func(all_2100)
 all_2100_plot +
   ggsave(
-    file = paste0(pref, "PNGs/all-2100.png"),
+    file = paste0(pref, "PNGs/all-2100", suff, ".png"),
     width = 9, height = 6
     )
 all_2100_plot +
   ggsave(
-    file = paste0(pref, "all-2100.pdf"),
+    file = paste0(pref, "all-2100", suff, ".pdf"),
     width = 9, height = 6,
     device = cairo_pdf
     )
