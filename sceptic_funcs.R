@@ -144,6 +144,12 @@ coef_plot_func <-
 
 pred_plot_func <-
   function(predictions) {
+    
+    # series_labs <- c("HadCRUT4", "Model fit", 
+    #                  "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
+    #                  "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
+    series_labs <- trimws(gsub(".*\\)","",rcp_names))
+    
     ggplot(
       data = predictions, 
       aes(x = year, col = series, fill = series, linetype = series)
@@ -192,7 +198,7 @@ pred_plot_func <-
       scale_y_continuous(
         sec.axis = dup_axis(
           breaks = predictions %>% filter(year==2100, grepl("rcp", series)) %>% pull(mean),
-          labels = gsub(" \\(forecast\\)","",series_labs[3:6]),
+          labels = gsub(" \\(forecast\\)","",series_labs),
           name = NULL)
         ) +
       theme(

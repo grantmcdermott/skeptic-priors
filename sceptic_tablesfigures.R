@@ -72,7 +72,8 @@ tcr_plot +
 rm(tcr_plot)
 
 ## Just the priors this time (plus ni posterior for comparison) for presentations
-tcr %>%
+tcr_plot_priors <-
+  tcr %>%
   filter(prior == "ni") %>%
   mutate(prior = factor(match_priors(prior),
                         levels = prior_names)) %>%
@@ -93,10 +94,21 @@ tcr %>%
   scale_colour_manual(values = prior_cols,
                       limits = prior_names) +
   guides(col = guide_legend(nrow = 2)) +
-  theme_tcr +
-  ggsave(file = paste0(pref, "tcr-combined-prior", suff, ".pdf"),
-         width = 6, height = 4,
-         device = cairo_pdf)
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank()
+    ) 
+tcr_plot_priors +
+  ggsave(
+    file = paste0(pref, "PNGs/tcr-combined-prior", suff, ".png"),
+    width = 6, height = 4
+    )
+tcr_plot_priors +
+  ggsave(
+    file = paste0(pref, "tcr-combined-prior", suff, ".pdf"),
+    width = 6, height = 4,
+    device = cairo_pdf
+    )
 
 ## Summarise in tabular form
 tcr %>%

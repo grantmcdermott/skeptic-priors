@@ -226,9 +226,6 @@ predictions <-
                          levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))
          ) 
 
-series_labs <- c("HadCRUT4", "Model fit", 
-                 "RCP 2.6 (forecast)", "RCP 4.5 (forecast)", 
-                 "RCP 6.0 (forecast)", "RCP 8.5 (forecast)")
 
 ## predictions plot
 pred_plot <- pred_plot_func(predictions)

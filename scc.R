@@ -16,6 +16,7 @@ scc_plot +
     width = 6, height = 4.5,
     device = cairo_pdf
     )
+rm(scc_plot)
 
 scc_tab <-
   scc %>%
