@@ -3,17 +3,17 @@ library(LearnBayes) ## For simulating noninformative prior (using random multiva
 library(rjags) ## For running the MCMC (Gibbs) sampler
 library(dclone) ## Allows parallel updating of JAGS models
 library(snow) ## Allows clusters: i.e. subsidiary R programmes running separately on your computer's different CPUs
-library(jagstools) ## devtools::install_github("johnbaums/jagstools") For extracting summary statistics from MCMC chain
+library(jagstools) ## devtools::install_github("johnbaums/jagstools") Extract summary statistics from MCMC objects
 library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
-library(gridExtra) ## Facilitates easier labelling in ggplot2 (e.g. annote with extrafont fonts)
+library(gridExtra) ## Easier labelling in ggplot2 (e.g. annote with extrafont fonts)
 library(tidyverse)
-library(hrbrthemes)
-library(cowplot) ## For cowplot ggplot theme
-library(ggridges)
-library(RColorBrewer)
+library(hrbrthemes) ## For the theme_ipsum() ggplot2 theme
+# library(cowplot) ## Added ggplot2 functionality and theme_cowplot() theme
+library(ggridges) ## For ridge plots
+library(RColorBrewer) ## Nice colour palettes
 library(extrafont) ## For additional fonts in ggplot2
 library(stargazer) ## For nice LaTeX tables
-library(xtable)
+library(xtable) ## Another LaTeX table option
 library(pbapply) ## Add progress bar to *apply functions
 
 
@@ -23,7 +23,7 @@ library(pbapply) ## Add progress bar to *apply functions
 
 ## Choose non-standard font for plots. Installation: https://github.com/wch/extrafont 
 ## Will revert to ggplot2 default if not available.
-font_type <- choose_font(c("Fira Sans", "Palatino Linotype")[1])
+font_type <- choose_font(c("Fira Sans", "Open Sans"))
 
 ## Set global plot theme 
 ## Note: Specific themes for various plots at the bottom of this document
