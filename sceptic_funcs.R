@@ -256,7 +256,9 @@ tcr_plot_func <-
     tcr_density %>%
       mutate(prior = factor(match_priors(prior), levels=prior_names)) %>%
       ggplot(aes(x=tcr, y =fct_reorder(prior, tcr), height=height, group=prior, col=prior, fill=prior)) +
-      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0, lwd = 0.25) +
+      ## Dummy data (need to plot first otherwise annotate geom doesn't work)
+      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0, col=NA) +
+      ## IPCC "likely" region (1.0–2.5 °C)
       annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
       ## Priors
       geom_density_ridges(
@@ -265,7 +267,8 @@ tcr_plot_func <-
         lty = 2, fill = NA
       ) +
       ## Posteriors
-      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0.4) +
+      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0.5, lwd = 0.5) +
+      ## Stylistic elements
       labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
       xlim(-1, 3) +
       scale_colour_manual(values = prior_cols) +
@@ -277,6 +280,69 @@ tcr_plot_func <-
       ) 
   }
 
+## Priors only version of the above
+tcr_plot_func_priors <-
+  function(tcr) {
+    
+    ## Can't use stat_function() that maps to facets, ridges or other aesthetic elements.
+    ## So have to create the data manually instead.
+    ## See: https://github.com/tidyverse/ggplot2/issues/2357
+    p_df <- 
+      priors_df %>%
+      mutate(prior = paste0(prior_type, convic_type)) %>%
+      mutate(prior = factor(match_priors(prior), levels=prior_names)) %>% 
+      filter(prior_type!="ni")
+    prior_dens <- 
+      lapply(prior_names[1:4], function(x){
+        df <- p_df %>% filter(prior==x)
+        tcr_grid <- seq(from=qnorm(0.0001,df$mu,df$sigma), to=qnorm(0.9999,df$mu,df$sigma), length=100)
+        data_frame(
+          tcr = tcr_grid,
+          height = dnorm(tcr_grid, mean=df$mu, sd=df$sigma),
+          prior = x
+          )
+      }) %>%
+      bind_rows()
+    
+    tcr_density <- 
+      lapply(unique(tcr$prior), function(x){
+        tcr_df <- filter(tcr, prior==x)
+        tcr_df <- density(tcr_df$tcr)
+        out <- 
+          data_frame(
+            tcr=tcr_df$x, 
+            height=tcr_df$y,
+            prior = x
+            )
+      }) %>%
+      bind_rows()
+    
+    tcr_density %>%
+      mutate(prior = factor(match_priors(prior), levels=prior_names)) %>%
+      ggplot(aes(x=tcr, y =fct_reorder(prior, tcr), height=height, group=prior, col=prior, fill=prior)) +
+      ## Dummy data (need to plot first otherwise annotate geom doesn't work)
+      geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0, col=NA) +
+      ## IPCC "likely" region (1.0–2.5 °C)
+      annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
+      ## Priors
+      geom_density_ridges(
+        stat = "identity", scale = 1.75, 
+        data = prior_dens,
+        lty = 2, fill = NA
+        ) +
+      ## Posteriors
+      # geom_density_ridges(stat = "identity", scale = 1.75, alpha = 0.5, lwd = 0.5) +
+      ## Stylistic elements
+      labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
+      xlim(-1, 3) +
+      scale_colour_manual(values = prior_cols) +
+      scale_fill_manual(values = prior_cols) +
+      theme(
+        axis.text.y = element_text(vjust = 0),
+        axis.title.y = element_blank(),
+        legend.position = "none"
+        ) 
+  }
 
 #################################################
 #################################################

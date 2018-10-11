@@ -60,55 +60,31 @@ coefs_tab[, 2:ncol(coefs_tab)] %>%
 tcr_plot <- tcr_plot_func(tcr)
 tcr_plot +
   ggsave(
-    file = paste0(pref, "PNGs/tcr-combined", suff, ".png"),
+    file = paste0(pref, "PNGs/tcr", suff, ".png"),
     width = 8, height = 4.5
     )
 tcr_plot +
   ggsave(
-    file = paste0(pref, "tcr-combined", suff, ".pdf"),
+    file = paste0(pref, "tcr", suff, ".pdf"),
     width = 6, height = 4,
     device = cairo_pdf
     )
 rm(tcr_plot)
 
-## Just the priors this time (plus ni posterior for comparison) for presentations
-tcr_plot_priors <-
-  tcr %>%
-  filter(prior == "ni") %>%
-  mutate(prior = factor(match_priors(prior),
-                        levels = prior_names)) %>%
-  ggplot(aes(x = tcr, col = prior)) +
-  geom_line(stat = "density") +
-  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
-  xlim(-1, 3) +
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .065),
-                lty=2, aes(col=prior_names[1])) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .25),
-                lty=2, aes(col=prior_names[2])) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
-                lty=2, aes(col=prior_names[3])) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
-                lty=2, aes(col=prior_names[4])) +
-  scale_colour_manual(values = prior_cols,
-                      limits = prior_names) +
-  guides(col = guide_legend(nrow = 2)) +
-  theme(
-    legend.position = "bottom",
-    legend.title = element_blank()
-    ) 
+## Just the priors this time (for presentations)
+tcr_plot_priors <- tcr_plot_func_priors(tcr)
 tcr_plot_priors +
   ggsave(
-    file = paste0(pref, "PNGs/tcr-combined-prior", suff, ".png"),
+    file = paste0(pref, "PNGs/tcr-prior", suff, ".png"),
     width = 6, height = 4
     )
 tcr_plot_priors +
   ggsave(
-    file = paste0(pref, "tcr-combined-prior", suff, ".pdf"),
+    file = paste0(pref, "tcr-prior", suff, ".pdf"),
     width = 6, height = 4,
     device = cairo_pdf
     )
+rm(tcr_plot_priors)
 
 ## Summarise in tabular form
 tcr %>%
