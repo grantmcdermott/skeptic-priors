@@ -396,10 +396,10 @@ recursive_plot_func <-
       scale_linetype_manual(
         values = c(0, 0, 0, 0, 2),
         limits = prior_names) +
-      background_grid(major = "xy", minor = "none") +
       facet_wrap(~ priorlab, ncol = 2) +
       theme(
         axis.title.x = element_blank(),
+        panel.grid.minor = element_blank(),
         legend.position = "none"
         )
     }

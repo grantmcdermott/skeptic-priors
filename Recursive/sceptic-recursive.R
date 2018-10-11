@@ -168,6 +168,7 @@ tcr_rec <- read_csv(paste0("Recursive/Data/tcr-rec-", recurse_type,".csv"))
 
 tcr_rec <- 
   tcr_rec %>%
+  rename(prior = series) %>%
   arrange(prior) %>% 
   mutate(priorlab = prior)
 
@@ -205,12 +206,12 @@ if(recurse_type == "historic"){
   }
 tcr_rec_plot +
   ggsave(
-    file = paste0("Recursive/TablesFigures/PNGs/rec-tcr-all-", recurse_type, ".png"),
+    file = paste0("Recursive/TablesFigures/PNGs/rec-tcr-", recurse_type, ".png"),
     width = 8, height = 7
     )
 tcr_rec_plot +
   ggsave(
-    file = paste0("Recursive/TablesFigures/rec-tcr-all-", recurse_type, ".pdf"),
+    file = paste0("Recursive/TablesFigures/rec-tcr-", recurse_type, ".pdf"),
     width = 8, height = 7,
     device = cairo_pdf
     )
