@@ -1,31 +1,22 @@
-rm(list = ls()) # Clear data
-
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source("sceptic_funcs.R")
-library(xtable)
+# library(xtable)
 
 scc <- read_csv("./Data/PAGE09/scc.csv")
 
-scc %>%
-  gather(prior, scc) %>%
-  mutate(prior = factor(match_priors(prior),
-                        levels = prior_names)) %>%
-  ggplot(aes(x = scc, col = prior)) +
-  geom_line(stat = "density") +
-  xlim(-10, 100) + ## NB: x-axis is truncated to aid visual inspection!
-  labs(#x = expression("Social cost of CO"[2]*" (US$2005)"), 
-    x = "US$ (2005)", 
-       y = "Density") + 
-  scale_colour_manual(values = prior_cols) +
-  guides(col = guide_legend(nrow = 2)) +
-  theme(
-    text = element_text(family = font_type),
-    legend.position = "bottom",
-    legend.title = element_blank()
-  ) +
-  ggsave(file = "./TablesFigures/scc.pdf",
-         width = 6, height = 4.5,
-         device = cairo_pdf)
+scc_plot <- scc_plot_func(scc)
+scc_plot +
+  ggsave(
+    file = "./TablesFigures/PNGs/scc.png",
+    width = 6, height = 4.5
+    )
+scc_plot +
+  ggsave(
+    file = "./TablesFigures/scc.pdf",
+    width = 6, height = 4.5,
+    device = cairo_pdf
+    )
+rm(scc_plot)
 
 scc_tab <-
   scc %>%
@@ -70,7 +61,7 @@ scc_tab %>%
 
 ## Alternatively, use Stargazer package... but still requires additional tinkering
 ## in LaTeX and also doesn't have booktabs option.
-library(stargazer) 
+# library(stargazer) 
 scc_tab %>%
   magrittr::set_colnames(c("prior", "Mean", "Median", "95% Probability Interval")) %>%
   mutate(prior = as.character(prior)) %>%

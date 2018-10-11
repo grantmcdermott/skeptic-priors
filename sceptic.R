@@ -1,5 +1,3 @@
-rm(list = ls()) # Clear data
-
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source("sceptic_funcs.R")
 
@@ -76,6 +74,6 @@ rm(priors_loop)
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
 pref <- "TablesFigures/"
-suff <- paste0("", suff)
+suff <- ""
 
 source("sceptic_tablesfigures.R")

@@ -57,64 +57,29 @@ coefs_tab[, 2:ncol(coefs_tab)] %>%
 ###################
 
 ## TCR Density plot
-tcr %>%
-  mutate(prior = factor(match_priors(prior),
-                        levels = prior_names)) %>%
-  ggplot(aes(x = tcr, col = prior)) +
-  geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
-  xlim(-1, 3) +
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .065),
-                lty=2, col=prior_cols[1]) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .25),
-                lty=2, col=prior_cols[2]) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
-                lty=2, col=prior_cols[3]) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
-                lty=2, col=prior_cols[4]) +
-  scale_colour_manual(values = prior_cols) +
-  guides(col = guide_legend(nrow = 2)) +
-  theme_tcr +
-  ggsave(file = paste0(pref, "tcr-combined", suff, ".pdf"),
-         width = 6, height = 4,
-         device = cairo_pdf)
-
-## As above, but fill only
-tcr %>%
-  mutate(prior = factor(match_priors(prior),
-                        levels = prior_names)) %>%
-  ggplot(aes(x = tcr, fill = prior)) +
-  labs(x = expression(~degree*C), y = "Density") +
-  xlim(-1, 3) +
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .065),
-                lty=2, col=prior_cols[1]) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = .25),
-                lty=2, col=prior_cols[2]) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .065),
-                lty=2, col=prior_cols[3]) +
-  stat_function(fun = dnorm, args = list(mean = 1, sd = .25),
-                lty=2, col=prior_cols[4]) +
-  geom_area(stat = "density", position = "dodge", alpha = .5) +
-  scale_colour_manual(values = prior_cols) +
-  scale_fill_manual(values = prior_cols) +
-  guides(col = guide_legend(nrow = 2), fill = guide_legend(nrow = 2)) +
-  theme_tcr +
-  ggsave(file = paste0(pref, "tcr-combined", suff, "-fill.pdf"),
-         width = 6, height = 4,
-         device = cairo_pdf)
+tcr_plot <- tcr_plot_func(tcr)
+tcr_plot +
+  ggsave(
+    file = paste0(pref, "PNGs/tcr-combined", suff, ".png"),
+    width = 8, height = 4.5
+    )
+tcr_plot +
+  ggsave(
+    file = paste0(pref, "tcr-combined", suff, ".pdf"),
+    width = 6, height = 4,
+    device = cairo_pdf
+    )
+rm(tcr_plot)
 
 ## Just the priors this time (plus ni posterior for comparison) for presentations
-tcr %>%
+tcr_plot_priors <-
+  tcr %>%
   filter(prior == "ni") %>%
   mutate(prior = factor(match_priors(prior),
                         levels = prior_names)) %>%
   ggplot(aes(x = tcr, col = prior)) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   xlim(-1, 3) +
   annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
            alpha = .2) +
@@ -129,10 +94,21 @@ tcr %>%
   scale_colour_manual(values = prior_cols,
                       limits = prior_names) +
   guides(col = guide_legend(nrow = 2)) +
-  theme_tcr +
-  ggsave(file = paste0(pref, "tcr-combined-prior", suff, ".pdf"),
-         width = 6, height = 4,
-         device = cairo_pdf)
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank()
+    ) 
+tcr_plot_priors +
+  ggsave(
+    file = paste0(pref, "PNGs/tcr-combined-prior", suff, ".png"),
+    width = 6, height = 4
+    )
+tcr_plot_priors +
+  ggsave(
+    file = paste0(pref, "tcr-combined-prior", suff, ".pdf"),
+    width = 6, height = 4,
+    device = cairo_pdf
+    )
 
 ## Summarise in tabular form
 tcr %>%
@@ -140,47 +116,28 @@ tcr %>%
   summarise(tcr_mean = decimals(mean(tcr), 1),
             q025 = decimals(quantile(tcr, .025), 1),
             q975 = decimals(quantile(tcr, .975), 1)) %>%
-  mutate(prior =
-           factor(prior,
-                  levels = c("ni", "lukemod", "lukestrong", "denmod", "denstrong"))
-         ) %>%
-  arrange(prior)
+  mutate(prior = match_priors(prior)) %>% 
+  arrange(desc(tcr_mean))
 
 ####################
 ### TEMP IN 2100 ###
 ####################
 
-## All 2100 density plot
-all_2100 %>%
-  mutate(prior = factor(match_priors(prior),
-                        levels = prior_names)) %>%
-  mutate(rcp = match_rcps(rcp)) %>%
-  ggplot(aes(x = temp, col = prior)) +
-  geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
-  scale_colour_manual(values = prior_cols) +
-  guides(col = guide_legend(nrow = 2)) +
-  facet_wrap(~ rcp, labeller = label_parsed) +
-  theme_2100 +
-  ggsave(file = paste0(pref, "all-2100", suff, ".pdf"),
-         width = 6, height = 5.5,
-         device = cairo_pdf)
+## All 2100 pointrange plot
 
-## As above, but fill only
-all_2100 %>%
-  mutate(prior = factor(match_priors(prior),
-                        levels = prior_names)) %>%
-  mutate(rcp = match_rcps(rcp)) %>%
-  ggplot(aes(x = temp, fill = prior)) +
-  geom_area(stat = "density", position = "dodge", alpha = .5) +
-  labs(x = expression(~degree*C), y = "Density") +
-  scale_fill_manual(values = prior_cols) +
-  guides(col = guide_legend(nrow = 2), fill = guide_legend(nrow = 2)) +
-  facet_wrap(~ rcp, labeller = label_parsed) +
-  theme_2100 +
-  ggsave(file = paste0(pref, "all-2100", suff, "-fill.pdf"),
-         width = 6, height = 5.5,
-         device = cairo_pdf)
+all_2100_plot <- all_2100_plot_func(all_2100)
+all_2100_plot +
+  ggsave(
+    file = paste0(pref, "PNGs/all-2100", suff, ".png"),
+    width = 9, height = 6
+    )
+all_2100_plot +
+  ggsave(
+    file = paste0(pref, "all-2100", suff, ".pdf"),
+    width = 9, height = 6,
+    device = cairo_pdf
+    )
+rm(all_2100_plot)
 
 ## Summarise in tabular form
 all_2100 %>%
@@ -188,6 +145,6 @@ all_2100 %>%
   summarise(mean_2100 = decimals(mean(temp), 1),
             q025 = decimals(quantile(temp, .025), 1),
             q975 = decimals(quantile(temp, .975), 1)) %>%
-  mutate(prior = factor(prior, levels = c("ni", "lukemod", "lukestrong",
-                                          "denmod", "denstrong"))) %>%
-  arrange(prior)
+  mutate(prior = match_priors(prior)) %>% 
+  group_by(prior) %>%
+  arrange(desc(mean_2100))
