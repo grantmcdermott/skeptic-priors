@@ -236,12 +236,12 @@ evid <-
 ## Plot the data
 ## Years with red-white-blue colour scheme
 evid_plot <- evid_plot_func(evid)
-evid +
+evid_plot +
   ggsave(
     file = "Evidence/TablesFigures/PNGs/evidence-grid.png",
     width = 8, height = 4
     )
-evid +
+evid_plot +
   ggsave(
     file = "Evidence/TablesFigures/evidence-grid.pdf",
     width = 8, height = 4,
