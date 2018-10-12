@@ -7,7 +7,7 @@ source("sceptic_funcs.R")
 set.seed(123) 
 
 ## Load climate data
-climate <- read_csv("./Data/climate.csv")
+climate <- read_csv("Data/climate.csv")
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
@@ -95,20 +95,24 @@ rcps <-
 rcps_eff <-
   rcps %>%
   filter(year >= 1866 & year <= 2100) %>%
-  select(year, rcp, trf, volc, solar, co2ch4n2o, fgassum, mhalosum, aerosols,
-         cloud_tot, stratoz, tropoz, ch4oxstrath2o, landuse, bcsnow ## "other" category
-         ) %>% 
+  select(
+    year, rcp, trf, volc, solar, co2ch4n2o, fgassum, mhalosum, aerosols,
+    cloud_tot, stratoz, tropoz, ch4oxstrath2o, landuse, bcsnow ## "other" category
+    ) %>% 
   ## Create effective forcing versions of the necessary variables
-  mutate(volc_eff = 0.61*volc,
-         solar_eff = 1.68*solar, 
-         co2ch4n2o_eff = 1.17*co2ch4n2o, 
-         # fgassum_eff = fgassum, 
-         mhalosum_eff = 0.66*mhalosum, 
-         aerosols_eff = 1.55*aerosols,
-         landuse_eff = 4.27*landuse
-         ) %>%
-  mutate(other = landuse + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow,
-         other_eff = landuse_eff + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow) %>%
+  mutate(
+    volc_eff = 0.61*volc,
+    solar_eff = 1.68*solar, 
+    co2ch4n2o_eff = 1.17*co2ch4n2o, 
+    # fgassum_eff = fgassum, 
+    mhalosum_eff = 0.66*mhalosum, 
+    aerosols_eff = 1.55*aerosols,
+    landuse_eff = 4.27*landuse
+    ) %>%
+  mutate(
+    other = landuse + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow,
+    other_eff = landuse_eff + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow
+    ) %>%
   ## Sum these and (other variables) to get effective TRF
   mutate(trf_eff = solar_eff + co2ch4n2o_eff + fgassum + mhalosum_eff + aerosols_eff + other_eff) %>%
   ## Stricter version of effective TRF that doesn't adjust nonsig. coefs in MEA2016 (solar & landuse)
@@ -210,7 +214,7 @@ eff_func <- function(m, lc){
 eff_func(1.55, 1.05)
 
 ## Load climate data
-# climate <- read_csv("./Data/climate.csv")
+# climate <- read_csv("Data/climate.csv")
 
 ## Set chain (and rf2x) length to reduce time needed for large loop over the
 ## t-distribution sampling below
@@ -223,18 +227,20 @@ tcr_eff2 <-
     rcps_eff <-
       rcps %>%
       filter(year >= 1866 & year <= 2100) %>%
-      select(year, rcp, trf, volc, solar, co2ch4n2o, fgassum, mhalosum, aerosols,
-             cloud_tot, stratoz, tropoz, ch4oxstrath2o, landuse, bcsnow ## "other" category
-             ) %>% 
+      select(
+        year, rcp, trf, volc, solar, co2ch4n2o, fgassum, mhalosum, aerosols,
+        cloud_tot, stratoz, tropoz, ch4oxstrath2o, landuse, bcsnow ## "other" category
+        ) %>% 
       ## Create effective forcing versions of the necessary variables
-      mutate(volc_eff = volc * eff_func(0.61, 0.33),
-             solar_eff = solar * eff_func(1.68, -1.27), 
-             co2ch4n2o_eff = co2ch4n2o * eff_func(1.17, 1.07),
-             # fgassum_eff = fgassum, 
-             mhalosum_eff = mhalosum * eff_func(0.66, 0.34),
-             aerosols_eff = aerosols * eff_func(1.55, 1.05),
-             landuse_eff = landuse * eff_func(3.82, -2.16)
-             ) %>%
+      mutate(
+        volc_eff = volc * eff_func(0.61, 0.33),
+        solar_eff = solar * eff_func(1.68, -1.27), 
+        co2ch4n2o_eff = co2ch4n2o * eff_func(1.17, 1.07),
+        # fgassum_eff = fgassum, 
+        mhalosum_eff = mhalosum * eff_func(0.66, 0.34),
+        aerosols_eff = aerosols * eff_func(1.55, 1.05),
+        landuse_eff = landuse * eff_func(3.82, -2.16)
+        ) %>%
       mutate(other_eff = landuse_eff + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow) %>%
       ## Sum these and (other variables) to get effective TRF
       mutate(trf_eff = solar_eff + co2ch4n2o_eff + fgassum + mhalosum_eff + aerosols_eff + other_eff)
@@ -288,36 +294,28 @@ tcr_eff2 %>%
   # xlim(-1, 3) + 
   coord_cartesian(xlim=c(-1, 3)) + 
   annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
-  # stat_function(fun = dnorm, args = list(mean = 0, sd = .065), 
-  #               lty=2, col=prior_cols[1]) +
-  # stat_function(fun = dnorm, args = list(mean = 0, sd = .25), 
-  #               lty=2, col=prior_cols[2]) + 
-  # stat_function(fun = dnorm, args = list(mean = 1, sd = .065), 
-  #               lty=2, col=prior_cols[3]) +
-  # stat_function(fun = dnorm, args = list(mean = 1, sd = .25), 
-  #               lty=2, col=prior_cols[4]) + 
-  # scale_colour_manual(values = prior_cols) +
-  # guides(col = guide_legend(nrow = 2)) +
-  theme_tcr 
-
+           alpha = .2)  
 
 bind_rows(
   tcr_eff1 %>%
     filter(series == "trf_eff") %>%
     mutate(series = "marvel_a") %>%
     group_by(series) %>%
-    summarise(mean = mean(tcr),
-              q025 = quantile(tcr, .025),
-              q975 = quantile(tcr, .975)),
+    summarise(
+      mean = mean(tcr),
+      q025 = quantile(tcr, .025),
+      q975 = quantile(tcr, .975)
+      ),
   tcr_eff2 %>%
     mutate(series = "marvel_b") %>%
     group_by(series) %>%
-    summarise(mean = mean(tcr),
-              q025 = quantile(tcr, .025),
-              q975 = quantile(tcr, .975))
+    summarise(
+      mean = mean(tcr),
+      q025 = quantile(tcr, .025),
+      q975 = quantile(tcr, .975)
+      )
   ) %>%
-  write_csv("Robustness/Data/tcr-marvel.csv")
+  write_csv("Data/Robustness/tcr-marvel.csv")
 
 rm(tcr_eff1, tcr_eff2)
 

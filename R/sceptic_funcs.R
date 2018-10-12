@@ -219,7 +219,7 @@ pred_plot <-
 ############################
 ## TCR density plot function
 
-tcr_plot_func <-
+tcr_plot <-
   function(tcr) {
     
     ## Can't use stat_function() that maps to facets, ridges or other aesthetic elements.
@@ -283,7 +283,7 @@ tcr_plot_func <-
   }
 
 ## Priors only version of the above
-tcr_plot_func_priors <-
+tcr_plot_priors <-
   function(tcr) {
     
     ## Can't use stat_function() that maps to facets, ridges or other aesthetic elements.

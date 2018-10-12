@@ -10,7 +10,7 @@ source("sceptic_funcs.R")
 
 ## Combine the main (noninformative) TCR outputs in a single table
 tcr_robust <- 
-  lapply(list.files("Robustness/Data", full.names = T), read_csv) %>%
+  lapply(list.files("Data/Robustness", full.names = T), read_csv) %>%
   bind_rows()
 
 tcr_robust <-

@@ -52,24 +52,24 @@ coefs_tab[, 2:ncol(coefs_tab)] %>%
             )
 
 
-###################
-###     TCR     ###
-###################
+###############################
+### Figure 1: TCR densities ###
+###############################
 
-## TCR Density plot
-tcr_plot <- tcr_plot_func(tcr)
-tcr_plot +
+## Priors and posteriors
+fig_1 <- tcr_plot(tcr)
+fig_1 +
   ggsave(
-    file = paste0(pref, "PNGs/tcr", suff, ".png"),
+    file = paste0(pref, "PNGs/fig-1", suff, ".png"),
     width = 8, height = 4.5
     )
-tcr_plot +
+fig_1 +
   ggsave(
-    file = paste0(pref, "tcr", suff, ".pdf"),
+    file = paste0(pref, "fig-1", suff, ".pdf"),
     width = 6, height = 4,
     device = cairo_pdf
     )
-rm(tcr_plot)
+rm(fig_1)
 
 ## Just the priors this time (for presentations)
 tcr_plot_priors <- tcr_plot_func_priors(tcr)

@@ -66,24 +66,29 @@ tcr_secondary <-
 
 tcr_secondary %>%
   ungroup() %>%
-  mutate(series = gsub("cw", "CW2014", series),
-         series = gsub("giss", "GISTEMP", series),
-         series = gsub("had", "HadCRUT4", series)) %>% 
+  mutate(
+    series = gsub("cw", "CW2014", series),
+    series = gsub("giss", "GISTEMP", series),
+    series = gsub("had", "HadCRUT4", series)
+    ) %>% 
   mutate(series = factor(series, levels = c("HadCRUT4", "CW2014", "GISTEMP"))) %>%
   ggplot(aes(x = tcr, group = series, col = series)) +
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
   labs(x = expression(~degree*C), y = "Density") +
   xlim(-1, 3) +
   geom_line(stat = "density") +
   labs(x = expression(~degree*C), y = "Density") +
-  theme(text = element_text(family = "Palatino Linotype"),
-        legend.title=element_blank(),
-        legend.position="bottom"
-        ) +
-  ggsave(file = "Robustness/TablesFigures/tcr-secondary.pdf",
-         width = 5, height = 4, 
-         device = cairo_pdf) ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+  scale_color_brewer(palette = "Set1") +
+  theme(
+    text = element_text(family = font_type),
+    legend.title=element_blank(),
+    legend.position="bottom"
+    ) +
+  ggsave(
+    file = "TablesFigures/Untracked/Robustness/tcr-secondary.pdf",
+    width = 5, height = 4, 
+    device = cairo_pdf
+    )
 
 tcr_secondary %>%
   group_by(series) %>%
@@ -91,7 +96,7 @@ tcr_secondary %>%
             q025 = quantile(tcr, .025),
             q975 = quantile(tcr, .975)) %>%
   arrange(mean) %>%
-  write_csv("Robustness/Data/tcr-secondary.csv")
+  write_csv("Data/Robustness/tcr-secondary.csv")
 
 ## Use own function to help pull desired data in summary form for table ##
 clean_func <- function(x) {
@@ -132,5 +137,5 @@ stargazer(tcr_secondary_tab,
           notes.align = "l",
           notes = c("\\footnotesize All estimates are computed using noninformative priors."),
           # type = "text" 
-          out = "./Robustness/TablesFigures/tcr-secondary.tex"
+          out = "Robustness/TablesFigures/tcr-secondary.tex"
           )

@@ -109,10 +109,10 @@ tcr_rec <-
         
         if(prior_type == "ni")  {
           # source("Recursive/jags-recursive.R", local = T) ## For vague noninformative riors using the rjags package
-          source("Recursive/noninf-recursive-pblapply.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
+          source("Recursive/noninf-recursive.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
         }
         else{
-          source("Recursive/jags-recursive-pblapply.R", local = T)
+          source("Recursive/jags-recursive.R", local = T)
         }
 
       })
@@ -130,14 +130,16 @@ tcr_rec <-
         paste0("Looking forward to ", tcr_df$year_to[1],"\n(Sample size = ", tcr_df$year_to[1]-2005+1, " years)")
         )
 
-    ## TCR Density plot
-    tcr_plot <- 
-      tcr_plot_func(tcr_df) +
+    ##################################################################################
+    ### Animated / recursive version of Figure 1 (TCR densities) for presentations ###
+    ##################################################################################
+    fig_1 <- 
+      tcr_plot(tcr_df) +
       annotate("text", x = 1.75, y = 1, label = year_tracker_lab, size = 3.5)
     
-    tcr_plot +
+    fig_1 +
       ggsave(
-        file = paste0("Recursive/TablesFigures/Animation/", recurse_type, "/rec-tcr-", 1000 + n, ".png"),
+        file = paste0("TablesFigures/Untracked/Recursive/Animation/", recurse_type, "/rec-tcr-", 1000 + n, ".png"),
         width = 8, height = 4.5
         )
     
@@ -159,12 +161,12 @@ tcr_rec <-
 tcr_rec
 
 ## Write to disk for future use
-write_csv(tcr_rec, paste0("Recursive/Data/tcr-rec-", recurse_type, ".csv"))
+write_csv(tcr_rec, paste0("Data/Recursive/tcr-rec-", recurse_type, ".csv"))
 
 
 ###################################
 ## Read data
-tcr_rec <- read_csv(paste0("Recursive/Data/tcr-rec-", recurse_type,".csv"))
+tcr_rec <- read_csv(paste0("Data/Recursive/tcr-rec-", recurse_type,".csv"))
 
 tcr_rec <- 
   tcr_rec %>%
