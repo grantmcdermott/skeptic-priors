@@ -24,7 +24,7 @@ climate <-
   read_csv("Data/climate.csv") %>%
   filter(rcp == rcp_type) 
 
-y_dev <- read_csv("Evidence/Data/y-dev.csv")
+y_dev <- read_csv("Data/Evidence/y-dev.csv")
 
 climate$noise <- sample(y_dev$dev, nrow(climate), replace = T)
 
