@@ -88,6 +88,7 @@ rm(priors_loop)
 ##################################
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
+run_type <- "me"
 pref <- "TablesFigures/Untracked/Robustness/"
 suff <- "-me"
 

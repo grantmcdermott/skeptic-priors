@@ -95,6 +95,49 @@ tcr %>%
   mutate(prior = match_priors(prior)) %>% 
   arrange(desc(tcr_mean))
 
+
+
+###################################
+## Read data
+tcr_rec <- read_csv(paste0("Data/Recursive/tcr-rec-", recurse_type,".csv"))
+
+
+###############################
+### Figure 2: TCR densities ###
+###############################
+
+## Only plot this figure for the main run
+if (run_type == "main") {
+  lapply(c("historic", "future"), function(recurse_type) {
+    tcr_rec <- read_csv(tcr_rec, paste0("Data/Recursive/tcr-rec-", recurse_type, ".csv"))
+    fig_2 <- recursive_plot(tcr_rec)
+    fig_2_pref <- "TablesFigures/Untracked"
+    fig_2_suff <- paste0("-", recurse_type)
+    if(recurse_type == "historic"){
+      fig_2 <- 
+        fig_2 + 
+        scale_x_reverse(breaks = seq(max(tcr_rec$year_to), min(tcr_rec$year_to), by = -30))
+      fig_2_pref <- "TablesFigures/"
+      fig_2_suff <- ""
+    }
+    fig_2 +
+      ggsave(
+        file = paste0(fig_2_pref, "PNGs/fig-2", fig_2_pref, ".png"),
+        width = 8, height = 7
+        )
+    fig_2 +
+      ggsave(
+        file = paste0(fig_2_pref, "fig-2", fig_2_pref, ".pdf"),
+        width = 8, height = 7,
+        device = cairo_pdf
+        )
+    rm(fig_2)
+  })
+}
+  
+
+
+
 ####################
 ### TEMP IN 2100 ###
 ####################

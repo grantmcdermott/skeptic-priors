@@ -73,6 +73,7 @@ rm(priors_loop)
 ##################################
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
+run_type <- "main"
 pref <- "TablesFigures/"
 suff <- ""
 

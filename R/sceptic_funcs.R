@@ -377,8 +377,41 @@ all_2100_plot_func <-
 ##############################
 ##############################
 ## Recursive TCR plot function
-recursive_plot_func <-
+recursive_plot <-
   function(tcr_rec) {
+    
+    ## To depict the noninformative series in each sceptic prior facet, we need
+    ## to duplicate the series manually. Start by mutating a label column.
+    tcr_rec <- 
+      tcr_rec %>%
+      rename(prior = series) %>%
+      arrange(prior) %>% 
+      mutate(priorlab = prior)
+    ## Next "rebind" the ni prior data in the way that can be easily faceted by  
+    ## the four sceptic priors.
+    tcr_rec <-
+      bind_rows(
+        tcr_rec %>% 
+          filter(prior != "ni"),
+        lapply(c("lukemod", "lukestrong", "denmod", "denstrong"), function(x) {
+          tcr_rec %>%
+            filter(prior == "ni") %>%
+            mutate(priorlab = x)
+          }) %>%
+          bind_rows()
+        )
+    ## Make the prior lab prettier
+    tcr_rec$priorlab <- 
+      ifelse(tcr_rec$priorlab == "lukemod",
+             "(a) Moderate Lukewarmer", 
+             ifelse(tcr_rec$priorlab == "lukestrong",
+                    "(b) Strong Lukewarmer",
+                    ifelse(tcr_rec$priorlab == "denmod",
+                           "(c) Moderate Denier",
+                           "(d) Strong Denier"
+                    )))
+    
+    ## Now we can plot the figure
     tcr_rec %>%
       mutate(prior = factor(match_priors(prior), levels=prior_names[c(5,1:4)])) %>% ## Plot NI first
       ggplot(aes(x = year_to, y = mean, col = prior, fill = prior), lwd=0.5) +
