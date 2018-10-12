@@ -478,7 +478,7 @@ evid_plot_lines_func <-
 ############################
 ## SCC density plot function
 
-scc_plot_func <-
+scc_plot <-
   function(scc) {
     
     scc %>%

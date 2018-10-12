@@ -1,22 +1,21 @@
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source("sceptic_funcs.R")
-# library(xtable)
 
-scc <- read_csv("./Data/PAGE09/scc.csv")
+scc <- read_csv("Data/PAGE09/scc.csv")
 
-scc_plot <- scc_plot_func(scc)
-scc_plot +
+fig_s2 <- scc_plot(scc)
+fig_s2 +
   ggsave(
-    file = "./TablesFigures/PNGs/scc.png",
+    file = "TablesFigures/PNGs/scc.png",
     width = 6, height = 4.5
     )
-scc_plot +
+fig_s2 +
   ggsave(
-    file = "./TablesFigures/scc.pdf",
+    file = "TablesFigures/scc.pdf",
     width = 6, height = 4.5,
     device = cairo_pdf
     )
-rm(scc_plot)
+rm(fig_s2)
 
 scc_tab <-
   scc %>%
@@ -45,7 +44,7 @@ scc_tab %>%
          label = "tab:scc") %>%
   print(booktabs = T, caption.placement = "top", 
         table.placement = "t", include.rownames = F,
-        file = "./TablesFigures/scc.tex"
+        file = "TablesFigures/scc.tex"
         )
 
 ## Using xable.decimal function for alignment (see scep_funcs.R file)
@@ -73,5 +72,5 @@ scc_tab %>%
           rownames = F,
           align = T,  
           notes.align = "l"#,
-          # out = "./TablesFigures/scc.tex"
+          # out = "TablesFigures/scc.tex"
           )
