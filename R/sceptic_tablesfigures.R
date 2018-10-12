@@ -72,7 +72,7 @@ fig_1 +
 rm(fig_1)
 
 ## Just the priors this time (for presentations)
-tcr_plot_priors <- tcr_plot_func_priors(tcr)
+tcr_plot_priors <- tcr_plot_priors(tcr)
 tcr_plot_priors +
   ggsave(
     file = paste0(pref, "PNGs/tcr-prior", suff, ".png"),
