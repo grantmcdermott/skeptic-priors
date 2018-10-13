@@ -96,12 +96,6 @@ tcr %>%
   arrange(desc(tcr_mean))
 
 
-
-###################################
-## Read data
-tcr_rec <- read_csv(paste0("Data/Recursive/tcr-rec-", recurse_type,".csv"))
-
-
 ###############################
 ### Figure 2: TCR densities ###
 ###############################
@@ -134,9 +128,48 @@ if (run_type == "main") {
     rm(fig_2)
   })
 }
+
+
+###################################
+### Figure 3: Evidence required ###
+###################################  
+
+if (run_type=="main") {
+  ## Read data
+  evid <- read_csv("Data/Evidence/tcr-evidence.csv")
   
-
-
+  ## Plot the data
+  ## Years with red-white-blue colour scheme
+  fig_3 <- evid_plot(evid)
+  fig_3 +
+    ggsave(
+      file = "TablesFigures/PNGs/fig-3.png",
+      width = 8, height = 4
+      )
+  fig_3 +
+    ggsave(
+      file = "TablesFigures/fig-3.pdf",
+      width = 8, height = 4,
+      device = cairo_pdf
+      )
+  rm(fig_3)
+  
+  ## Lines instead of grid
+  fig_3_lines <- evid_plot_lines(evid) 
+  fig_3_lines +
+    ggsave(
+      file = "TablesFigures/Untracked/PNGs/fig-3-lines.png",
+      width = 8, height = 4
+    )
+  fig_3_lines +
+    ggsave(
+      file = "TablesFigures/Untracked/fig-3-lines.pdf",
+      width = 8, height = 4,
+      device = cairo_pdf
+    )
+  rm(fig_3_lines)
+}
+  
 
 ####################
 ### TEMP IN 2100 ###

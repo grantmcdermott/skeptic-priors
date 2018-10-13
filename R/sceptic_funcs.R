@@ -444,9 +444,16 @@ recursive_plot <-
 #########################
 ## Evidence plot function 
 
-## Grid
-evid_plot_func <-
+## Grid version
+evid_plot <-
   function(evid) {
+    ## Labels for facetting
+    evid <-
+      evid %>%
+      mutate(yrs = ifelse(round(tcr_mean, 1) < thresh, NA, yrs)) %>%
+      mutate(thresh_lab = paste0("(a) ", thresh, " °C")) %>%
+      mutate(thresh_lab = ifelse(thresh == 1.5, gsub("\\(a\\)", "\\(b\\)", thresh_lab), thresh_lab))
+    ## Plot the figure
     evid %>% 
       mutate(yrs = ifelse(is.na(yrs), 2100-1866, yrs)) %>%
       ggplot(aes(x = mu, y = sigma)) +
@@ -465,8 +472,19 @@ evid_plot_func <-
   }
 
 ## Using lines instead of a grid
-evid_plot_lines_func <-
+evid_plot_lines <-
   function(evid) {
+    ## Labels for facetting
+    ## Also, manually adjust some parts of the data for plotting 
+    ## (Only applies to obs where no convergence by 2100)
+    evid <-
+      evid %>%
+      mutate(yrs_dash = ifelse(yrs == 235, yrs - 1, yrs)) %>% 
+      mutate(yrs = ifelse(round(tcr_mean, 1) < thresh, NA, yrs)) %>%
+      mutate(sigma_dash = ifelse(round(tcr_mean, 1) < thresh, (0.0674+(.2-mu)/30)^1.2+0.03, sigma)) %>%
+      mutate(thresh_lab = paste0("(a) ", thresh, " °C")) %>%
+      mutate(thresh_lab = ifelse(thresh == 1.5, gsub("\\(a\\)", "\\(b\\)", thresh_lab), thresh_lab))
+    ## Now plot the figure
     evid %>%
       filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
       ggplot(aes(x = sigma, y = yrs + 1866 - 1, group = factor(mu), col = factor(mu))) +
