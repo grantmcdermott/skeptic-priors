@@ -1,22 +1,6 @@
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source("sceptic_funcs.R")
 
-scc <- read_csv("Data/PAGE09/scc.csv")
-
-fig_s2 <- scc_plot(scc)
-fig_s2 +
-  ggsave(
-    file = "TablesFigures/PNGs/scc.png",
-    width = 6, height = 4.5
-    )
-fig_s2 +
-  ggsave(
-    file = "TablesFigures/scc.pdf",
-    width = 6, height = 4.5,
-    device = cairo_pdf
-    )
-rm(fig_s2)
-
 scc_tab <-
   scc %>%
   gather(prior, scc) %>%
