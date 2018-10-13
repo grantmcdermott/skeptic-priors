@@ -346,33 +346,6 @@ tcr_plot_priors <-
         ) 
   }
 
-#################################################
-#################################################
-## Temperature's in 2100 pointrange plot function
-all_2100_plot_func <-
-  function(all_2100) {
-    all_2100 %>%
-      group_by(rcp, prior) %>%
-      summarise(
-        temp_mean = mean(temp, na.rm=T),
-        temp_q025 = quantile(temp, p=0.025, na.rm=T),
-        temp_q975 = quantile(temp, p=0.975, na.rm=T)
-      ) %>%
-      ungroup %>%
-      mutate(prior = factor(match_priors(prior))) %>%
-      mutate(rcp = match_rcps(rcp)) %>%
-      ggplot(aes(x=fct_reorder(prior, temp_mean), y=temp_mean, ymin=temp_q025, ymax=temp_q975, col=prior)) +
-      geom_pointrange() + 
-      coord_flip() +
-      scale_colour_manual(values = prior_cols) +
-      facet_wrap(~ rcp) +
-      labs(x = "Prior", y = "Temperature anomaly by 2100 (°C)") +
-      theme(
-        legend.position = "none",
-        axis.title.y = element_blank()
-      ) 
-  }
-
 
 ##############################
 ##############################
@@ -522,6 +495,34 @@ evid_plot_lines <-
       scale_x_reverse(expand = c(0.2, 0)) +
       scale_y_continuous(expand = c(0.1, 0)) +
       facet_wrap(~thresh_lab) + theme(legend.position = "none")
+  }
+
+
+#################################################
+#################################################
+## Temperature's in 2100 pointrange plot function
+temp2100_plot <-
+  function(temp2100) {
+    temp2100 %>%
+      group_by(rcp, prior) %>%
+      summarise(
+        temp_mean = mean(temp, na.rm=T),
+        temp_q025 = quantile(temp, p=0.025, na.rm=T),
+        temp_q975 = quantile(temp, p=0.975, na.rm=T)
+        ) %>%
+      ungroup %>%
+      mutate(prior = factor(match_priors(prior))) %>%
+      mutate(rcp = match_rcps(rcp)) %>%
+      ggplot(aes(x=fct_reorder(prior, temp_mean), y=temp_mean, ymin=temp_q025, ymax=temp_q975, col=prior)) +
+      geom_pointrange() + 
+      coord_flip() +
+      scale_colour_manual(values = prior_cols) +
+      facet_wrap(~ rcp) +
+      labs(x = "Prior", y = "Temperature anomaly by 2100 (°C)") +
+      theme(
+        legend.position = "none",
+        axis.title.y = element_blank()
+        ) 
   }
 
 

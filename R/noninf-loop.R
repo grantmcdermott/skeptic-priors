@@ -109,13 +109,13 @@ rcp_loop <-
     select(year, everything())
   
   ## Full distribution of temps in 2100 by themselves 
-  all_2100 <-  as_data_frame(y_pred["2100", ]) 
-  colnames(all_2100) <- "temp"
-  all_2100$rcp <- i #rcp_type 
-  all_2100$prior <- paste0(prior_type, convic_type)
+  temp2100 <-  as_data_frame(y_pred["2100", ]) 
+  colnames(temp2100) <- "temp"
+  temp2100$rcp <- i #rcp_type 
+  temp2100$prior <- paste0(prior_type, convic_type)
   
   return(list(tcr=tcr, coefs_tab=coefs_tab,
-              predictions=predictions, all_2100=all_2100, 
+              predictions=predictions, temp2100=temp2100, 
               N=data.frame(N))) 
   
   }) ## END OF RCP LOOP FOR MCMC SIMLUATIONS
@@ -190,6 +190,6 @@ write_csv(y_dev, "Data/Evidence/y-dev.csv")
 ## Remove data frames no longer needed
 rm(y_dev, N, predictions)
 ## Similarly, subset rcp_loop list to relevant variables for outer (prior) loop
-rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "all_2100")]
+rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "temp2100")]
 
 return(rcp_loop=rcp_loop)

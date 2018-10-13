@@ -171,28 +171,36 @@ if (run_type=="main") {
 }
   
 
-####################
-### TEMP IN 2100 ###
-####################
+###########################################
+### Figure 4: Model fit and predictions ###
+########################################### 
+
+## Figure(s) already exported as part of the main Bayesian (RCP) loop.
+
+
+###############################
+### Figure 5: Temps in 2100 ###
+###############################  
 
 ## All 2100 pointrange plot
 
-all_2100_plot <- all_2100_plot_func(all_2100)
-all_2100_plot +
+fig_5 <- temp2100_plot(temp2100)
+fig_5 +
   ggsave(
-    file = paste0(pref, "PNGs/all-2100", suff, ".png"),
+    file = paste0(pref, "PNGs/fig-5", suff, ".png"),
     width = 9, height = 6
     )
-all_2100_plot +
+fig_5 +
   ggsave(
-    file = paste0(pref, "all-2100", suff, ".pdf"),
+    file = paste0(pref, "fig-5", suff, ".pdf"),
     width = 9, height = 6,
     device = cairo_pdf
     )
-rm(all_2100_plot)
+rm(fig_5)
 
 ## Summarise in tabular form
-all_2100 %>%
+temp2100 %>%
+  mutate(run_type = run_type) %>%
   group_by(rcp, prior) %>%
   summarise(mean_2100 = decimals(mean(temp), 1),
             q025 = decimals(quantile(temp, .025), 1),
