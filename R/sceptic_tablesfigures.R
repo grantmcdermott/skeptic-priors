@@ -230,12 +230,12 @@ if (run_type=="main") {
   fig_s2 <- scc_plot(scc)
   fig_s2 +
     ggsave(
-      file = "TablesFigures/PNGs/scc.png",
+      file = "TablesFigures/PNGs/fig-s2.png",
       width = 6, height = 4.5
       )
   fig_s2 +
     ggsave(
-      file = "TablesFigures/scc.pdf",
+      file = "TablesFigures/fig-s2.pdf",
       width = 6, height = 4.5,
       device = cairo_pdf
       )
