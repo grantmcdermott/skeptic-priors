@@ -1,7 +1,7 @@
 rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("sceptic_funcs.R")
+source("R/sceptic_funcs.R")
 
 ## Optional for replication
 set.seed(123) 
@@ -92,7 +92,7 @@ run_type <- "me"
 pref <- "TablesFigures/Untracked/Robustness/"
 suff <- "-me"
 
-source("sceptic_tablesfigures.R")
+source("R/sceptic_tablesfigures.R")
 
 tcr %>%
   filter(prior == "ni") %>%

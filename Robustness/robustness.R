@@ -1,7 +1,7 @@
 rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("sceptic_funcs.R")
+source("R/sceptic_funcs.R")
 
 ## Uncomment to run the individual robustness files one by one
 # source("Robustness/CW2014-GISTEMP/cw-2014-gsitemp.R")
