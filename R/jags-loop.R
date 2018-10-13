@@ -127,7 +127,7 @@ rcp_loop <-
       #############################################
       ### Figure S1: Coefficient densities plot ###
       #############################################
-      fig_s1 <- coef_plot(coefs_df)
+      fig_s1 <- coefs_plot(coefs_df)
       fig_s1 +
         ggsave(
           file = paste0("TablesFigures/PNGs/fig-s1.png"),
@@ -213,8 +213,8 @@ predictions <-
 ##########################################
 
 fig_4 <- pred_plot(predictions)
-fig_4_dir <- ifelse(prior=="ni", "TablesFigures/", "TablesFigures/Untracked/")
-fig_4_lab <- ifelse(prior=="ni", "fig-4", paste0("fig-4-", prior_type, convic_type))
+fig_4_dir <- ifelse(prior_type=="ni", "TablesFigures/", "TablesFigures/Untracked/")
+fig_4_lab <- ifelse(prior_type=="ni", "fig-4", paste0("fig-4-", prior_type, convic_type))
 fig_4 +
   ggsave(
     file = paste0(fig_4_dir, "PNGs/", fig_4_lab, ".png"),

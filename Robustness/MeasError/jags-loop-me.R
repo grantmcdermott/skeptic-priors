@@ -152,7 +152,7 @@ rcp_loop <-
       #############################################
       ### Figure S1: Coefficient densities plot ###
       #############################################
-      fig_s1 <- coef_plot(coefs_df)
+      fig_s1 <- coefs_plot(coefs_df)
       fig_s1 +
         ggsave(
           file = paste0("TablesFigures/Untracked/PNGs/fig-s1.png"),

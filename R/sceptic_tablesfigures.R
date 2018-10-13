@@ -72,19 +72,19 @@ fig_1 +
 rm(fig_1)
 
 ## Just the priors this time (for presentations)
-tcr_plot_priors <- tcr_plot_priors(tcr)
-tcr_plot_priors +
+fig_1_priors <- tcr_plot_priors(tcr)
+fig_1_priors +
   ggsave(
-    file = paste0(pref, "PNGs/tcr-prior", suff, ".png"),
+    file = paste0(pref, "Untracked/PNGs/fig-1-priors", suff, ".png"),
     width = 6, height = 4
     )
-tcr_plot_priors +
+fig_1_priors +
   ggsave(
-    file = paste0(pref, "tcr-prior", suff, ".pdf"),
+    file = paste0(pref, "Untracked/fig-1-priors", suff, ".pdf"),
     width = 6, height = 4,
     device = cairo_pdf
     )
-rm(tcr_plot_priors)
+rm(fig_1_priors)
 
 ## Summarise in tabular form
 tcr %>%
@@ -93,7 +93,8 @@ tcr %>%
             q025 = decimals(quantile(tcr, .025), 1),
             q975 = decimals(quantile(tcr, .975), 1)) %>%
   mutate(prior = match_priors(prior)) %>% 
-  arrange(desc(tcr_mean))
+  arrange(desc(tcr_mean)) %>% 
+  mutate(run_type = run_type)
 
 
 ###############################
@@ -103,9 +104,9 @@ tcr %>%
 ## Only plot this figure for the main run
 if (run_type == "main") {
   lapply(c("historic", "future"), function(recurse_type) {
-    tcr_rec <- read_csv(tcr_rec, paste0("Data/Recursive/tcr-rec-", recurse_type, ".csv"))
+    tcr_rec <- read_csv(paste0("Data/Recursive/tcr-rec-", recurse_type, ".csv"))
     fig_2 <- recursive_plot(tcr_rec)
-    fig_2_pref <- "TablesFigures/Untracked"
+    fig_2_pref <- "TablesFigures/Untracked/"
     fig_2_suff <- paste0("-", recurse_type)
     if(recurse_type == "historic"){
       fig_2 <- 
@@ -116,12 +117,12 @@ if (run_type == "main") {
     }
     fig_2 +
       ggsave(
-        file = paste0(fig_2_pref, "PNGs/fig-2", fig_2_pref, ".png"),
+        file = paste0(fig_2_pref, "PNGs/fig-2", fig_2_suff, ".png"),
         width = 8, height = 7
         )
     fig_2 +
       ggsave(
-        file = paste0(fig_2_pref, "fig-2", fig_2_pref, ".pdf"),
+        file = paste0(fig_2_pref, "fig-2", fig_2_suff, ".pdf"),
         width = 8, height = 7,
         device = cairo_pdf
         )
@@ -200,11 +201,19 @@ rm(fig_5)
 
 ## Summarise in tabular form
 temp2100 %>%
-  mutate(run_type = run_type) %>%
   group_by(rcp, prior) %>%
   summarise(mean_2100 = decimals(mean(temp), 1),
             q025 = decimals(quantile(temp, .025), 1),
             q975 = decimals(quantile(temp, .975), 1)) %>%
   mutate(prior = match_priors(prior)) %>% 
   group_by(prior) %>%
-  arrange(desc(mean_2100))
+  arrange(desc(mean_2100)) %>%
+  mutate(run_type = run_type)
+
+
+
+################################################
+### Figure S1: Parameter posterior densities ###
+################################################ 
+
+## Figure(s) already exported as part of the main Bayesian (RCP) loop.
