@@ -1,7 +1,7 @@
 ## Loop over all four RCPs ##
 rcp_loop <-
   
-  pblapply(c("rcp26" , "rcp45" , "rcp60" , "rcp85"), function(i){
+  pblapply(c("rcp26" , "rcp45" , "rcp60" , "rcp85"), function(i) {
   
   ## Subset the data to the relevant RCP ##
   ## NEW: Add omega columns for measurement error
@@ -232,9 +232,7 @@ predictions <-
   filter(!(year > 2005 & series %in% c("fitted"))) %>% 
   spread(stat, temp) %>% 
   arrange(series) %>%
-  mutate(series = factor(series, 
-                         levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))
-         ) 
+  mutate(series = factor(series, levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))) 
 
 
 ##########################################
@@ -260,33 +258,44 @@ rm(fig_4, fig_4_dir, fig_4_lab)
 
 ## Zoom in on historic record with comparison between model and measurement error
 bind_rows(
-  data.frame(year = climate$year[c(1:N)],
+  data_frame(year = climate$year[c(1:N)],
              series = "had_full",
              mean = climate$had_full[c(1:N)],
              q025 = climate$had_025[c(1:N)],
              q975 = climate$had_975[c(1:N)]
              ),
   predictions %>% 
-    filter(series == "fitted")
+    filter(series == "fitted") %>%
+    mutate(series = as.character(series))
   ) %>%
   filter(!is.na(mean)) %>%
   mutate(series = factor(series, levels = c("had_full", "fitted"))) %>%
-  ggplot(aes(x = year, col = series)) +
-  geom_ribbon(aes(ymin = q025, ymax = q975, fill = series), alpha = .3) +
-  geom_line(aes(y = mean), lwd = 1) +
-  labs(x = "Year", y = expression(~degree*C)) +
-  scale_colour_manual(values = c("black", "blue"),
-                      labels = c("HadCRUT4 (plus measurement error)", 
-                                 "Model fit (plus 95% CI)")) +
-  scale_fill_manual(values = c("grey40", "blue"),
-                    labels = c("HadCRUT4 (plus measurement error)", 
-                               "Model fit (plus 95% CI)")) +
-  geom_vline(xintercept = 2005, linetype = 4) +
-  theme_pred +
-  theme(legend.position = c(.325, .9)) +
+  ggplot(aes(x = year, y = mean, ymin = q025, ymax = q975, col = series, fill = series)) +
+  geom_ribbon(lwd=0.25, alpha = .3) +
+  # geom_line() +
+  labs(
+    title = "Comparing measurement error and model error",
+    subtitle = paste0("Prior: ", match_priors(paste0(prior_type, convic_type))), 
+    y = "Temperature anomaly (°C)\n"
+    ) + 
+  scale_colour_manual(
+    values = c("had_full"="black", "fitted"="#377EB8"),
+    labels = c("HadCRUT4 (measurement error)   ", "Model fit (95% CI)")
+    ) +
+  scale_fill_manual(
+    values = c("had_full"="black", "fitted"="#377EB8"),
+    labels = c("HadCRUT4 (measurement error)   ", "Model fit (95% CI)")
+    ) +
+  ## Historic vs Forecast period
+  geom_vline(xintercept = 2005, colour = "gray35", linetype = 6) +
+  theme(
+    axis.title.x = element_blank(),
+    legend.title = element_blank(),
+    legend.position = "bottom"
+    ) +
   ggsave(
-    file = paste0("TablesFigures/Untracked/Robustness/PNGS/compare-", prior_type, convic_type, "-fit-me.png"),
-    width = 10, height = 6.75
+    file = paste0("TablesFigures/Untracked/Robustness/PNGs/compare-", prior_type, convic_type, "-fit-me.png"),
+    width = 8, height = 6
     )
 
 ## Remove data frames no longer needed

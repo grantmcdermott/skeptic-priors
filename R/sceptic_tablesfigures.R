@@ -200,19 +200,22 @@ fig_1 +
 rm(fig_1)
 
 ## Just the priors this time (for presentations)
-fig_1_priors <- tcr_plot_priors(tcr)
-fig_1_priors +
-  ggsave(
-    file = paste0(pref, "Untracked/PNGs/fig-1-priors", suff, ".png"),
-    width = 6, height = 4
-    )
-fig_1_priors +
-  ggsave(
-    file = paste0(pref, "Untracked/fig-1-priors", suff, ".pdf"),
-    width = 6, height = 4,
-    device = cairo_pdf
-    )
-rm(fig_1_priors)
+## Only plot this figure for the main run
+if (run_type == "main") {
+  fig_1_priors <- tcr_plot_priors(tcr)
+  fig_1_priors +
+    ggsave(
+      file = paste0(pref, "Untracked/PNGs/fig-1-priors", suff, ".png"),
+      width = 6, height = 4
+      )
+  fig_1_priors +
+    ggsave(
+      file = paste0(pref, "Untracked/fig-1-priors", suff, ".pdf"),
+      width = 6, height = 4,
+      device = cairo_pdf
+      )
+  rm(fig_1_priors)
+}
 
 ## Summarise in tabular form
 tcr %>%

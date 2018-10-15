@@ -26,7 +26,8 @@ climate %>%
   geom_hline(yintercept = 0.075) + ## Sigma mean = 0.075, sigma s.d. = 0.0045
   geom_hline(yintercept = 0.075 + 0.0045*2, lty = 2) + 
   geom_hline(yintercept = 0.075 - 0.0045*2, lty = 2) +
-  labs(y = expression(paste("Measurement Error (", omega, ") vs Sigma (", sigma, ")")))
+  labs(y = expression(paste("Measurement Error (", omega, ") vs Sigma (", sigma, ")"))) +
+  theme(axis.title.x = element_blank())
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
@@ -66,7 +67,7 @@ priors_loop <-
     sigma_beta <- s/3.71
     
     ## Inner: Loop over climate scenarios
-    source("Robustness/MeasError/jags-loop-me.R", local = T)
+    source("R/Robustness/MeasError/jags-loop-me.R", local = T)
     
   })
 
