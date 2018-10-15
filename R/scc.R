@@ -11,11 +11,11 @@ scc_tab <-
             q975 = decimals(quantile(scc, .975), 2)) %>%
   mutate(prior = factor(match_priors(prior), levels = rev(prior_names))) %>%
   arrange(prior)
+
 scc_tab <-
   scc_tab %>%
-  mutate("95% probability interval" = paste0("[", sprintf("%.2f", q025), 
-                                             ", ", 
-                                             sprintf("%.2f", q975), "]")
+  mutate("95% probability interval" = 
+           paste0("[", sprintf("%.2f", q025), ", ", sprintf("%.2f", q975), "]")
          ) %>%
   select(-c(q025, q975)) %>%
   magrittr::set_colnames(c("", "Mean", "Median", "95% Probability Interval"))
@@ -23,15 +23,18 @@ scc_tab <-
 ## Export table to LaTeX. Still requires some manual tinkering to get ideal 
 ## formatting and alignment, as well as include table notes.
 scc_tab %>%
-  xtable(#align = c("l", "l","c","c","c"), ## Note: extra col align. char. (yet to exlude row names)
-         caption = "Social cost of carbon (US\\$2005 per tonne)",
-         label = "tab:scc") %>%
-  print(booktabs = T, caption.placement = "top", 
-        table.placement = "t", include.rownames = F,
-        file = "TablesFigures/scc.tex"
-        )
+  xtable(
+    #align = c("l", "l","c","c","c"), ## Note: extra col align. char. (yet to exlude row names)
+    caption = "Social cost of carbon (US\\$2005 per tonne)",
+    label = "tab:scc"
+    ) %>%
+  print(
+    booktabs = T, caption.placement = "top", 
+    table.placement = "t", include.rownames = F,
+    file = "TablesFigures/tab-6.tex"
+    )
 
-## Using xable.decimal function for alignment (see scep_funcs.R file)
+## Using xable.decimal function for alignment (see sceptic_funcs.R file)
 ## Not quite right either
 # scc_tab %>%
 #   xtable.decimal(caption = "Social cost of carbon (US\\$2005 per tonne)",
@@ -49,12 +52,13 @@ scc_tab %>%
   magrittr::set_colnames(c("prior", "Mean", "Median", "95% Probability Interval")) %>%
   mutate(prior = as.character(prior)) %>%
   magrittr::set_colnames(c("", "Mean", "Median", "95% Probability Interval")) %>%
-  stargazer(summary = F,
-          header = F,
-          title = "Social cost of carbon (US\\$2005)",
-          label = "tab:scc",
-          rownames = F,
-          align = T,  
-          notes.align = "l"#,
-          # out = "TablesFigures/scc.tex"
-          )
+  stargazer(
+    summary = F,
+    header = F,
+    title = "Social cost of carbon (US\\$2005)",
+    label = "tab:scc",
+    rownames = F,
+    align = T,  
+    notes.align = "l"#,
+    # out = "TablesFigures/tab-6.tex"
+    )

@@ -1,55 +1,61 @@
-##########################
-### COEFFICIENTS TABLE ###
-##########################
+###################################################
+### Table 3: Posterior regressions coefficients ###
+###################################################
 
 ## Add TCR summary info to coefficents table
 coefs_tab <-
-  bind_rows(coefs_tab,
-            tcr %>%
-              group_by(prior) %>%
-              summarise(mean = mean(tcr),
-                        q025 = quantile(tcr, .025),
-                        q975 = quantile(tcr, .975)) %>%
-              mutate(coef = "tcr") %>%
-              select(coef, mean, q025, q975, prior)
-            )
+  bind_rows(
+    coefs_tab,
+    tcr %>%
+      group_by(prior) %>%
+      summarise(
+        mean = mean(tcr),
+        q025 = quantile(tcr, .025),
+        q975 = quantile(tcr, .975)
+        ) %>%
+      mutate(coef = "tcr") %>%
+      select(coef, mean, q025, q975, prior)
+    )
 
 ## Convert table into nicer format for the paper. Requires some minor tinkering in
 ## in LaTeX afterwards (e.g. not all vars have 3 decimals), but close enough.
 coefs_tab <- 
   coefs_tab %>%
   filter(coef != "sigma") %>%
-  mutate(mean = ifelse(coef=="tcr", decimals(mean, 1), decimals(mean, 3)),
-         ci = ifelse(coef=="tcr",  
-                     paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]"),
-                     paste0("[", decimals(q025, 3), ", ", decimals(q975, 3), "]")
-                     )
-         ) %>%
+  mutate(
+    mean = ifelse(coef=="tcr", decimals(mean, 1), decimals(mean, 3)),
+    ci = ifelse(coef=="tcr",
+                paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]"),
+                paste0("[", decimals(q025, 3), ", ", decimals(q975, 3), "]")
+                )
+    ) %>%
   select(prior, coef, mean, ci) %>%
   gather(key, value, -c(prior, coef)) %>% ## This step causes some values to drop the (zero) 3rd decimal
-  mutate(prior = factor(prior, levels = c("ni", "lukemod", 
-                                          "lukestrong", "denmod", "denstrong")),
-         key = factor(key, levels = c("mean", "ci"))) %>%
+  mutate(
+    prior = factor(prior, levels = c("ni", "lukemod", "lukestrong", "denmod", "denstrong")),
+    key = factor(key, levels = c("mean", "ci"))
+    ) %>%
   arrange(prior, coef) %>%
   spread(prior, value) %>% 
-  mutate(coef = factor(coef, levels = c("beta", "gamma", 
-                                        "delta", "eta", "alpha", "tcr"))) %>%
+  mutate(coef = factor(coef, levels = c("beta", "gamma", "delta", "eta", "alpha", "tcr"))) %>%
   arrange(coef) %>% 
   mutate(coef = ifelse(key == "mean", paste(coef), "")) %>%
   select(-key) %>%
   as.matrix()
+
 rownames(coefs_tab) <- match_coefs(coefs_tab[, "coef"])
 colnames(coefs_tab) <- match_priors(colnames(coefs_tab))
 
 coefs_tab[, 2:ncol(coefs_tab)] %>%
-  stargazer(align = T, header = F, rownames = T,
-            title = "Posterior regression results",
-            label = paste0("tab:coefs-all", suff),
-            #             notes.align = "l",
-            #             notes.append = T,
-            #             notes = c("Dependent variable: Global Mean Surface Temperature (GMST).")
-            out = paste0(pref, "coefs-all", suff, ".tex")
-            )
+  stargazer(
+    align = T, header = F, rownames = T,
+    title = "Posterior regression results",
+    label = paste0("tab:reg-coefs", suff),
+    # notes.align = "l",
+    # notes.append = T,
+    # notes = c("Dependent variable: Global Mean Surface Temperature (GMST)."),
+    out = paste0(pref, "tab-3", suff, ".tex")
+    )
 
 
 ###############################
