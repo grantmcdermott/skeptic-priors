@@ -1,0 +1,3 @@
+# Results
+
+This folder contains saved results from the various model runs described in the paper. In addition, the PAGE09 folder contains estimates of the social cost of carbon (`scc.csv`), which result from running the PAGE09 integrated assement model on various posterior estimates of climate sensitivity. Note that I am only able to provide the final output of the PAGE09 analysis, since the model is proprietary.

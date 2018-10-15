@@ -1,6 +1,6 @@
 # Data
 
-This folder contains the main dataset used in the paper — i.e. `climate.csv` — as well as the *R* code that was used to construct the dataset in the first place. The file `rcp_flowchart.pdf` summarizes the RCP forcings data (see further below). In addition, the PAGE09 folder contains estimates of the social cost of carbon (`scc.csv`), which result from running the PAGE09 integrated assement model on various posterior estimates of climate sensitivity. Note that I am only able to provide the final output of the PAGE09 analysis, since the model is proprietary.
+This folder contains the main `climate.csv` dataset used in the paper, as well as the *R* code that was used to construct the dataset in the first place (`R/climate.R`). The file `rcp_flowchart.pdf` summarizes the RCP forcings data (see further below). 
 
 ## Data sources
 
