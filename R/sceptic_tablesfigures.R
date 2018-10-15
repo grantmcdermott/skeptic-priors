@@ -4,169 +4,173 @@
 ##########################
 ##########################
 
-
-###################################################
-### Table 3: Posterior regressions coefficients ###
-###################################################
-
-## Add TCR summary info to coefficents table
-coefs_tab <-
-  bind_rows(
-    coefs_tab,
-    tcr %>%
-      group_by(prior) %>%
-      summarise(
-        mean = mean(tcr),
-        q025 = quantile(tcr, .025),
-        q975 = quantile(tcr, .975)
-        ) %>%
-      mutate(coef = "tcr") %>%
-      select(coef, mean, q025, q975, prior)
-    )
-
-## Convert table into nicer format for the paper. Requires some minor tinkering in
-## in LaTeX afterwards (e.g. not all vars have 3 decimals), but close enough.
-coefs_tab <- 
-  coefs_tab %>%
-  filter(coef != "sigma") %>%
-  mutate(
-    mean = ifelse(coef=="tcr", decimals(mean, 1), decimals(mean, 3)),
-    ci = ifelse(coef=="tcr",
-                paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]"),
-                paste0("[", decimals(q025, 3), ", ", decimals(q975, 3), "]")
-                )
-    ) %>%
-  select(prior, coef, mean, ci) %>%
-  gather(key, value, -c(prior, coef)) %>% ## This step causes some values to drop the (zero) 3rd decimal
-  mutate(
-    prior = factor(prior, levels = c("ni", "lukemod", "lukestrong", "denmod", "denstrong")),
-    key = factor(key, levels = c("mean", "ci"))
-    ) %>%
-  arrange(prior, coef) %>%
-  spread(prior, value) %>% 
-  mutate(coef = factor(coef, levels = c("beta", "gamma", "delta", "eta", "alpha", "tcr"))) %>%
-  arrange(coef) %>% 
-  mutate(coef = ifelse(key == "mean", paste(coef), "")) %>%
-  select(-key) %>%
-  as.matrix()
-
-rownames(coefs_tab) <- match_coefs(coefs_tab[, "coef"])
-colnames(coefs_tab) <- match_priors(colnames(coefs_tab))
-
-coefs_tab[, 2:ncol(coefs_tab)] %>%
-  stargazer(
-    align = T, header = F, rownames = T,
-    title = "Posterior regression results",
-    label = paste0("tab:reg-coefs", suff),
-    # notes.align = "l",
-    # notes.append = T,
-    # notes = c("Dependent variable: Global Mean Surface Temperature (GMST)."),
-    out = paste0(pref, "tab-3", suff, ".tex")
-    )
+## Only export tables for the main run
+if (run_type == "main") {
 
 
-########################################
-### Table 4: Robustness checks (TCR) ###
-########################################
-
-## Read and combine the main (noninformative) TCR outputs in a single table
-tcr_robust <- 
-  lapply(list.files("Results/Robustness", full.names = T), read_csv) %>%
-  bind_rows()
-
-tcr_robust <-
-  tcr_robust %>%
-  mutate(series = 
-           factor(series, levels = c("had", "cw", "giss", "me", "marvel_a", "marvel_b"))
-         ) %>%
-  arrange(series)
-
-## Format for LaTeX export
-tcr_robust_tab <-
-  tcr_robust %>%
-  rename_("Mean" = "mean", "Series" = "series") %>%
-  mutate(
-    Mean = 
-      decimals(Mean, 1), "95% C.I." = paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]")
-    ) %>%
-  mutate(
-    Series = gsub("had", "HadCRUT4", Series),
-    Series = gsub("cw", "CW2014", Series),
-    Series = gsub("giss", "GISTEMP", Series),
-    Series = gsub("me", "Measurement Error", Series),
-    Series = gsub("marvel", "Marvel", Series)
-    ) %>%
-  mutate(Comment = "") %>%
-  # magrittr::set_rownames(.$series) %>%
-  select(-c(q025, q975)) %>%
-  as.matrix() 
-
-tcr_robust_tab[, "Comment"] <-
-  c("Primary GMST series. For comparison.",
-    "Alternative GMST series.",
-    "Alternative GMST series.",
-    "Specifying measurement error in HadCRUT4.",
-    "Adjusted forcing efficacies (means).",
-    "Adjusted forcing efficacies (distributions)."
-    )
-
-## Requires some addtional tinkering in LaTeX (threeparttable package, left-align, etc)
-tcr_robust_tab %>%
-  stargazer(
-    header = F,
-    summary = F,
-    rownames = F,
-    title ="TCR: Alternative specifications and robustness checks",
-    label = "tab:tcr-robust",
-    # align = T, 
-    notes.align = "l",
-    notes = c("\\footnotesize All estimates are computed using noninformative priors. See text for details."),
-    # type = "text"
-    out = "TablesFigures/tab-4.tex"
-    )
-
-
-####################
-### Table 6: SCC ###
-####################
-
-scc <- read_csv("Results/PAGE09/scc.csv")
-
-scc_tab <-
-  scc %>%
-  gather(prior, scc) %>%
-  group_by(prior) %>%
-  summarise(
-    Mean = decimals(mean(scc), 2),
-    Median = decimals(quantile(scc, .5), 2),
-    q025 = decimals(quantile(scc, .025), 2),
-    q975 = decimals(quantile(scc, .975), 2)
-    ) %>%
-  mutate(prior = factor(match_priors(prior), levels = rev(prior_names))) %>%
-  arrange(prior)
-
-scc_tab <-
+  ###################################################
+  ### Table 3: Posterior regressions coefficients ###
+  ###################################################
+  
+  ## Add TCR summary info to coefficents table
+  coefs_tab <-
+    bind_rows(
+      coefs_tab,
+      tcr %>%
+        group_by(prior) %>%
+        summarise(
+          mean = mean(tcr),
+          q025 = quantile(tcr, .025),
+          q975 = quantile(tcr, .975)
+          ) %>%
+        mutate(coef = "tcr") %>%
+        select(coef, mean, q025, q975, prior)
+      )
+  
+  ## Convert table into nicer format for the paper. Requires some minor tinkering in
+  ## in LaTeX afterwards (e.g. not all vars have 3 decimals), but close enough.
+  coefs_tab <- 
+    coefs_tab %>%
+    filter(coef != "sigma") %>%
+    mutate(
+      mean = ifelse(coef=="tcr", decimals(mean, 1), decimals(mean, 3)),
+      ci = ifelse(coef=="tcr",
+                  paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]"),
+                  paste0("[", decimals(q025, 3), ", ", decimals(q975, 3), "]")
+                  )
+      ) %>%
+    select(prior, coef, mean, ci) %>%
+    gather(key, value, -c(prior, coef)) %>% ## This step causes some values to drop the (zero) 3rd decimal
+    mutate(
+      prior = factor(prior, levels = c("ni", "lukemod", "lukestrong", "denmod", "denstrong")),
+      key = factor(key, levels = c("mean", "ci"))
+      ) %>%
+    arrange(prior, coef) %>%
+    spread(prior, value) %>% 
+    mutate(coef = factor(coef, levels = c("beta", "gamma", "delta", "eta", "alpha", "tcr"))) %>%
+    arrange(coef) %>% 
+    mutate(coef = ifelse(key == "mean", paste(coef), "")) %>%
+    select(-key) %>%
+    as.matrix()
+  
+  rownames(coefs_tab) <- match_coefs(coefs_tab[, "coef"])
+  colnames(coefs_tab) <- match_priors(colnames(coefs_tab))
+  
+  coefs_tab[, 2:ncol(coefs_tab)] %>%
+    stargazer(
+      align = T, header = F, rownames = T,
+      title = "Posterior regression results",
+      label = paste0("tab:reg-coefs", suff),
+      # notes.align = "l",
+      # notes.append = T,
+      # notes = c("Dependent variable: Global Mean Surface Temperature (GMST)."),
+      out = paste0(pref, "tab-3", suff, ".tex")
+      )
+  
+  
+  ########################################
+  ### Table 4: Robustness checks (TCR) ###
+  ########################################
+  
+  ## Read and combine the main (noninformative) TCR outputs in a single table
+  tcr_robust <- 
+    lapply(list.files("Results/Robustness", full.names = T), read_csv) %>%
+    bind_rows()
+  
+  tcr_robust <-
+    tcr_robust %>%
+    mutate(series = 
+             factor(series, levels = c("had", "cw", "giss", "me", "marvel_a", "marvel_b"))
+           ) %>%
+    arrange(series)
+  
+  ## Format for LaTeX export
+  tcr_robust_tab <-
+    tcr_robust %>%
+    rename_("Mean" = "mean", "Series" = "series") %>%
+    mutate(
+      Mean = 
+        decimals(Mean, 1), "95% C.I." = paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]")
+      ) %>%
+    mutate(
+      Series = gsub("had", "HadCRUT4", Series),
+      Series = gsub("cw", "CW2014", Series),
+      Series = gsub("giss", "GISTEMP", Series),
+      Series = gsub("me", "Measurement Error", Series),
+      Series = gsub("marvel", "Marvel", Series)
+      ) %>%
+    mutate(Comment = "") %>%
+    # magrittr::set_rownames(.$series) %>%
+    select(-c(q025, q975)) %>%
+    as.matrix() 
+  
+  tcr_robust_tab[, "Comment"] <-
+    c("Primary GMST series. For comparison.",
+      "Alternative GMST series.",
+      "Alternative GMST series.",
+      "Specifying measurement error in HadCRUT4.",
+      "Adjusted forcing efficacies (means).",
+      "Adjusted forcing efficacies (distributions)."
+      )
+  
+  ## Requires some addtional tinkering in LaTeX (threeparttable package, left-align, etc)
+  tcr_robust_tab %>%
+    stargazer(
+      header = F,
+      summary = F,
+      rownames = F,
+      title ="TCR: Alternative specifications and robustness checks",
+      label = "tab:tcr-robust",
+      # align = T, 
+      notes.align = "l",
+      notes = c("\\footnotesize All estimates are computed using noninformative priors. See text for details."),
+      # type = "text"
+      out = "TablesFigures/tab-4.tex"
+      )
+  
+  
+  ####################
+  ### Table 6: SCC ###
+  ####################
+  
+  scc <- read_csv("Results/PAGE09/scc.csv")
+  
+  scc_tab <-
+    scc %>%
+    gather(prior, scc) %>%
+    group_by(prior) %>%
+    summarise(
+      Mean = decimals(mean(scc), 2),
+      Median = decimals(quantile(scc, .5), 2),
+      q025 = decimals(quantile(scc, .025), 2),
+      q975 = decimals(quantile(scc, .975), 2)
+      ) %>%
+    mutate(prior = factor(match_priors(prior), levels = rev(prior_names))) %>%
+    arrange(prior)
+  
+  scc_tab <-
+    scc_tab %>%
+    mutate("95% probability interval" = 
+             paste0("[", sprintf("%.2f", q025), ", ", sprintf("%.2f", q975), "]")
+           ) %>%
+    select(-c(q025, q975)) %>%
+    magrittr::set_colnames(c("", "Mean", "Median", "95% Probability Interval"))
+  
+  ## Export table to LaTeX. Still requires some manual tinkering to get ideal 
+  ## formatting and alignment, as well as include table notes.
   scc_tab %>%
-  mutate("95% probability interval" = 
-           paste0("[", sprintf("%.2f", q025), ", ", sprintf("%.2f", q975), "]")
-         ) %>%
-  select(-c(q025, q975)) %>%
-  magrittr::set_colnames(c("", "Mean", "Median", "95% Probability Interval"))
+    xtable(
+      #align = c("l", "l","c","c","c"), ## Note: extra col align. char. (yet to exlude row names)
+      caption = "Social cost of carbon (US\\$2005 per tonne)",
+      label = "tab:scc"
+      ) %>%
+    print(
+      booktabs = T, caption.placement = "top", 
+      table.placement = "t", include.rownames = F,
+      file = "TablesFigures/tab-6.tex"
+      )
 
-## Export table to LaTeX. Still requires some manual tinkering to get ideal 
-## formatting and alignment, as well as include table notes.
-scc_tab %>%
-  xtable(
-    #align = c("l", "l","c","c","c"), ## Note: extra col align. char. (yet to exlude row names)
-    caption = "Social cost of carbon (US\\$2005 per tonne)",
-    label = "tab:scc"
-    ) %>%
-  print(
-    booktabs = T, caption.placement = "top", 
-    table.placement = "t", include.rownames = F,
-    file = "TablesFigures/tab-6.tex"
-    )
-
+}
 
 
 ###########################
