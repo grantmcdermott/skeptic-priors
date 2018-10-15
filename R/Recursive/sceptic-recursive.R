@@ -108,11 +108,11 @@ tcr_rec <-
         sigma_beta <- s/3.71
         
         if(prior_type == "ni")  {
-          # source("Recursive/jags-recursive.R", local = T) ## For vague noninformative riors using the rjags package
-          source("Recursive/noninf-recursive.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
+          # source("R/Recursive/jags-recursive.R", local = T) ## For vague noninformative riors using the rjags package
+          source("R/Recursive/noninf-recursive.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
         }
         else{
-          source("Recursive/jags-recursive.R", local = T)
+          source("R/Recursive/jags-recursive.R", local = T)
         }
 
       })
@@ -161,5 +161,5 @@ tcr_rec <-
 tcr_rec
 
 ## Write to disk for future use
-write_csv(tcr_rec, paste0("Data/Recursive/tcr-rec-", recurse_type, ".csv"))
+write_csv(tcr_rec, paste0("Results/Recursive/tcr-rec-", recurse_type, ".csv"))
 

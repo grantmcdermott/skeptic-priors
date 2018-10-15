@@ -65,7 +65,7 @@ rcp_loop <-
     }" 
     ) 
   
-  bugs_file <- paste0("./Robustness/MeasError/BUGSFiles/", 
+  bugs_file <- paste0("BUGSFiles/Robustness/MeasError/", 
                       prior_type, "-", convic_type, "-", i, #rcp_type, 
                       "-me.txt")
   if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
@@ -155,12 +155,12 @@ rcp_loop <-
       fig_s1 <- coefs_plot(coefs_df)
       fig_s1 +
         ggsave(
-          file = paste0("TablesFigures/Untracked/PNGs/fig-s1.png"),
+          file = paste0("TablesFigures/Untracked/Robustness/PNGs/fig-s1-me.png"),
           width = 8, height = 10
           )
       fig_s1 +
         ggsave(
-          file = paste0("TablesFigures/Untracked/fig-s1.pdf"),
+          file = paste0("TablesFigures/Untracked/Robustness/fig-s1-me.pdf"),
           width = 8, height = 10, 
           device = cairo_pdf
           )

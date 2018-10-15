@@ -1,4 +1,4 @@
-rm(list = ls()) # Clear data
+# rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for 
 ## plotting and tables
@@ -7,8 +7,8 @@ source("R/sceptic_funcs.R")
 ## Optional for replication
 set.seed(123) 
 
-## Load climate data
-climate <- read_csv("Data/climate.csv")
+# ## Load climate data
+# climate <- read_csv("Data/climate.csv")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 chain_length <- 9000
@@ -23,7 +23,7 @@ rcp_type <- "rcp26"
 climate <- 
   read_csv("Data/climate.csv") %>%
   filter(rcp == rcp_type) 
-y_dev <- read_csv("Data/Evidence/y-dev.csv")
+y_dev <- read_csv("Results/Evidence/y-dev.csv")
 climate$noise <- sample(y_dev$dev, nrow(climate), replace = T)
 
 ## Also add noise to future "mean" covariate values; otherwise collinearity 
@@ -35,10 +35,11 @@ climate$amo_noise <- rnorm(nrow(climate), sd = .1)
 ## Simulate climate data based on noninformative parameters
 climate <- 
   climate %>% 
-  mutate(volc_sim = ifelse(year <= 2005, volc_mean, volc_mean + volc_noise),
-         soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
-         amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
-         ) %>%
+  mutate(
+    volc_sim = ifelse(year <= 2005, volc_mean, volc_mean + volc_noise),
+    soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
+    amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
+    ) %>%
   mutate(had_sim = -0.102 + 0.418*trf + 0.051*volc_sim + -0.028*soi_sim + 0.473*amo_sim + noise)
 
 
@@ -127,7 +128,7 @@ evid_func <-
       }" 
         ) 
         
-        bugs_file <- paste("Evidence/BUGSFiles/evidence-bugs.txt")
+        bugs_file <- paste("BUGSFiles/Evidence/evidence-bugs.txt")
         writeLines(mod_string, con = bugs_file)
         
         load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
@@ -214,4 +215,4 @@ evid <- evid_func(df)
 rm(yrs, yrs_j)
 
 ## Write data
-write_csv(evid, "Data/Evidence/tcr-evidence.csv")
+write_csv(evid, "Results/Evidence/tcr-evidence.csv")

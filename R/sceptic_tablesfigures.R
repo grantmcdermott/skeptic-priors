@@ -1,3 +1,10 @@
+##########################
+##########################
+####    * TABLES *    ####
+##########################
+##########################
+
+
 ###################################################
 ### Table 3: Posterior regressions coefficients ###
 ###################################################
@@ -58,6 +65,56 @@ coefs_tab[, 2:ncol(coefs_tab)] %>%
     )
 
 
+####################
+### Table 6: SCC ###
+####################
+
+scc <- read_csv("Results/PAGE09/scc.csv")
+
+scc_tab <-
+  scc %>%
+  gather(prior, scc) %>%
+  group_by(prior) %>%
+  summarise(
+    Mean = decimals(mean(scc), 2),
+    Median = decimals(quantile(scc, .5), 2),
+    q025 = decimals(quantile(scc, .025), 2),
+    q975 = decimals(quantile(scc, .975), 2)
+    ) %>%
+  mutate(prior = factor(match_priors(prior), levels = rev(prior_names))) %>%
+  arrange(prior)
+
+scc_tab <-
+  scc_tab %>%
+  mutate("95% probability interval" = 
+           paste0("[", sprintf("%.2f", q025), ", ", sprintf("%.2f", q975), "]")
+         ) %>%
+  select(-c(q025, q975)) %>%
+  magrittr::set_colnames(c("", "Mean", "Median", "95% Probability Interval"))
+
+## Export table to LaTeX. Still requires some manual tinkering to get ideal 
+## formatting and alignment, as well as include table notes.
+scc_tab %>%
+  xtable(
+    #align = c("l", "l","c","c","c"), ## Note: extra col align. char. (yet to exlude row names)
+    caption = "Social cost of carbon (US\\$2005 per tonne)",
+    label = "tab:scc"
+    ) %>%
+  print(
+    booktabs = T, caption.placement = "top", 
+    table.placement = "t", include.rownames = F,
+    file = "TablesFigures/tab-6.tex"
+    )
+
+
+
+###########################
+###########################
+####    * FIGURES *    ####
+###########################
+###########################
+
+
 ###############################
 ### Figure 1: TCR densities ###
 ###############################
@@ -110,7 +167,7 @@ tcr %>%
 ## Only plot this figure for the main run
 if (run_type == "main") {
   lapply(c("historic", "future"), function(recurse_type) {
-    tcr_rec <- read_csv(paste0("Data/Recursive/tcr-rec-", recurse_type, ".csv"))
+    tcr_rec <- read_csv(paste0("Results/Recursive/tcr-rec-", recurse_type, ".csv"))
     fig_2 <- recursive_plot(tcr_rec)
     fig_2_pref <- "TablesFigures/Untracked/"
     fig_2_suff <- paste0("-", recurse_type)
@@ -143,7 +200,7 @@ if (run_type == "main") {
 
 if (run_type=="main") {
   ## Read data
-  evid <- read_csv("Data/Evidence/tcr-evidence.csv")
+  evid <- read_csv("Results/Evidence/tcr-evidence.csv")
   
   ## Plot the data
   ## Years with red-white-blue colour scheme
@@ -231,7 +288,7 @@ temp2100 %>%
 
 if (run_type=="main") {
   
-  scc <- read_csv("Data/PAGE09/scc.csv")
+  scc <- read_csv("Results/PAGE09/scc.csv")
   
   fig_s2 <- scc_plot(scc)
   fig_s2 +

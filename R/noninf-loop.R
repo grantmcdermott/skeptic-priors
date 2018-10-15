@@ -185,7 +185,7 @@ y_dev <-
   mutate(dev = fitted - had_full) %>%
   filter(!is.na(dev))
 
-write_csv(y_dev, "Data/Evidence/y-dev.csv")
+write_csv(y_dev, "Results/Evidence/y-dev.csv")
 
 ## Remove data frames no longer needed
 rm(y_dev, N, predictions)

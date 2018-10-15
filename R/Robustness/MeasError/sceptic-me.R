@@ -1,4 +1,4 @@
-rm(list = ls()) # Clear data
+# rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source("R/sceptic_funcs.R")
@@ -21,8 +21,8 @@ climate %>%
     omega_up = (had_975 - had_full)/2
     ) %>%
   ggplot(aes(x = year)) +
-  geom_line(aes(y = omega_low), col = "blue") +
-  geom_line(aes(y = omega_up), col = "red") +
+  geom_line(aes(y = omega_low), col = "#377EB8") +
+  geom_line(aes(y = omega_up), col = "#E41A1C") +
   geom_hline(yintercept = 0.075) + ## Sigma mean = 0.075, sigma s.d. = 0.0045
   geom_hline(yintercept = 0.075 + 0.0045*2, lty = 2) + 
   geom_hline(yintercept = 0.075 - 0.0045*2, lty = 2) +
