@@ -1,6 +1,6 @@
 # Data
 
-This folder contains the main `climate.csv` dataset used in the paper, as well as the *R* code that was used to construct the dataset in the first place (`R/climate.R`). The file `rcp_flowchart.pdf` summarizes the RCP forcings data (see further below). 
+This directory contains the main `climate.csv` dataset used in the paper, as well as the *R* code that was used to construct the dataset in the first place (`R/climate.R`). The file, `rcp_flowchart.png`, summarizes the RCP forcings data (see further below). 
 
 ## Data sources
 
