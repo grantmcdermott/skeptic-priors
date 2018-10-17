@@ -1,4 +1,4 @@
-rm(list = ls()) # Clear data
+# rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source("R/sceptic_funcs.R")
@@ -14,7 +14,7 @@ chain_length <- 15000
 n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 
 ## NB: Decide whether using historical data only (and work *backwards* from most recent 
-## date), or whether using simulated future data (and work *fowards* from earliest data).
+## date), or whether using simulated future data (and work *fowards* from earliest date).
 recurse_type <- c("historic", "future")[1]
 
 ## Decide on max year for the recursive regressions
