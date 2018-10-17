@@ -16,7 +16,7 @@ All of the analysis is conducted in the *R* programming environment. *R* is free
 
 ### Step 2. Install JAGS
 
-In addition, you will need to install JAGS ("Just Another Gibbs Sampler"), which is the underlying program used for running the Bayesian regressions. JAGS too is free and open-source, and is available for download [**here**]((http://mcmc-jags.sourceforge.net/)).
+In addition, you will need to install JAGS ("Just Another Gibbs Sampler"), which is the underlying program used for running the Bayesian regressions. JAGS too is free and open-source, and is available for download [**here**](http://mcmc-jags.sourceforge.net/).
 
 ### Step 3. Install *R* packages
 
@@ -29,7 +29,7 @@ devtools::install_github("johnbaums/jagstools")
 pacman::p_update()
 ```
 
-A brief note on fonts and figures: The `extrafont` package is used to embed the [Fira Sans](https://fonts.google.com/specimen/Fira+Sans) font (which must be installed separately on your system) in the figures. Please note that this requires some minor setup upon first use. See [here](https://github.com/wch/extrafont/blob/master/README.md) for instructions. However, you can also skip this setup if you want; in which case the code will automatically use one of *R*'s default fonts instead.
+The `extrafont` package is used to embed [Fira Sans](https://fonts.google.com/specimen/Fira+Sans) fonts in the figures. Please note that the Fira Sans font family must be installed separately on your system and also requires some minor setup before *R* recognizes it. See [here](https://github.com/wch/extrafont/blob/master/README.md) for instructions. However, you can also skip this setup if you want; the code is written in such a way that it will revert to *R*'s default font (Arial) if Fira Sans is unavailable.
 
 ## Problems
 
