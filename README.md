@@ -1,43 +1,40 @@
 # Sceptic priors and climate policy
 
-This repository contains code and data for replicating my ["Sceptic priors and climate policy"](https://drive.google.com/file/d/0B6AgOxtQA9dTcjRmZkNjMVhuVFU/view?usp=sharing) paper. Click on the "fork" button at the very top right of the page to create an independent copy of the repo within your own GitHub account. Alternately, click on the green "clone or download" button just below that to download the repo to your local computer.
+This repository contains code and data for replicating my working paper, ["Sceptic priors and climate policy"](https://drive.google.com/file/d/0B6AgOxtQA9dTcjRmZkNjMVhuVFU/view?usp=sharing). 
 
-The main file for running the analysis is `sceptic.R`. This file will execute a nested loop, where the outer loop is over different priors types and the inner loop is over different climate scenarios. During each loop, the code will call several subsidiary scripts (e.g. `scep_funcs.R`, `jags-loop.R`, etc.) to run the Bayesian regressions, save the posterior results for later, and export them as figures or .tex files. Assuming that you have installed all of the necessary programs and packages (see below), you should thus be able to reproduce all of the primary results simply by running the `sceptic.R` parent file.
+> **Abstract:** How much evidence would it take to convince climate sceptics that they are wrong about global warming? I explore this question within a Bayesian framework. I consider a group of stylised sceptics and examine how these individuals update their beliefs in the face of current and continuing climate change. I find that available evidence in the form of instrumental climate data already tends to overwhelm all but the most extreme priors. The resulting posterior distributions of climate sensitivity correspond closely to existing estimates from the scientific literature. The updated beliefs of most sceptics are thus consistent with a carbon price that is substantially greater than zero. However, belief convergence is a non-linear function of prior strength, so that it become increasingly difficult to convince the marginal sceptic. I conclude by discussing the general conditions for consensus formation under Bayesian learning, its relevance to our current policy impasse, and offer some remarks about finding common ground in the future.
 
-In addition, a number of supplementary regressions and simulations are described in the "Evidence", "Recursive", and "Robustness" folders. All of these supplementary exercises are similarly self-contained in the sense that they should execute fully upon running a single parent script. See the respective README files for details.
+Click on the "fork" button at the very top right of the page to create an independent copy of the repo within your own GitHub account. Alternately, click on the green "clone or download" button just below that to download the repo to your local computer.
 
-Lastly, the "Data" folder contains the main dataset and the code needed to construct it from scratch. Any other folder or files that I have not described in detail should hopefully be self-explanatory (e.g. TablesFigures).
+The scripts for running the analysis can be found in the `R/` sub-directory. Click on this directory to see more details in the accompanying README file. However, first you need to make sure that you have completed the necessary software installation (below).
 
-## Requirements
+## Software requirements
 
-All of the analysis is conducted in the *R* programming environment. *R* is free, open-source and available for download [here](https://www.r-project.org/). You will also need download and install [JAGS](http://mcmc-jags.sourceforge.net/) in order to run the Bayesian regressions.
+### Step 1. Install *R* (and RStudio)
 
-Once *R* and JAGS are set up on your system, please install the following *R* packages. All of the packages are available on CRAN except where noted.
+All of the analysis is conducted in the *R* programming environment. *R* is free, open-source and available for download [**here**](https://www.r-project.org/).  I highly recommend running *R* in the RStudio IDE, which you can also download for free [**here**](https://www.rstudio.com/products/rstudio/download/). 
+
+### Step 2. Install JAGS
+
+In addition, you will need to install JAGS ("Just Another Gibbs Sampler"), which is the underlying program used for running the Bayesian regressions. JAGS too is free and open-source, and is available for download [**here**]((http://mcmc-jags.sourceforge.net/)).
+
+### Step 3. Install *R* packages
+
+Once *R* and JAGS are successfully set up on your system, you will need to install a number of external *R* packages. These are listed at the top of the `R/sceptic_funcs.R` script. However, a convenient way to ensure that you have the correct versions of all these packages is to simply run the following code chunk in your *R* console:
 
 ```r
-library(readr)
-library(LearnBayes)
-library(rjags)
-library(dclone)
-library(snow)
-library(devtools)
-library(jagstools) ## devtools::install_github("johnbaums/jagstools")
-library(ggplot2)
-library(cowplot)
-library(ggthemes)
-library(RColorBrewer)
-library(grid)
-library(gridExtra)
-library(extrafont) ## See note below
-library(stargazer)
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(tibble)
-library(pbapply)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_install(c(LearnBayes, rjags, dclone, snow, grid, gridExtra, tidyverse, hrbrthemes, ggridges, RColorBrewer, stargazer, xtable, pbapply, extrafont, here))
+devtools::install_github("johnbaums/jagstools")
+pacman::p_update()
 ```
 
-A brief note on fonts and figures: The figures in this paper are produced using the `ggplot2` package, but incorporating [Palatino Linotype](http://www.myfontfree.com/palatino-linotype-myfontfreecom126f31679.htm) (or [Open Sans](https://fonts.google.com/specimen/Open+Sans)) fonts to match the paper's overall style. Most users will likely have the Palatino TFFs installed on their systems already. However, you will still need to register them to your *R* instance using the `extrafont` package. See [here](https://github.com/wch/extrafont) for instructions. If that all sounds like too much work, don't worry: The figures will revert to the ggplot2 default, as long as the `extrafont` package has been installed and loaded.
+A brief note on fonts and figures: The `extrafont` package is used to embed the [Fira Sans](https://fonts.google.com/specimen/Fira+Sans) font (which must be installed separately on your system) in the figures. Please note that this requires some minor setup upon first use. See [here](https://github.com/wch/extrafont/blob/master/README.md) for instructions. However, you can also skip this setup if you want; in which case the code will automatically use one of *R*'s default fonts instead.
 
-## Performance
-As mentioned above, much of the code is contained within a nested loop. The goal is to encourage reproducibility by making the code easy to read and understand, say nothing of the ability to execute everything in a concise manner. Having said that, it can take a few minutes to run over the full set of prior types and climate scenarios. On my system (quad core CPU with 16GB RAM), the main loop only takes around two minutes to run. (Users with older machines can speed things up by reducing the length of the MCMC chains: `chain_length <- ...` on +/- line 15 of the `sceptic.R` parent file.) However, some of secondary analyses contained in the "Recursive" and "Evidence" folders take considerably longer to run. See the respective README files in those folders for more details, but consider this fair warning. One final thing to note is that the MCMC simulations are run in parallel in JAGS to help speed things up. The code will automatically detect how many CPUs your system has available and adjust the number of parallel processes accordingly.
+## Problems
+
+If you have any trouble running the code, or find any errors, please file an issue on this repo and I'll look into it.
+
+## License
+
+The software code contained within this repository is made available under the [MIT license](http://opensource.org/licenses/mit-license.php). The data and figures are made available under the [Creative Commons Attribution 4.0 license](https://creativecommons.org/licenses/by/4.0/).

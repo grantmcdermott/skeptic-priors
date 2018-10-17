@@ -47,21 +47,28 @@ rcp_loop <-
                  ) 
     tcr$tcr <- tcr$beta * rf2x
     
-    ### Density plot ###
-    coefs_plot <- coef_plot_func(coefs_df)
-    coefs_plot +
-      ggsave(
-        file = paste0("TablesFigures/PNGs/coefs-", prior_type, convic_type, "-prop.png"),
-        width = 8, height = 10
-        )
-    coefs_plot +
-      ggsave(
-        file = paste0("TablesFigures/coefs-", prior_type, convic_type, "-prop.pdf"),
-        width = 8, height = 10, 
-        device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-        )
 
-    rm(coefs_df, coefs_plot)
+    if (prior_type=="ni") {
+      #############################################
+      ### Figure S1: Coefficient densities plot ###
+      #############################################
+      fig_s1 <- coefs_plot(coefs_df)
+      fig_s1 +
+        ggsave(
+          file = paste0("TablesFigures/PNGs/fig-s1.png"),
+          width = 8, height = 10
+          )
+      fig_s1 +
+        ggsave(
+          file = paste0("TablesFigures/fig-s1.pdf"),
+          width = 8, height = 10, 
+          device = cairo_pdf
+          )
+      rm(fig_s1)
+    } ## End of mini NI "if" clause
+    
+    rm(coefs_df)
+    
     
     } ## End of RCP 2.6 "if" clause
     
@@ -102,13 +109,13 @@ rcp_loop <-
     select(year, everything())
   
   ## Full distribution of temps in 2100 by themselves 
-  all_2100 <-  as_data_frame(y_pred["2100", ]) 
-  colnames(all_2100) <- "temp"
-  all_2100$rcp <- i #rcp_type 
-  all_2100$prior <- paste0(prior_type, convic_type)
+  temp2100 <-  as_data_frame(y_pred["2100", ]) 
+  colnames(temp2100) <- "temp"
+  temp2100$rcp <- i #rcp_type 
+  temp2100$prior <- paste0(prior_type, convic_type)
   
   return(list(tcr=tcr, coefs_tab=coefs_tab,
-              predictions=predictions, all_2100=all_2100, 
+              predictions=predictions, temp2100=temp2100, 
               N=data.frame(N))) 
   
   }) ## END OF RCP LOOP FOR MCMC SIMLUATIONS
@@ -146,20 +153,25 @@ predictions <-
   mutate(series = factor(series, levels = c("had_full","fitted","rcp26","rcp45","rcp60","rcp85"))) 
 
 
-## Predictions plot
-pred_plot <- pred_plot_func(predictions)
-pred_plot +
+##########################################
+### Figure 4: Model fit and prediction ###
+##########################################
+
+fig_4 <- pred_plot(predictions)
+fig_4_dir <- ifelse(prior_type=="ni", "TablesFigures/", "TablesFigures/Untracked/")
+fig_4_lab <- ifelse(prior_type=="ni", "fig-4", paste0("fig-4-", prior_type, convic_type))
+fig_4 +
   ggsave(
-    file = paste0("TablesFigures/PNGs/predictions-", prior_type, convic_type, ".png"),
+    file = paste0(fig_4_dir, "PNGs/", fig_4_lab, ".png"),
     width = 8, height = 6
     )
-pred_plot +
+fig_4 +
   ggsave(
-    file = paste0("TablesFigures/predictions-", prior_type, convic_type, ".pdf"),
+    file = paste0(fig_4_dir, fig_4_lab, ".pdf"),
     width = 8, height = 6,
-    device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
+    device = cairo_pdf 
     )
-rm(pred_plot)
+rm(fig_4, fig_4_dir, fig_4_lab)
 
 ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
 ## together with the had obs, to the Evidence data folder. We'll be using the
@@ -173,11 +185,11 @@ y_dev <-
   mutate(dev = fitted - had_full) %>%
   filter(!is.na(dev))
 
-write_csv(y_dev, "Evidence/Data/y-dev.csv")
+write_csv(y_dev, "Results/Evidence/y-dev.csv")
 
 ## Remove data frames no longer needed
 rm(y_dev, N, predictions)
 ## Similarly, subset rcp_loop list to relevant variables for outer (prior) loop
-rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "all_2100")]
+rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "temp2100")]
 
 return(rcp_loop=rcp_loop)

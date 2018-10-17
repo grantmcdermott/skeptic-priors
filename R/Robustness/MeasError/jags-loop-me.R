@@ -1,25 +1,47 @@
 ## Loop over all four RCPs ##
 rcp_loop <-
   
-  pblapply(c("rcp26" , "rcp45" , "rcp60" , "rcp85"), function(i){
-
+  pblapply(c("rcp26" , "rcp45" , "rcp60" , "rcp85"), function(i) {
+  
   ## Subset the data to the relevant RCP ##
+  ## NEW: Add omega columns for measurement error
   clim_df <- 
     climate %>%
-    filter(rcp == i) 
+    filter(rcp == i) %>%
+    mutate(had_omega = (had_975 - had_full)/2, ## Currently 95% bound, i.e. 2*sigma.
+           cw_omega = cw_1sigma)
+  
+  ## Fill in measurement error for future values (needed for prediction) based on
+  ## measurement error of last two decades
+  omega_had_recent <- 
+    (clim_df %>% 
+       filter(!is.na(had_full)) %>% 
+       tail(20))$had_omega %>% 
+    mean()
+
+  clim_df$had_omega <- ifelse(is.na(clim_df$had_omega), omega_had_recent, clim_df$had_omega)
+  
   
   ##------------------------------------------------------------------------------
   ## THE BUGS/JAGS MODEL.
   
   N <- nrow(clim_df)
-
+  
   mod_string <- paste(
     "model{
     
     for(t in 1:N) {
-      mu[t] <- alpha + beta*trf[t] + gamma*volc_mean[t] + delta*soi_mean[t] + eta*amo_mean[t]
-      had[t]  ~ dnorm(mu[t], tau)
-      y_pred[t] ~ dnorm(mu[t], tau) ## For predictions into the future
+    mu[t] <- alpha + beta*trf[t] + gamma*volc_mean[t] + delta*soi_mean[t] + eta*amo_mean[t]
+    
+    ## Meas. error in variance of y, i.e.: y[t]* = y[t] + v[t], where Var(v[t]) = omega[t]
+    ## Note change in variance and tau formula because of combined normal distributions
+    ## See: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
+    
+    sigmasq_tot[t] <- pow(sigma, 2) + pow(had_omega[t], 2)
+    tau_tot[t] <- pow(sigmasq_tot[t], -1)
+    
+    had[t]  ~ dnorm(mu[t], tau_tot[t])
+    y_pred[t] ~ dnorm(mu[t], tau_tot[t]) 
     }
     ", 
     paste0(
@@ -28,23 +50,24 @@ rcp_loop <-
     paste0(
       "
             sigma_beta <- ", sigma_beta),
-    
     "
 
     ## Priors for all parameters   
     alpha ~ dnorm(0, 0.0001)            ## intercept
+    tau_beta <- pow(sigma_beta, -2)
     beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
-      tau_beta <- pow(sigma_beta, -2)
     gamma ~ dnorm(0, 0.0001)            ## volc coef
     delta ~ dnorm(0, 0.0001)            ## soi coef
     eta ~ dnorm(0, 0.0001)              ## amo coef
     sigma ~ dunif(0, 100)               ## Residual std dev
-      tau <- pow(sigma, -2)  	          
+    #tau <- pow(sigma, -2) ## Changed to commented out
     had0 ~ dnorm(0.0, 1.0E-6)           ## Initialising value
     }" 
     ) 
   
-  bugs_file <- paste0("BUGSFiles/", prior_type, "-", convic_type, "-", i, ".txt")
+  bugs_file <- paste0("BUGSFiles/Robustness/MeasError/", 
+                      prior_type, "-", convic_type, "-", i, #rcp_type, 
+                      "-me.txt")
   if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
   writeLines(mod_string, con = bugs_file)
   
@@ -58,7 +81,9 @@ rcp_loop <-
   
   data_list <- list("N" = N, "had" = clim_df$had, "trf" = clim_df$trf, 
                     "volc_mean" = clim_df$volc_mean, 
-                    "soi_mean" = clim_df$soi_mean, "amo_mean" = clim_df$amo_mean)
+                    "soi_mean" = clim_df$soi_mean, "amo_mean" = clim_df$amo_mean,
+                    "had_omega" = clim_df$had_omega ## variance of ME
+                    ) 
   
   inits_list <- function() {
     list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1)
@@ -99,7 +124,7 @@ rcp_loop <-
     coefs_df <-
       as.matrix(mod_samples[, c(1:6)], iters = F) %>%
       data.frame() %>% 
-      tbl_df() %>%
+      tbl_df() %>% 
       gather(coef, values)
     
     ## Get summary statistics for tables ##
@@ -123,21 +148,26 @@ rcp_loop <-
     tcr$tcr <- tcr$beta * rf2x
     
   
-    ### Density plot ###
-    coefs_plot <- coef_plot_func(coefs_df)
-    coefs_plot +
-      ggsave(
-        file = paste0("TablesFigures/PNGs/coefs-", prior_type, convic_type, ".png"),
-        width = 8, height = 10
-        )
-    coefs_plot +
-      ggsave(
-        file = paste0("TablesFigures/coefs-", prior_type, convic_type, ".pdf"),
-        width = 8, height = 10, 
-        device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-        )
+    if (prior_type=="ni") {
+      #############################################
+      ### Figure S1: Coefficient densities plot ###
+      #############################################
+      fig_s1 <- coefs_plot(coefs_df)
+      fig_s1 +
+        ggsave(
+          file = paste0("TablesFigures/Untracked/Robustness/PNGs/fig-s1-me.png"),
+          width = 8, height = 10
+          )
+      fig_s1 +
+        ggsave(
+          file = paste0("TablesFigures/Untracked/Robustness/fig-s1-me.pdf"),
+          width = 8, height = 10, 
+          device = cairo_pdf
+          )
+      rm(fig_s1)
+    } ## End of mini NI "if" clause
     
-    rm(coefs_df, coefs_plot)
+    rm(coefs_df)
     
   } ## End of RCP 2.6 "if" clause
   
@@ -147,7 +177,9 @@ rcp_loop <-
   }
   
   ## Summarise temperature predictions over 1866-2100 ##
+  
   predictions <- jagsresults(mod_samples, params = "y_pred", regex = T)
+  # predictions <- tbl_df(as.data.frame(predictions[, c("mean", "2.5%", "97.5%")]))
   predictions <- as_data_frame(predictions[, c("mean", "2.5%", "97.5%")])
   colnames(predictions) <- c("mean", "q025", "q975")
   
@@ -159,13 +191,13 @@ rcp_loop <-
     select(year, everything())
   
   ## Full distribution of temps in 2100 by themselves 
-  all_2100 <- as_data_frame(as.matrix(mod_samples[, "y_pred[235]"]))
-  colnames(all_2100) <- "temp"
-  all_2100$rcp <- i #rcp_type 
-  all_2100$prior <- paste0(prior_type, convic_type) 
+  temp2100 <- as_data_frame(as.matrix(mod_samples[, "y_pred[235]"]))
+  colnames(temp2100) <- "temp"
+  temp2100$rcp <- i #rcp_type 
+  temp2100$prior <- paste0(prior_type, convic_type) 
   
   return(list(tcr=tcr, coefs_tab=coefs_tab,
-              predictions=predictions, all_2100=all_2100, 
+              predictions=predictions, temp2100=temp2100, 
               N=data.frame(N))) 
   
   }) ## END OF RCP LOOP FOR JAGS SIMLUATIONS
@@ -188,7 +220,7 @@ predictions <-
                ),
     predictions
     ) 
-
+ 
 ## Tidy the data:
 ## Get rid of duplicate historic (pre-2006) model fits from different RCPs. 
 ## Simultaneously rename historic RCP 2.6 series as "fitted".
@@ -200,44 +232,75 @@ predictions <-
   filter(!(year > 2005 & series %in% c("fitted"))) %>% 
   spread(stat, temp) %>% 
   arrange(series) %>%
-  mutate(series = factor(series, levels = c("had_full","fitted","rcp26","rcp45","rcp60","rcp85"))) 
+  mutate(series = factor(series, levels = c("had_full", "fitted", "rcp26", "rcp45", "rcp60", "rcp85"))) 
 
 
-## Predictions plot
-pred_plot <- pred_plot_func(predictions)
-pred_plot +
+##########################################
+### Figure 4: Model fit and prediction ###
+##########################################
+
+fig_4 <- pred_plot(predictions)
+fig_4_dir <- "TablesFigures/Untracked/Robustness/"
+fig_4_lab <- paste0("fig-4-", prior_type, convic_type, "-me")
+fig_4 +
   ggsave(
-    file = paste0("TablesFigures/PNGs/predictions-", prior_type, convic_type, ".png"),
+    file = paste0(fig_4_dir, "PNGs/", fig_4_lab, ".png"),
+    width = 8, height = 6
+  )
+fig_4 +
+  ggsave(
+    file = paste0(fig_4_dir, fig_4_lab, ".pdf"),
+    width = 8, height = 6,
+    device = cairo_pdf 
+  )
+rm(fig_4, fig_4_dir, fig_4_lab)
+
+
+## Zoom in on historic record with comparison between model and measurement error
+bind_rows(
+  data_frame(year = climate$year[c(1:N)],
+             series = "had_full",
+             mean = climate$had_full[c(1:N)],
+             q025 = climate$had_025[c(1:N)],
+             q975 = climate$had_975[c(1:N)]
+             ),
+  predictions %>% 
+    filter(series == "fitted") %>%
+    mutate(series = as.character(series))
+  ) %>%
+  filter(!is.na(mean)) %>%
+  mutate(series = factor(series, levels = c("had_full", "fitted"))) %>%
+  ggplot(aes(x = year, y = mean, ymin = q025, ymax = q975, col = series, fill = series)) +
+  geom_ribbon(lwd=0.25, alpha = .3) +
+  # geom_line() +
+  labs(
+    title = "Comparing measurement error and model error",
+    subtitle = paste0("Prior: ", match_priors(paste0(prior_type, convic_type))), 
+    y = "Temperature anomaly (°C)\n"
+    ) + 
+  scale_colour_manual(
+    values = c("had_full"="black", "fitted"="#377EB8"),
+    labels = c("HadCRUT4 (measurement error)   ", "Model fit (95% CI)")
+    ) +
+  scale_fill_manual(
+    values = c("had_full"="black", "fitted"="#377EB8"),
+    labels = c("HadCRUT4 (measurement error)   ", "Model fit (95% CI)")
+    ) +
+  ## Historic vs Forecast period
+  geom_vline(xintercept = 2005, colour = "gray35", linetype = 6) +
+  theme(
+    axis.title.x = element_blank(),
+    legend.title = element_blank(),
+    legend.position = "bottom"
+    ) +
+  ggsave(
+    file = paste0("TablesFigures/Untracked/Robustness/PNGs/compare-", prior_type, convic_type, "-fit-me.png"),
     width = 8, height = 6
     )
-pred_plot +
-  ggsave(
-    file = paste0("TablesFigures/predictions-", prior_type, convic_type, ".pdf"),
-    width = 8, height = 6,
-    device = cairo_pdf ## See: https://github.com/wch/extrafont/issues/8#issuecomment-50245466
-    )
-rm(pred_plot)
-
-if(prior_type == "ni"){
-  ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
-  ## together with the had obs, to the Evidence data folder. We'll be using the
-  ## difference between these series as noise when simulating future "true" temperatures
-  ## in the evidence section of the paper.
-  y_dev <-
-    predictions %>%
-    filter(series %in% c("had_full", "fitted")) %>%
-    select(year:mean) %>%
-    spread(series, mean) %>%
-    mutate(dev = fitted - had_full) %>%
-    filter(!is.na(dev))
-
-  write_csv(y_dev, "Evidence/Data/y-dev.csv")
-  rm(y_dev)
-}
 
 ## Remove data frames no longer needed
 rm(N, predictions)
 ## Similarly, subset rcp_loop list to relevant variables for outer (prior) loop
-rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "all_2100")]
+rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "temp2100")]
 
 return(rcp_loop=rcp_loop)

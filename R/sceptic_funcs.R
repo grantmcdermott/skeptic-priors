@@ -116,15 +116,17 @@ match_rcps <- function(x) {
 }
 
 
-######################
-### PLOT FUNCTIONS ###
-######################
+######################################
+######################################
+####    * PLOTTING FUNCTIONS *    ####
+######################################
+######################################
 
 ######################################
 ######################################
 ## Coeficients densities plot function
 
-coef_plot_func <-
+coefs_plot <-
   function(coefs_df) {
     coefs_df %>%
       mutate(coef = factor(coef, levels=c("alpha","beta","gamma", "delta","eta","sigma"))) %>%
@@ -142,7 +144,7 @@ coef_plot_func <-
 ################################################
 ## Temperature prediction plot function (by RCP)
 
-pred_plot_func <-
+pred_plot <-
   function(predictions) {
     
     # series_labs <- c("HadCRUT4", "Model fit", 
@@ -217,7 +219,7 @@ pred_plot_func <-
 ############################
 ## TCR density plot function
 
-tcr_plot_func <-
+tcr_plot <-
   function(tcr) {
     
     ## Can't use stat_function() that maps to facets, ridges or other aesthetic elements.
@@ -281,7 +283,7 @@ tcr_plot_func <-
   }
 
 ## Priors only version of the above
-tcr_plot_func_priors <-
+tcr_plot_priors <-
   function(tcr) {
     
     ## Can't use stat_function() that maps to facets, ridges or other aesthetic elements.
@@ -344,39 +346,45 @@ tcr_plot_func_priors <-
         ) 
   }
 
-#################################################
-#################################################
-## Temperature's in 2100 pointrange plot function
-all_2100_plot_func <-
-  function(all_2100) {
-    all_2100 %>%
-      group_by(rcp, prior) %>%
-      summarise(
-        temp_mean = mean(temp, na.rm=T),
-        temp_q025 = quantile(temp, p=0.025, na.rm=T),
-        temp_q975 = quantile(temp, p=0.975, na.rm=T)
-      ) %>%
-      ungroup %>%
-      mutate(prior = factor(match_priors(prior))) %>%
-      mutate(rcp = match_rcps(rcp)) %>%
-      ggplot(aes(x=fct_reorder(prior, temp_mean), y=temp_mean, ymin=temp_q025, ymax=temp_q975, col=prior)) +
-      geom_pointrange() + 
-      coord_flip() +
-      scale_colour_manual(values = prior_cols) +
-      facet_wrap(~ rcp) +
-      labs(x = "Prior", y = "Temperature anomaly by 2100 (°C)") +
-      theme(
-        legend.position = "none",
-        axis.title.y = element_blank()
-      ) 
-  }
-
 
 ##############################
 ##############################
 ## Recursive TCR plot function
-recursive_plot_func <-
+recursive_plot <-
   function(tcr_rec) {
+    
+    ## To depict the noninformative series in each sceptic prior facet, we need
+    ## to duplicate the series manually. Start by mutating a label column.
+    tcr_rec <- 
+      tcr_rec %>%
+      rename(prior = series) %>%
+      arrange(prior) %>% 
+      mutate(priorlab = prior)
+    ## Next "rebind" the ni prior data in the way that can be easily faceted by  
+    ## the four sceptic priors.
+    tcr_rec <-
+      bind_rows(
+        tcr_rec %>% 
+          filter(prior != "ni"),
+        lapply(c("lukemod", "lukestrong", "denmod", "denstrong"), function(x) {
+          tcr_rec %>%
+            filter(prior == "ni") %>%
+            mutate(priorlab = x)
+          }) %>%
+          bind_rows()
+        )
+    ## Make the prior lab prettier
+    tcr_rec$priorlab <- 
+      ifelse(tcr_rec$priorlab == "lukemod",
+             "(a) Moderate Lukewarmer", 
+             ifelse(tcr_rec$priorlab == "lukestrong",
+                    "(b) Strong Lukewarmer",
+                    ifelse(tcr_rec$priorlab == "denmod",
+                           "(c) Moderate Denier",
+                           "(d) Strong Denier"
+                    )))
+    
+    ## Now we can plot the figure
     tcr_rec %>%
       mutate(prior = factor(match_priors(prior), levels=prior_names[c(5,1:4)])) %>% ## Plot NI first
       ggplot(aes(x = year_to, y = mean, col = prior, fill = prior), lwd=0.5) +
@@ -409,9 +417,16 @@ recursive_plot_func <-
 #########################
 ## Evidence plot function 
 
-## Grid
-evid_plot_func <-
+## Grid version
+evid_plot <-
   function(evid) {
+    ## Labels for facetting
+    evid <-
+      evid %>%
+      mutate(yrs = ifelse(round(tcr_mean, 1) < thresh, NA, yrs)) %>%
+      mutate(thresh_lab = paste0("(a) ", thresh, " °C")) %>%
+      mutate(thresh_lab = ifelse(thresh == 1.5, gsub("\\(a\\)", "\\(b\\)", thresh_lab), thresh_lab))
+    ## Plot the figure
     evid %>% 
       mutate(yrs = ifelse(is.na(yrs), 2100-1866, yrs)) %>%
       ggplot(aes(x = mu, y = sigma)) +
@@ -430,8 +445,19 @@ evid_plot_func <-
   }
 
 ## Using lines instead of a grid
-evid_plot_lines_func <-
+evid_plot_lines <-
   function(evid) {
+    ## Labels for facetting
+    ## Also, manually adjust some parts of the data for plotting 
+    ## (Only applies to obs where no convergence by 2100)
+    evid <-
+      evid %>%
+      mutate(yrs_dash = ifelse(yrs == 235, yrs - 1, yrs)) %>% 
+      mutate(yrs = ifelse(round(tcr_mean, 1) < thresh, NA, yrs)) %>%
+      mutate(sigma_dash = ifelse(round(tcr_mean, 1) < thresh, (0.0674+(.2-mu)/30)^1.2+0.03, sigma)) %>%
+      mutate(thresh_lab = paste0("(a) ", thresh, " °C")) %>%
+      mutate(thresh_lab = ifelse(thresh == 1.5, gsub("\\(a\\)", "\\(b\\)", thresh_lab), thresh_lab))
+    ## Now plot the figure
     evid %>%
       filter(mu %in% round(seq(0, 1, by = .2), 1)) %>%
       ggplot(aes(x = sigma, y = yrs + 1866 - 1, group = factor(mu), col = factor(mu))) +
@@ -472,11 +498,39 @@ evid_plot_lines_func <-
   }
 
 
+#################################################
+#################################################
+## Temperature's in 2100 pointrange plot function
+temp2100_plot <-
+  function(temp2100) {
+    temp2100 %>%
+      group_by(rcp, prior) %>%
+      summarise(
+        temp_mean = mean(temp, na.rm=T),
+        temp_q025 = quantile(temp, p=0.025, na.rm=T),
+        temp_q975 = quantile(temp, p=0.975, na.rm=T)
+        ) %>%
+      ungroup %>%
+      mutate(prior = factor(match_priors(prior))) %>%
+      mutate(rcp = match_rcps(rcp)) %>%
+      ggplot(aes(x=fct_reorder(prior, temp_mean), y=temp_mean, ymin=temp_q025, ymax=temp_q975, col=prior)) +
+      geom_pointrange() + 
+      coord_flip() +
+      scale_colour_manual(values = prior_cols) +
+      facet_wrap(~ rcp) +
+      labs(x = "Prior", y = "Temperature anomaly by 2100 (°C)") +
+      theme(
+        legend.position = "none",
+        axis.title.y = element_blank()
+        ) 
+  }
+
+
 ############################
 ############################
 ## SCC density plot function
 
-scc_plot_func <-
+scc_plot <-
   function(scc) {
     
     scc %>%

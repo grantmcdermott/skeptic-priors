@@ -1,15 +1,14 @@
-rm(list = ls()) # Clear data
+# rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for 
 ## plotting and tables
-source("sceptic_funcs.R")
+source("R/sceptic_funcs.R")
 
 ## Optional for replication
 set.seed(123) 
 
-
-## Load climate data
-climate <- read_csv("Data/climate.csv")
+# ## Load climate data
+# climate <- read_csv("Data/climate.csv")
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 chain_length <- 9000
@@ -19,13 +18,12 @@ n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 ## doesn't really matter.
 rcp_type <- "rcp26" 
 
-## Load climate data and deviation DF for simulating "true" future values
+## Limit climate DF to one RCP (doesn't matter which one) and then add model-derived 
+## standard errors (deviations) to simulate "true" future values.
 climate <- 
   read_csv("Data/climate.csv") %>%
   filter(rcp == rcp_type) 
-
-y_dev <- read_csv("Evidence/Data/y-dev.csv")
-
+y_dev <- read_csv("Results/Evidence/y-dev.csv")
 climate$noise <- sample(y_dev$dev, nrow(climate), replace = T)
 
 ## Also add noise to future "mean" covariate values; otherwise collinearity 
@@ -37,10 +35,11 @@ climate$amo_noise <- rnorm(nrow(climate), sd = .1)
 ## Simulate climate data based on noninformative parameters
 climate <- 
   climate %>% 
-  mutate(volc_sim = ifelse(year <= 2005, volc_mean, volc_mean + volc_noise),
-         soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
-         amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
-         ) %>%
+  mutate(
+    volc_sim = ifelse(year <= 2005, volc_mean, volc_mean + volc_noise),
+    soi_sim = ifelse(year <= 2005, soi_mean, soi_mean + soi_noise),
+    amo_sim = ifelse(year <= 2005, amo_mean, amo_mean + amo_noise)
+    ) %>%
   mutate(had_sim = -0.102 + 0.418*trf + 0.051*volc_sim + -0.028*soi_sim + 0.473*amo_sim + noise)
 
 
@@ -129,7 +128,7 @@ evid_func <-
       }" 
         ) 
         
-        bugs_file <- paste("Evidence/BUGSFiles/evidence-bugs.txt")
+        bugs_file <- paste("BUGSFiles/Evidence/evidence-bugs.txt")
         writeLines(mod_string, con = bugs_file)
         
         load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
@@ -209,57 +208,11 @@ df <-
 
 ####
 ## Run the function over the full range of sceptic priors
-## NOTE: Takes about an hour to run on my laptop (16 GB RAM), so skip to line 224
-## once it has already been run and the data exported to file.
+## NOTE: Takes about an hour to run on my laptop (16 GB RAM). You may wish to skip diectly
+## to the already-exported file ("Data/Evidence/tcr-evidence.csv") to avoid this wait.
 evid <- evid_func(df)
 # |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 55m 09s
 rm(yrs, yrs_j)
 
 ## Write data
-write_csv(evid, "Evidence/Data/tcr-evidence.csv")
-
-## Read data
-evid <- read_csv("Evidence/Data/tcr-evidence.csv")
-
-## Include labels for facetting and manually adjust some parts of the data for
-## plotting (only applies to obs where no convergence by 2100)
-evid <-
-  evid %>%
-  mutate(yrs_dash = ifelse(yrs == 235, yrs - 1, yrs)) %>% 
-  mutate(yrs = ifelse(round(tcr_mean, 1) < thresh, NA, yrs)) %>%
-  mutate(sigma_dash = ifelse(round(tcr_mean, 1) < thresh, (0.0674+(.2-mu)/30)^1.2+0.03, sigma)) %>%
-  mutate(thresh_lab = paste0(thresh, " °C")) %>%
-  mutate(thresh_lab = ifelse(thresh == 1.3, 
-                             paste0("(a) ", thresh_lab), 
-                             paste0("(b) ", thresh_lab)))
-
-## Plot the data
-## Years with red-white-blue colour scheme
-evid_plot <- evid_plot_func(evid)
-evid_plot +
-  ggsave(
-    file = "Evidence/TablesFigures/PNGs/evidence-grid.png",
-    width = 8, height = 4
-    )
-evid_plot +
-  ggsave(
-    file = "Evidence/TablesFigures/evidence-grid.pdf",
-    width = 8, height = 4,
-    device = cairo_pdf
-    )
-rm(evid_plot)
-
-## Lines instead of grid
-evid_plot_lines <- evid_plot_lines_func(evid) 
-evid_plot_lines +
-  ggsave(
-    file = "Evidence/TablesFigures/PNGs/evidence-lines.png",
-    width = 8, height = 4
-    )
-evid_plot_lines +
-  ggsave(
-    file = "Evidence/TablesFigures/evidence-lines.pdf",
-    width = 8, height = 4,
-    device = cairo_pdf
-    )
-rm(evid_plot_lines)
+write_csv(evid, "Results/Evidence/tcr-evidence.csv")

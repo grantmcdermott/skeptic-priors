@@ -2,6 +2,6 @@
 .Rhistory
 .RData
 TESTING/
-/Data/test
-/Robustness/MeasError/test
-/Data/rcp_flowchart.odp
+Robustness/MeasError/test
+Data/rcp_flowchart.odp
+Data/rcp_flowchart.pdf

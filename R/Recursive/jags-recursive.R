@@ -34,7 +34,7 @@ mod_string <- paste(
     had0 ~ dnorm(0.0, 1.0E-6)           ## Initialising value
     }" 
 ) 
-bugs_file <- paste0("Recursive/BUGSFiles/", prior_type, "-", convic_type, recurse_type, ".txt")
+bugs_file <- paste0("BUGSFiles/Recursive/", prior_type, "-", convic_type, recurse_type, ".txt")
 if(prior_type == "ni"){bugs_file <- gsub("--","-",bugs_file)}
 writeLines(mod_string, con = bugs_file)
 

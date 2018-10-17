@@ -1,30 +1,11 @@
-rm(list = ls()) # Clear data
-
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("sceptic_funcs.R")
+source("R/sceptic_funcs.R")
 
 ## Optional for replication
 set.seed(123) 
 
 ## Load climate data
 climate <- read_csv("Data/climate.csv")
-
-## The 95% measurement error bounds are not quite symmetrical, but very close. 
-# We can also compare the measurement error with model uncertainty i.e. sigma 
-# from noninformative model. Note: dividing 95% ME bounds by 2 to get 1 std dev 
-# (i.e. fair comparison to model sigma).
-ggplot(climate %>% 
-         filter(rcp == "rcp26") %>%
-         filter(!is.na(had_full)) %>%
-         mutate(omega_low = (had_full - had_025)/2,
-                omega_up = (had_975 - had_full)/2), 
-       aes(x = year)) +
-  geom_line(aes(y = omega_low), col = "blue") +
-  geom_line(aes(y = omega_up), col = "red") +
-  geom_hline(yintercept = 0.075) + ## Sigma mean = 0.075, sigma s.d. = 0.0045
-  geom_hline(yintercept = 0.075 + 0.0045*2, lty = 2) + 
-  geom_hline(yintercept = 0.075 - 0.0045*2, lty = 2) +
-  labs(y = expression(paste("Measurement Error (", omega, ") vs Sigma (", sigma, ")")))
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
@@ -50,7 +31,7 @@ priors_df <-
              )
 priors_df
 
-# Run the nested loop (takes about two and a half minutes on my laptop)
+# Run the nested loop (takes about 2min on my laptop)
 ## Outer: Loop over priors ##
 priors_loop <-
   pblapply(1:nrow(priors_df), function(j){
@@ -64,7 +45,13 @@ priors_loop <-
     sigma_beta <- s/3.71
     
     ## Inner: Loop over climate scenarios
-    source("Robustness/MeasError/jags-loop-me.R", local = T)
+    if(prior_type == "ni")  {
+        # source("R/jags-loop.R", local = T) ## For vague noninformative riors using the rjags package
+        source("R/noninf-loop.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
+      }
+      else{
+        source("R/jags-loop.R", local = T)
+      }
     
   })
 
@@ -86,16 +73,8 @@ rm(priors_loop)
 ##################################
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
-pref <- "Robustness/TablesFigures/"
-suff <- "-me"
+run_type <- "main"
+pref <- "TablesFigures/"
+suff <- ""
 
-source("sceptic_tablesfigures.R")
-
-tcr %>%
-  filter(prior == "ni") %>%
-  mutate(series = "me") %>%
-  group_by(series) %>%
-  summarise(mean = mean(tcr),
-            q025 = quantile(tcr, .025),
-            q975 = quantile(tcr, .975)) %>%
-  write_csv("Robustness/Data/tcr-me.csv")
+source("R/sceptic_tablesfigures.R")

@@ -1,7 +1,7 @@
-rm(list = ls()) # Clear data
+# rm(list = ls()) # Clear data
 
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("sceptic_funcs.R")
+source("R/sceptic_funcs.R")
 
 ## Optional for replication
 set.seed(123) 
@@ -14,7 +14,7 @@ chain_length <- 15000
 n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 
 ## NB: Decide whether using historical data only (and work *backwards* from most recent 
-## date), or whether using simulated future data (and work *fowards* from earliest data).
+## date), or whether using simulated future data (and work *fowards* from earliest date).
 recurse_type <- c("historic", "future")[1]
 
 ## Decide on max year for the recursive regressions
@@ -108,11 +108,11 @@ tcr_rec <-
         sigma_beta <- s/3.71
         
         if(prior_type == "ni")  {
-          # source("Recursive/jags-recursive.R", local = T) ## For vague noninformative riors using the rjags package
-          source("Recursive/noninf-recursive-pblapply.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
+          # source("R/Recursive/jags-recursive.R", local = T) ## For vague noninformative riors using the rjags package
+          source("R/Recursive/noninf-recursive.R", local = T) ## For "proportional" noninformative prors using the LearnBayes package
         }
         else{
-          source("Recursive/jags-recursive-pblapply.R", local = T)
+          source("R/Recursive/jags-recursive.R", local = T)
         }
 
       })
@@ -130,14 +130,16 @@ tcr_rec <-
         paste0("Looking forward to ", tcr_df$year_to[1],"\n(Sample size = ", tcr_df$year_to[1]-2005+1, " years)")
         )
 
-    ## TCR Density plot
-    tcr_plot <- 
-      tcr_plot_func(tcr_df) +
+    ##################################################################################
+    ### Animated / recursive version of Figure 1 (TCR densities) for presentations ###
+    ##################################################################################
+    fig_1 <- 
+      tcr_plot(tcr_df) +
       annotate("text", x = 1.75, y = 1, label = year_tracker_lab, size = 3.5)
     
-    tcr_plot +
+    fig_1 +
       ggsave(
-        file = paste0("Recursive/TablesFigures/Animation/", recurse_type, "/rec-tcr-", 1000 + n, ".png"),
+        file = paste0("TablesFigures/Untracked/Recursive/Animation/", recurse_type, "/rec-tcr-", 1000 + n, ".png"),
         width = 8, height = 4.5
         )
     
@@ -159,60 +161,5 @@ tcr_rec <-
 tcr_rec
 
 ## Write to disk for future use
-write_csv(tcr_rec, paste0("Recursive/Data/tcr-rec-", recurse_type, ".csv"))
+write_csv(tcr_rec, paste0("Results/Recursive/tcr-rec-", recurse_type, ".csv"))
 
-
-###################################
-## Read data
-tcr_rec <- read_csv(paste0("Recursive/Data/tcr-rec-", recurse_type,".csv"))
-
-tcr_rec <- 
-  tcr_rec %>%
-  rename(prior = series) %>%
-  arrange(prior) %>% 
-  mutate(priorlab = prior)
-
-## Next "rebind" the ni prior data in the way that can be easily faceted by the 
-## four sceptic priors... Basically involves duplicating the ni series for each
-## sceptic prior in the data frame
-tcr_rec <-
-  bind_rows(
-    tcr_rec %>% 
-      filter(prior != "ni"),
-    lapply(c("lukemod", "lukestrong", "denmod", "denstrong"), function(x) {
-      tcr_rec %>%
-        filter(prior == "ni") %>%
-        mutate(priorlab = x)
-      }) %>%
-      bind_rows()
-    )
-
-tcr_rec$priorlab <- 
-  ifelse(tcr_rec$priorlab == "lukemod",
-         "(a) Moderate Lukewarmer", 
-         ifelse(tcr_rec$priorlab == "lukestrong",
-                "(b) Strong Lukewarmer",
-                ifelse(tcr_rec$priorlab == "denmod",
-                       "(c) Moderate Denier",
-                       "(d) Strong Denier"
-                       )))
-
-## Plot the recursive estimates
-tcr_rec_plot <- recursive_plot_func(tcr_rec)
-if(recurse_type == "historic"){
-  tcr_rec_plot <- 
-    tcr_rec_plot + 
-    scale_x_reverse(breaks = seq(max(tcr_rec$year_to), min(tcr_rec$year_to), by = -30))
-  }
-tcr_rec_plot +
-  ggsave(
-    file = paste0("Recursive/TablesFigures/PNGs/rec-tcr-", recurse_type, ".png"),
-    width = 8, height = 7
-    )
-tcr_rec_plot +
-  ggsave(
-    file = paste0("Recursive/TablesFigures/rec-tcr-", recurse_type, ".pdf"),
-    width = 8, height = 7,
-    device = cairo_pdf
-    )
-rm(tcr_rec_plot)
