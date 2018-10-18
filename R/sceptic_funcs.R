@@ -2,7 +2,7 @@
 library(LearnBayes) ## For simulating noninformative prior (using random multivarite normal command)
 library(rjags) ## For running the MCMC (Gibbs) sampler
 library(dclone) ## Allows parallel updating of JAGS models
-library(snow) ## Allows clusters: i.e. subsidiary R programmes running separately on your computer's different CPUs
+library(parallel) ## For parallel computing in R (either fork-based for *nix, or socket-based for Windows)
 library(jagstools) ## devtools::install_github("johnbaums/jagstools") Extract summary statistics from MCMC objects
 library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
 library(gridExtra) ## Easier labelling in ggplot2 (e.g. annote with extrafont fonts)
@@ -21,8 +21,12 @@ library(pbapply) ## Add progress bar to *apply functions
 ### GLOBAL ELEMENTS AND THEMES ###
 ##################################
 
-## Choose non-standard font for plots. Installation: https://github.com/wch/extrafont 
-## Will revert to ggplot2 default if not available.
+## Cluster type for parallel implementation (OS-dependent)
+cl_type <- ifelse(.Platform$OS.type == "windows", "SOCK", "FORK")
+
+## Fira Sans font for figures. Download here: https://bboxtype.com/typefaces/FiraSans/#!layout=specimen
+## Must then register with R. See here: https://github.com/wch/extrafont 
+## Will revert to ggplot2 default if not installed.
 font_type <- choose_font(c("Fira Sans", "Open Sans"))
 
 ## Set global plot theme 

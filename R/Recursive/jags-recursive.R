@@ -40,7 +40,7 @@ writeLines(mod_string, con = bugs_file)
 
 load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
 
-cl <- makeCluster(n_chains, type = "SOCK") # no. of clusters (i.e. MCMC chains), SOCK is simplest cluster
+cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
 parLoadModule(cl, "lecuyer", quiet = T)
 
 ##------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
 mod_iters <- chain_length/n_chains
 mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
                               n.iter = mod_iters, n.chain = n_chains)
-stopCluster(cl)
+parallel::stopCluster(cl)
 
 ##------------------------------------------------------------------------------
 ## Get TCR coefficient (i.e. beta) and then use to get TCR.
