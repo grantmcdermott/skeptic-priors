@@ -58,11 +58,13 @@ colnames(rcps) <- gsub("_rf", "", tolower(colnames(rcps)))
 ## Subset the data and change some column names for convenience.
 rcps <-
   rcps %>%
-  rename(year = years, 
-         trf_inclvolc = total_inclvolcanic, 
-         volc = volcanic_annual, 
-         anthro = total_anthro,
-         aerosols = totaer_dir) %>%
+  rename(
+    year = years, 
+    trf_inclvolc = total_inclvolcanic, 
+    volc = volcanic_annual, 
+    anthro = total_anthro,
+    aerosols = totaer_dir
+    ) %>%
   mutate(trf = trf_inclvolc - volc) 
 
 ## Adjust the relevant columns to match up with the MEA2016 forcings. Note that 
@@ -137,13 +139,12 @@ tcr_eff1 <-
         select_("had", x, "volc_eff", "soi", "amo") %>%
         rename_("trf_eff" = x)
       
-      theta_sample_eff <- blinreg(clim_df$had, 
-                                  cbind(alpha = 1, 
-                                        beta = clim_df$trf_eff,
-                                        gamma = clim_df$volc_eff, 
-                                        delta = clim_df$soi, 
-                                        eta = clim_df$amo), 
-                                  chain_length)
+      theta_sample_eff <- 
+        blinreg(
+          y = clim_df$had, 
+          X = cbind(alpha=1, beta=clim_df$trf_eff, gamma=clim_df$volc_eff, delta=clim_df$soi, eta=clim_df$amo), 
+          m = chain_length
+          )
       
       tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
       
@@ -158,9 +159,11 @@ tcr_eff1 <-
 
 tcr_eff1 %>%
   group_by(series) %>%
-  summarise(mean = round(mean(tcr), 1),
-            q025 = round(quantile(tcr, .025), 1),
-            q975 = round(quantile(tcr, .975), 1)) 
+  summarise(
+    mean = round(mean(tcr), 1),
+    q025 = round(quantile(tcr, .025), 1),
+    q975 = round(quantile(tcr, .975), 1)
+    ) 
 #      series  mean  q025  q975
 #       <chr> <dbl> <dbl> <dbl>
 #     trf_eff   2.1   1.9   2.4
@@ -170,16 +173,14 @@ tcr_eff1 %>%
   ggplot(aes(x = tcr, col = series)) +
   geom_vline(xintercept = 1.55, lwd = .25, lty = 4) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   xlim(-1, 3) + 
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
   scale_colour_brewer(palette = "Set1", name = "") +
   scale_linetype(name = "Landuse separate?") +
   theme(
-    text = element_text(family = font_type),
     legend.position = "bottom"
-  )
+    )
 
 
 #######################################################
@@ -199,14 +200,12 @@ tcr_eff1 %>%
 ## Simplifying, we can write this as a function that takes the mean (m) and lower
 # 95% CI (lc) as inputs, before returning a single, random draw from the 
 # resulting t distribution.
-eff_func <- function(m, lc){
-  rt(1, df=4)*(m - lc)/2.78 + m
-}
+eff_func <- 
+  function(m, lc){
+    rt(1, df=4)*(m - lc)/2.78 + m
+    }
 # E.g. For aerosols:
 eff_func(1.55, 1.05)
-
-## Load climate data
-# climate <- read_csv("Data/climate.csv")
 
 ## Set chain (and rf2x) length to reduce time needed for large loop over the
 ## t-distribution sampling below
@@ -214,7 +213,7 @@ chain_length <- 9000
 rf2x <- rf2x[1:chain_length]
 
 tcr_eff2 <-
-  pblapply(1:10000, function(x){
+  pblapply(1:10000, function(x) {
     
     rcps_eff <-
       rcps %>%
@@ -247,13 +246,12 @@ tcr_eff2 <-
       filter(rcp == "rcp26") %>%
       filter(year <= 2005)
     
-    theta_sample_eff <- blinreg(clim_df$had, 
-                                cbind(alpha = 1, 
-                                      beta = clim_df$trf_eff,
-                                      gamma = clim_df$volc_eff, 
-                                      delta = clim_df$soi, 
-                                      eta = clim_df$amo), 
-                                chain_length)
+    theta_sample_eff <- 
+      blinreg(
+        y = clim_df$had, 
+        X = cbind(alpha=1, beta=clim_df$trf_eff, gamma=clim_df$volc_eff, delta=clim_df$soi, eta=clim_df$amo), 
+        m = chain_length
+        )
     
     tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
     
@@ -271,9 +269,11 @@ tcr_eff2 <-
   bind_rows()
 
 tcr_eff2 %>%
-  summarise(mean = round(mean(tcr), 1),
-            q025 = round(quantile(tcr, .025), 1),
-            q975 = round(quantile(tcr, .975), 1))
+  summarise(
+    mean = round(mean(tcr), 1),
+    q025 = round(quantile(tcr, .025), 1),
+    q975 = round(quantile(tcr, .975), 1)
+    )
 #  mean  q025  q975
 # <dbl> <dbl> <dbl>
 #   1.9   0.4   3.4
@@ -282,11 +282,10 @@ tcr_eff2 %>%
   # sample_frac(0.1) %>%
   ggplot(aes(x = tcr)) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   # xlim(-1, 3) + 
   coord_cartesian(xlim=c(-1, 3)) + 
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2)  
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2)  
 
 bind_rows(
   tcr_eff1 %>%
