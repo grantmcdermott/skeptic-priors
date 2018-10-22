@@ -154,7 +154,9 @@ evid_func <-
             "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
             )
         inits_list <- 
-          function() {list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1)}
+          function() {
+            list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0)
+            }
         
         ##------------------------------------------------------------------------------
         ## RUN THE CHAINS/MCMC SAMPLES.
@@ -245,4 +247,4 @@ toc()
 rm(yrs, yrs_j)
 
 ## Write data
-write_csv(evid, here("Results/Evidence/tcr-evidence-TEST.csv"))
+write_csv(evid, here("Results/Evidence/tcr-evidence.csv"))

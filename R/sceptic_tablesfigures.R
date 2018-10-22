@@ -227,9 +227,11 @@ if (run_type == "main") {
 ## Summarise in tabular form
 tcr %>%
   group_by(prior) %>%
-  summarise(tcr_mean = decimals(mean(tcr), 1),
-            q025 = decimals(quantile(tcr, .025), 1),
-            q975 = decimals(quantile(tcr, .975), 1)) %>%
+  summarise(
+    tcr_mean = decimals(mean(tcr), 1),
+    q025 = decimals(quantile(tcr, .025), 1),
+    q975 = decimals(quantile(tcr, .975), 1)
+    ) %>%
   mutate(prior = match_priors(prior)) %>% 
   arrange(desc(tcr_mean)) %>% 
   mutate(run_type = run_type)
@@ -340,12 +342,14 @@ rm(fig_5)
 ## Summarise in tabular form
 temp2100 %>%
   group_by(rcp, prior) %>%
-  summarise(mean_2100 = decimals(mean(temp), 1),
-            q025 = decimals(quantile(temp, .025), 1),
-            q975 = decimals(quantile(temp, .975), 1)) %>%
+  summarise(
+    mean_2100 = decimals(mean(temp), 1),
+    q025 = decimals(quantile(temp, .025), 1),
+    q975 = decimals(quantile(temp, .975), 1)
+    ) %>%
   mutate(prior = match_priors(prior)) %>% 
-  group_by(prior) %>%
-  arrange(desc(mean_2100)) %>%
+  # group_by(rcp) %>%
+  arrange(desc(rcp), desc(mean_2100)) %>%
   mutate(run_type = run_type)
 
 

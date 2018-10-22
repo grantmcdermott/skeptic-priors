@@ -44,13 +44,15 @@ rcp_loop <-
       "had_omega" = clim_df$had_omega
     )
   inits_list <- 
-    function() {list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1)}
+    function() {
+      list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0)
+      }
 
   ##------------------------------------------------------------------------------
   ## RUN THE CHAINS/MCMC SAMPLES.
   
   ## Which parameters should R keep track of?
-  parameters <- c("alpha", "beta", "gamma", "delta", "eta", "sigma", "y_pred")
+  parameters <- c("alpha", "beta", "gamma", "delta", "eta", "sigma", "phi", "y_pred")
   ## Initialisation
   par_inits <- parallel.inits(inits_list, n.chains = n_chains) 
   ## Create the JAGS model object
@@ -90,7 +92,7 @@ rcp_loop <-
     ## Convert coefficients MCMC list into data frame for later. First combines
     ## all chains into one matrix.
     coefs_df <-
-      as.matrix(mod_samples[, c(1:6)], iters = F) %>%
+      as.matrix(mod_samples[, c(1:7)], iters = F) %>%
       # data.frame() %>% 
       as_data_frame() %>%
       gather(coef, values)
@@ -104,7 +106,7 @@ rcp_loop <-
         q025 = quantile(values, 0.025),
         q975 = quantile(values, 0.975)
         ) %>% 
-      mutate(coef = factor(coef, levels=c("beta","gamma","delta","eta","alpha","sigma"))) %>% 
+      mutate(coef = factor(coef, levels=c("beta","gamma","delta","eta","alpha","sigma","phi"))) %>% 
       mutate(prior = paste0(prior_type, convic_type)) %>%
       arrange(coef)
     

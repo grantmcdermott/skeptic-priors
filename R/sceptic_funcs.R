@@ -149,10 +149,19 @@ bugs_model_func <-
   function() {
     
     ## Regression model
-    for(t in 1:N) {
+    
+    ### Initial values 
+    mu[1] <- alpha + beta*trf[1] + gamma*volc[1] + delta*soi[1] + eta*amo[1]
+    # had[1]  ~ dnorm(mu[1], tau)
+    # y_pred[1] ~ dnorm(mu[1], tau) ## Predictions
+    y_pred[1] <- mu[1]
+    epsilon[1] <- had[1] - mu[1]
+    ### Subsequent periods
+    for(t in 2:N) {
       mu[t] <- alpha + beta*trf[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
-      had[t]  ~ dnorm(mu[t], tau)
-      y_pred[t] ~ dnorm(mu[t], tau) ## For predictions into the future
+      had[t]  ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1)
+      y_pred[t] ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1) ## Predictions
+      epsilon[t] <- y_pred[t] - mu[t] - phi*epsilon[t-1] 
     }
     
     ## Priors on all parameters
@@ -163,7 +172,10 @@ bugs_model_func <-
     delta ~ dnorm(0, 0.0001)            ## soi coef
     eta ~ dnorm(0, 0.0001)              ## amo coef
     sigma ~ dunif(0, 100)               ## Residual std dev
-    tau <- pow(sigma, -2)
+    tau <- pow(sigma, -2)               ## Precision
+    phi ~ dunif(-1,1)                   ## AR(1) coef
+    tau_ar1 <- tau / (1-phi*phi)        ## AR(1)-adjusted precision
+    
   }
 
 
@@ -172,15 +184,30 @@ bugs_model_func_me <-
   function() {
     
     ## Regression model
-    for(t in 1:N) {
+    
+    ### Initial values 
+    mu[1] <- alpha + beta*trf[1] + gamma*volc[1] + delta*soi[1] + eta*amo[1]
+    # # Meas. error in variance of y, i.e.: y[t]* = y[t] + v[t], where Var(v[t]) = omega[t]
+    # # Note change in variance and tau formula because of combined normal distributions
+    # # See: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
+    # sigmasq_tot[1] <- pow(tau, -1) + pow(had_omega[t], 2)
+    # tau_tot[1] <- pow(sigmasq_tot[1], -1)
+    # had[1]  ~ dnorm(mu[1], tau_tot[1])
+    # y_pred[1] ~ dnorm(mu[1], tau_tot[1]) ## Predictions
+    y_pred[1] <- mu[1]
+    epsilon[1] <- had[1] - mu[1]
+    
+    ### Subsequent periods
+    for(t in 2:N) {
       mu[t] <- alpha + beta*trf[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
       # Meas. error in variance of y, i.e.: y[t]* = y[t] + v[t], where Var(v[t]) = omega[t]
       # Note change in variance and tau formula because of combined normal distributions
       # See: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
-      sigmasq_tot[t] <- pow(sigma, 2) + pow(had_omega[t], 2)
+      sigmasq_tot[t] <- pow(tau_ar1, -1) + pow(had_omega[t], 2)
       tau_tot[t] <- pow(sigmasq_tot[t], -1)
-      had[t]  ~ dnorm(mu[t], tau_tot[t])
-      y_pred[t] ~ dnorm(mu[t], tau_tot[t]) ## For predictions into the future
+      had[t]  ~ dnorm(mu[t] + phi*epsilon[t-1], tau_tot[t])
+      y_pred[t] ~ dnorm(mu[t] + phi*epsilon[t-1], tau_tot[t]) ## Predictions
+      epsilon[t] <- y_pred[t] - mu[t] - phi*epsilon[t-1] 
     }
     
     ## Priors on all parameters
@@ -191,7 +218,9 @@ bugs_model_func_me <-
     delta ~ dnorm(0, 0.0001)            ## soi coef
     eta ~ dnorm(0, 0.0001)              ## amo coef
     sigma ~ dunif(0, 100)               ## Residual std dev
-    tau <- pow(sigma, -2)
+    tau <- pow(sigma, -2)               ## Precision
+    phi ~ dunif(-1,1)                   ## AR(1) coef
+    tau_ar1 <- tau / (1-phi*phi)        ## AR(1)-adjusted precision
   }
 
 
@@ -209,7 +238,7 @@ bugs_model_func_me <-
 coefs_plot <-
   function(coefs_df) {
     coefs_df %>%
-      mutate(coef = factor(coef, levels=c("alpha","beta","gamma", "delta","eta","sigma"))) %>%
+      mutate(coef = factor(coef, levels=c("alpha","beta","gamma", "delta","eta","sigma","phi"))) %>%
       ggplot(aes(x = values, group = coef)) +
       geom_density(alpha=0.2, fill="black") +
       facet_wrap(~coef, ncol = 2, scales = "free", labeller = label_parsed) +
