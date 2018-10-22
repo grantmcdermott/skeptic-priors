@@ -1,13 +1,11 @@
-rm(list = ls()) # Clear data
-
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("R/sceptic_funcs.R")
+source(here("R/sceptic_funcs.R"))
 
 ## Optional for replication
 set.seed(123) 
 
 ## Load climate data
-climate <- read_csv("Data/climate.csv")
+climate <- read_csv(here("Data/climate.csv"))
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
@@ -85,7 +83,7 @@ tcr_secondary %>%
     legend.position="bottom"
     ) +
   ggsave(
-    file = "TablesFigures/Untracked/Robustness/tcr-secondary.pdf",
+    file = here("TablesFigures/Untracked/Robustness/tcr-secondary.pdf"),
     width = 5, height = 4, 
     device = cairo_pdf
     )
@@ -96,7 +94,7 @@ tcr_secondary %>%
             q025 = quantile(tcr, .025),
             q975 = quantile(tcr, .975)) %>%
   arrange(mean) %>%
-  write_csv("Data/Robustness/tcr-secondary.csv")
+  write_csv(here("Results/Robustness/tcr-secondary.csv"))
 
 ## Use own function to help pull desired data in summary form for table ##
 clean_func <- function(x) {
@@ -137,5 +135,5 @@ stargazer(tcr_secondary_tab,
           notes.align = "l",
           notes = c("\\footnotesize All estimates are computed using noninformative priors."),
           # type = "text" 
-          out = "Robustness/TablesFigures/tcr-secondary.tex"
+          out = here("Robustness/TablesFigures/tcr-secondary.tex")
           )

@@ -1,13 +1,7 @@
-# rm(list = ls()) # Clear data
+run_type <- "me"
 
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("R/sceptic_funcs.R")
-
-## Optional for replication
-set.seed(123) 
-
-## Load climate data
-climate <- read_csv("Data/climate.csv")
+source(here::here("R/sceptic_funcs.R"))
 
 ## The 95% measurement error bounds are not quite symmetrical, but very close. 
 # We can also compare the measurement error with model uncertainty i.e. sigma 
@@ -29,6 +23,14 @@ climate %>%
   labs(y = expression(paste("Measurement Error (", omega, ") vs Sigma (", sigma, ")"))) +
   theme(axis.title.x = element_blank())
 
+## Add omega columns to climate DF for measurement error
+climate <-
+  climate %>%
+  mutate(
+    had_omega = (had_975 - had_full)/2, ## Currently 95% bound, i.e. 2*sigma.
+    cw_omega = cw_1sigma
+    )
+
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
@@ -44,16 +46,8 @@ n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
 ## Length of disbn equals length of MCMC chain for consistency
 rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
 
-## Priors data frame
-priors_df <- 
-  data_frame(mu = c(0, 1, 1, 0, 0),
-             sigma = c(100, 0.25, 0.065, 0.25, 0.065),
-             prior_type = c("ni", "luke", "luke", "den", "den"),
-             convic_type = c("", "mod", "strong", "mod", "strong")
-             )
-priors_df
+## Run the nested loop (takes about two and a half minutes on my laptop)
 
-# Run the nested loop (takes about two and a half minutes on my laptop)
 ## Outer: Loop over priors ##
 priors_loop <-
   pblapply(1:nrow(priors_df), function(j){
@@ -67,7 +61,7 @@ priors_loop <-
     sigma_beta <- s/3.71
     
     ## Inner: Loop over climate scenarios
-    source("R/Robustness/MeasError/jags-loop-me.R", local = T)
+    source(here("R/Robustness/MeasError/jags-loop-me.R"), local = T)
     
   })
 
@@ -90,10 +84,10 @@ rm(priors_loop)
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
 run_type <- "me"
-pref <- "TablesFigures/Untracked/Robustness/"
+pref <- here("TablesFigures/Untracked/Robustness/")
 suff <- "-me"
 
-source("R/sceptic_tablesfigures.R")
+source(here("R/sceptic_tablesfigures.R"))
 
 tcr %>%
   filter(prior == "ni") %>%
@@ -104,4 +98,4 @@ tcr %>%
     q025 = quantile(tcr, .025),
     q975 = quantile(tcr, .975)
     ) %>%
-  write_csv("Data/Robustness/tcr-me.csv")
+  write_csv("Results/Robustness/tcr-me.csv")

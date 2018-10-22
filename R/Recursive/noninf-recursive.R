@@ -8,15 +8,13 @@ theta_sample <-
           )
 
 ## Get TCR
-tcr <-
-  as.matrix(theta_sample$beta)[,2] %>%
-  data_frame() %>% 
-  magrittr::set_colnames("beta") %>%
-  mutate(prior = paste0(prior_type, convic_type)) %>%
-  mutate(year_to = ifelse(recurse_type == "historic", yr_min, max(clim_df$year)))
-
-tcr$tcr <- tcr$beta * rf2x
-
-tcr <- tcr %>% select_("-beta")
+tcr <- 
+  (as.matrix(theta_sample$beta)[,2] * rf2x) %>%
+  as_data_frame() %>%
+  magrittr::set_colnames("tcr") %>%
+  mutate(
+    prior = paste0(prior_type, convic_type),
+    year_to = ifelse(recurse_type == "historic", yr_min, max(clim_df$year))
+    )
 
 return(tcr = tcr)

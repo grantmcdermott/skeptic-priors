@@ -1,6 +1,8 @@
 ## Load packages ##
 library(LearnBayes) ## For simulating noninformative prior (using random multivarite normal command)
 library(rjags) ## For running the MCMC (Gibbs) sampler
+load.module("lecuyer") ## Extend JAGS with lecuyer module for RNG that avoids duplication across parallel chains
+library(R2jags) ## Mostly for writing JAGS/BUGS models as functions directly in R
 library(dclone) ## Allows parallel updating of JAGS models
 library(parallel) ## For parallel computing in R (either fork-based for *nix, or socket-based for Windows)
 library(jagstools) ## devtools::install_github("johnbaums/jagstools") Extract summary statistics from MCMC objects
@@ -15,14 +17,31 @@ library(extrafont) ## For additional fonts in ggplot2
 library(stargazer) ## For nice LaTeX tables
 library(xtable) ## Another LaTeX table option
 library(pbapply) ## Add progress bar to *apply functions
-
+library(tictoc) ## Simple timing wrappers
+library(R.cache) ## For caching results of long or complex functions 
+library(here) ## Smart management of relative paths and project files
 
 ##################################
 ### GLOBAL ELEMENTS AND THEMES ###
 ##################################
 
+## Optional for replication
+set.seed(123) 
+
+## Load climate data
+climate <- read_csv(here("Data/climate.csv"))
+
+## Priors data frame
+priors_df <- 
+  data_frame(
+    mu = c(0, 1, 1, 0, 0),
+    sigma = c(100, 0.25, 0.065, 0.25, 0.065),
+    prior_type = c("ni", "luke", "luke", "den", "den"),
+    convic_type = c("", "mod", "strong", "mod", "strong")
+    )
+
 ## Cluster type for parallel implementation (OS-dependent)
-cl_type <- ifelse(.Platform$OS.type == "windows", "SOCK", "FORK")
+cl_type <- ifelse(.Platform$OS.type == "windows", "PSOCK", "FORK")
 
 ## Fira Sans font for figures. Download here: https://bboxtype.com/typefaces/FiraSans/#!layout=specimen
 ## Must then register with R. See here: https://github.com/wch/extrafont 
@@ -118,6 +137,63 @@ match_rcps <- function(x) {
   x <- gsub("rcp85", rcp_names[4], x)
   return(x)
 }
+
+
+
+#######################################################
+#######################################################
+## The BUGS model depending on beta priors and run type
+
+## Main and derivative runs (evidence and recursive)
+bugs_model_func <- 
+  function() {
+    
+    ## Regression model
+    for(t in 1:N) {
+      mu[t] <- alpha + beta*trf[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
+      had[t]  ~ dnorm(mu[t], tau)
+      y_pred[t] ~ dnorm(mu[t], tau) ## For predictions into the future
+    }
+    
+    ## Priors on all parameters
+    alpha ~ dnorm(0, 0.0001)            ## intercept
+    beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
+    tau_beta <- pow(sigma_beta, -2)
+    gamma ~ dnorm(0, 0.0001)            ## volc coef
+    delta ~ dnorm(0, 0.0001)            ## soi coef
+    eta ~ dnorm(0, 0.0001)              ## amo coef
+    sigma ~ dunif(0, 100)               ## Residual std dev
+    tau <- pow(sigma, -2)
+  }
+
+
+## "Measure error" version of the above
+bugs_model_func_me <- 
+  function() {
+    
+    ## Regression model
+    for(t in 1:N) {
+      mu[t] <- alpha + beta*trf[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
+      # Meas. error in variance of y, i.e.: y[t]* = y[t] + v[t], where Var(v[t]) = omega[t]
+      # Note change in variance and tau formula because of combined normal distributions
+      # See: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
+      sigmasq_tot[t] <- pow(sigma, 2) + pow(had_omega[t], 2)
+      tau_tot[t] <- pow(sigmasq_tot[t], -1)
+      had[t]  ~ dnorm(mu[t], tau_tot[t])
+      y_pred[t] ~ dnorm(mu[t], tau_tot[t]) ## For predictions into the future
+    }
+    
+    ## Priors on all parameters
+    alpha ~ dnorm(0, 0.0001)            ## intercept
+    beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
+    tau_beta <- pow(sigma_beta, -2)
+    gamma ~ dnorm(0, 0.0001)            ## volc coef
+    delta ~ dnorm(0, 0.0001)            ## soi coef
+    eta ~ dnorm(0, 0.0001)              ## amo coef
+    sigma ~ dunif(0, 100)               ## Residual std dev
+    tau <- pow(sigma, -2)
+  }
+
 
 
 ######################################
@@ -361,7 +437,6 @@ recursive_plot <-
     ## to duplicate the series manually. Start by mutating a label column.
     tcr_rec <- 
       tcr_rec %>%
-      rename(prior = series) %>%
       arrange(prior) %>% 
       mutate(priorlab = prior)
     ## Next "rebind" the ni prior data in the way that can be easily faceted by  
@@ -391,14 +466,14 @@ recursive_plot <-
     ## Now we can plot the figure
     tcr_rec %>%
       mutate(prior = factor(match_priors(prior), levels=prior_names[c(5,1:4)])) %>% ## Plot NI first
-      ggplot(aes(x = year_to, y = mean, col = prior, fill = prior), lwd=0.5) +
-      geom_line(aes(y=q025, lty=prior)) +
-      geom_line(aes(y=q975, lty=prior)) +
+      ggplot(aes(x = year_to, y = tcr_mean, col = prior, fill = prior), lwd=0.5) +
+      geom_line(aes(y=tcr_q025, lty=prior)) +
+      geom_line(aes(y=tcr_q975, lty=prior)) +
       geom_ribbon(
         data= tcr_rec %>%
           filter(prior!="Noninformative") %>%
           mutate(prior = factor(match_priors(prior), levels=prior_names)),
-        aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.5
+        aes(ymin = tcr_q025, ymax = tcr_q975), lty = 0, alpha = 0.5
         ) +
       geom_line(lwd = .75) +
       labs(y = "Temperature anomaly (°C)\n") + 

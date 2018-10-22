@@ -1,13 +1,5 @@
-rm(list = ls()) # Clear data
-
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("R/sceptic_funcs.R")
-
-## Optional for replication
-set.seed(123) 
-
-## Load climate data
-climate <- read_csv("Data/climate.csv")
+source(here::here("R/sceptic_funcs.R"))
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
@@ -315,7 +307,7 @@ bind_rows(
       q975 = quantile(tcr, .975)
       )
   ) %>%
-  write_csv("Data/Robustness/tcr-marvel.csv")
+  write_csv(here("Results/Robustness/tcr-marvel.csv"))
 
 rm(tcr_eff1, tcr_eff2)
 
