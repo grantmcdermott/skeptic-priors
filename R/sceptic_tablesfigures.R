@@ -70,6 +70,8 @@ if (run_type == "main") {
       out = paste0(pref, "tab-3", suff, ".tex")
       )
   
+  rm(coefs_tab)
+  
   
   ########################################
   ### Table 4: Robustness checks (TCR) ###
@@ -129,6 +131,8 @@ if (run_type == "main") {
       out = paste0(pref, "tab-4.tex")
       )
   
+  rm(tcr_robust, tcr_robust_tab)
+  
   
   ####################
   ### Table 6: SCC ###
@@ -170,6 +174,8 @@ if (run_type == "main") {
       table.placement = "t", include.rownames = F,
       file = paste0(pref, "tab-6.tex")
       )
+  
+  rm(scc, scc_tab)
 
 }
 
@@ -229,9 +235,9 @@ tcr %>%
   mutate(run_type = run_type)
 
 
-###############################
-### Figure 2: TCR densities ###
-###############################
+#########################################
+### Figure 2: Recursive TCR estimates ###
+#########################################
 
 ## Only plot this figure for the main run
 if (run_type == "main") {
