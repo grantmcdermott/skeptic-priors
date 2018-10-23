@@ -139,7 +139,7 @@ evid_func <-
         ## PARALLEL SETUP.
         
         cl <- parallel::makeCluster(n_chains, type = cl_type, #"PSOCK"#"
-                                    outfile = here("BUGSFiles/Evidence/debug.txt")) # no. of clusters (i.e. MCMC chains)
+                                    outfile = here("R/Evidence/debug.txt")) # no. of clusters (i.e. MCMC chains)
         parLoadModule(cl, "lecuyer", quiet = T)
         clusterSetRNGStream(cl, 123)
         
