@@ -6,7 +6,10 @@ source(here::here("R/sceptic_funcs.R"))
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 chain_length <- 15000
-n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
+## The below below tries to optimize the number of parallel MCMC chains given
+## available CPUs, but balanced against the diminishing returns brought on by
+## repeating the burn-in period for each parallel worker. 
+n_chains <- n_chains_func(chain_length)
 
 ## NB: Decide whether using historical data only (and work *backwards* from most recent 
 ## date), or whether using simulated future data (and work *fowards* from earliest date).

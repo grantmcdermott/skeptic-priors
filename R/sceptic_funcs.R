@@ -78,6 +78,25 @@ prior_cols <- c("Strong Denier"="#1F78B4", "Moderate Denier"="#8BBDDA",
 ### FUNCTIONS ###
 #################
 
+
+####################################
+####################################
+## Optimal number of parallel chains
+## If each parallel worker has to implement a pre-defined burn-in period, then
+## you can actually *increase* the total computation time by adding additional
+## parallel processes (i.e. cores). This function guards against this outcome
+## in simple fashion by minimizing: t = chain_length/n_chains + n_chains*burn_in.
+## It does not account for any extra overhead in setting up the parallel process.
+## Related: See Amdahl's law (https://en.wikipedia.org/wiki/Amdahl%27s_law)
+n_chains_func <-
+  function(chain_length, burn_in=1000) { ## Assumes default burn-in of 1000
+    ifelse(
+      parallel::detectCores() >= round(sqrt(chain_length/burn_in)), 
+      round(sqrt(chain_length/burn_in)), 
+      parallel::detectCores()
+    )
+    }
+
 ######################################
 ######################################
 ## Global (highest) common denominator

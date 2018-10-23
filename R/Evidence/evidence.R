@@ -16,7 +16,10 @@ climate <- read_csv(here("Data/climate.csv"))
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 chain_length <- 9000
-n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
+## The below below tries to optimize the number of parallel MCMC chains given
+## available CPUs, but balanced against the diminishing returns brought on by
+## repeating the burn-in period for each parallel worker. 
+n_chains <- n_chains_func(chain_length)
 
 ## Only need to compare forcings and (relevant) predicted temps, so which RCP  
 ## doesn't really matter.

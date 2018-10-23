@@ -34,12 +34,10 @@ climate <-
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
-## Function below ensures that the individual chains sum exactly to the desired
-## total chain length, whilst still making full use of the available CPUs for
-## for parallel processing power. (Note: If you want to use less than your full
-## CPU allotment, use e.g. "...sapply(1:(detectCores-1)), ...)". The extra 
-## parentheses is important.)
-n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
+## The below below tries to optimize the number of parallel MCMC chains given
+## available CPUs, but balanced against the diminishing returns brought on by
+## repeating the burn-in period for each parallel worker. 
+n_chains <- n_chains_func(chain_length)
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
