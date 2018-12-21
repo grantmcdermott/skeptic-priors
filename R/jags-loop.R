@@ -237,7 +237,7 @@ if(prior_type == "ni"){
     mutate(dev = fitted - had_full) %>%
     filter(!is.na(dev))
 
-  write_csv(y_dev, here("Data/Evidence/y-dev.csv"))
+  write_csv(y_dev, here("Results/Evidence/y-dev.csv"))
   rm(y_dev)
 }
 
@@ -247,3 +247,5 @@ rm(N, predictions)
 rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "temp2100")]
 
 return(rcp_loop=rcp_loop)
+
+gc()
