@@ -20,6 +20,7 @@ library(pbapply) ## Add progress bar to *apply functions
 library(tictoc) ## Simple timing wrappers
 library(R.cache) ## For caching results of long or complex functions 
 library(here) ## Smart management of relative paths and project files
+library(RhpcBLASctl) ## To control the number of optimized BLAS threads (e.g. OpenBLAS or MKL)
 
 ##################################
 ### GLOBAL ELEMENTS AND THEMES ###
@@ -40,8 +41,26 @@ priors_df <-
     convic_type = c("", "mod", "strong", "mod", "strong")
     )
 
+
+#################
+#################
+## Parallel setup
+
 ## Cluster type for parallel implementation (OS-dependent)
 cl_type <- ifelse(.Platform$OS.type == "windows", "PSOCK", "FORK")
+
+### NOTE: Rather set this in the main script:
+# ## Number of chains (i.e. parallel workers), although note diminshing returns
+# ## due to Amdahl's law: https://en.wikipedia.org/wiki/Amdahl%27s_law
+# n_chains <- parallel::detectCores()
+
+## Turn off BLAS multithreading (relevent if R is linked to OpenBLAS or MKL) to
+## avoid resource competition with explicit parallel processes called from R.
+RhpcBLASctl::blas_set_num_threads(1)
+
+##########
+##########
+## Figures
 
 ## Fira Sans font for figures. Download here: https://bboxtype.com/typefaces/FiraSans/#!layout=specimen
 ## Must then register with R. See here: https://github.com/wch/extrafont 
@@ -78,25 +97,6 @@ prior_cols <- c("Strong Denier"="#1F78B4", "Moderate Denier"="#8BBDDA",
 ### FUNCTIONS ###
 #################
 
-
-####################################
-####################################
-## Optimal number of parallel chains
-## If each parallel worker has to implement a pre-defined burn-in period, then
-## you can actually *increase* the total computation time by adding additional
-## parallel processes (i.e. cores). This function guards against this outcome
-## in simple fashion by minimizing: t = chain_length/n_chains + n_chains*burn_in.
-## It does not account for any extra overhead in setting up the parallel process.
-## Related: See Amdahl's law (https://en.wikipedia.org/wiki/Amdahl%27s_law)
-n_chains_func <-
-  function(chain_length, burn_in=1000) { ## Assumes default burn-in of 1000
-    ifelse(
-      parallel::detectCores() >= round(sqrt(chain_length/burn_in)), 
-      round(sqrt(chain_length/burn_in)), 
-      parallel::detectCores()
-    )
-    }
-
 ######################################
 ######################################
 ## Global (highest) common denominator
@@ -113,8 +113,8 @@ gcd <-
 
 #######################################
 #######################################
-### Decimal function 
-### (To make sure, e.g. three decimals places are always printed in tables)
+## Decimal function 
+## (To make sure, e.g. three decimals places are always printed in tables)
 
 decimals <- function(x, k) {
   as.double(format(round(x, k), nsmall = k))

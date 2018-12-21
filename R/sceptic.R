@@ -5,13 +5,14 @@ run_type <- "main"
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
 source(here::here("R/sceptic_funcs.R"))
 
-## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
+## Decide on total length of MCMC chains (i.e. summed parallel chains of the JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
-## The below below tries to optimize the number of parallel MCMC chains given
-## available CPUs, but balanced against the diminishing returns brought on by
-## repeating the burn-in period for each parallel worker. 
-n_chains <- n_chains_func(chain_length)
+
+## Now set the JAGS parallel MCMC parameters
+n_chains <- detectCores() ## no. of parallel chains. Use `detectCores()-1` if you are worried about CPU resources
+n_adapt = 5000 ## no. of tuning or adaptation steps
+burn_in = 1000 ## no. of burn-in steps
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
@@ -33,8 +34,8 @@ priors_loop <-
     
     ## Inner: Loop over climate scenarios
     if(prior_type == "ni")  {
-        # source("R/jags-loop.R", local = T) ## For vague noninformative riors using the rjags package
-        source(here("R/noninf-loop.R"), local = T) ## For "proportional" noninformative prors using the LearnBayes package
+        source("R/jags-loop.R", local = T) ## For vague noninformative riors using the rjags package
+        # source(here("R/noninf-loop.R"), local = T) ## For "proportional" noninformative prors using the LearnBayes package
       }
       else{
         source(here("R/jags-loop.R"), local = T)

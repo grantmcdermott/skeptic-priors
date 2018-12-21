@@ -15,16 +15,11 @@ rcp_loop <-
   
   bugs_file <- bugs_model_func
   
-  ##------------------------------------------------------------------------------
-  ## PARALLEL SETUP.
-  
-  cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
-  parLoadModule(cl, "lecuyer", quiet = T)
-  clusterSetRNGStream(cl, 123)
   
   ##------------------------------------------------------------------------------
-  ## SPECIFY THE DATA AND INITIALIZE THE CHAINS.
+  ## SPECIFY THE DATA, INITIALIZATION VALUES AND PARAMETERS OF INTEREST.
   
+  ## Tell JAGS where the data are coming from
   data_list <- 
     list(
       "N" = N, "had" = clim_df$had, "trf" = clim_df$trf, 
@@ -32,32 +27,44 @@ rcp_loop <-
       "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
       )
   
+  ## Give JAGS some initialization values for the model parameters
   inits_list <- 
     function() {
-      list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0)
+      list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
       }
   
-  ##------------------------------------------------------------------------------
-  ## RUN THE CHAINS/MCMC SAMPLES.
-  
-  ## Which parameters should R keep track of?
+  ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
   parameters <- c("alpha", "beta", "gamma", "delta", "eta", "sigma", "phi", "y_pred")
+  
+  
+  ##------------------------------------------------------------------------------
+  ## PARALLEL SETUP.
+  
+  cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
+  parLoadModule(cl, "lecuyer", quiet = T)
+  clusterSetRNGStream(cl, 123)
+  
+  
+  ##------------------------------------------------------------------------------
+  ## RUN THE MODEL IN PARALLEL.
+  
   ## Initialisation
   par_inits <- parallel.inits(inits_list, n.chains = n_chains) 
   ## Create the JAGS model object
   parJagsModel(
     cl, name = "jags_mod", file = bugs_file, 
-    data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000,
+    data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = n_adapt,
     quiet = T
     )
   ## Burn-in
-  parUpdate(cl, "jags_mod", n.iter = 1000, progress.bar = "none")
+  parUpdate(cl, "jags_mod", n.iter = burn_in, progress.bar = "none")
   ## Now we run the full model samples
   mod_iters <- chain_length/n_chains
   mod_samples <- 
     parCodaSamples(
-      cl, "jags_mod", variable.names = parameters,
-      n.iter = mod_iters, n.chain = n_chains,
+      cl, model = "jags_mod", 
+      variable.names = parameters,
+      n.iter = mod_iters,
       progress.bar = "none"
       )
   
@@ -71,6 +78,8 @@ rcp_loop <-
   # summary(mod_samples)
   # quantile(mod_samples, probs = c(5, 50, 95)/100)
   #   
+  # mod_samples[,1:6] %>% gelman.plot() 
+  # mod_samples[,1:3] %>% plot(); mod_samples[,4:6] %>% plot()
   # geweke.diag(mod_samples)
   # heidel.diag(mod_samples)
   # raftery.diag(mod_samples)

@@ -24,7 +24,7 @@ Once *R* and JAGS are successfully set up on your system, you will need to insta
 
 ```r
 if (!require("pacman")) install.packages("pacman")
-pacman::p_install(c(LearnBayes, rjags, R2jags, dclone, snow, grid, gridExtra, tidyverse, devtools, hrbrthemes, ggridges, RColorBrewer, stargazer, xtable, pbapply, tictoc, extrafont, R.cache, here))
+pacman::p_install(c(LearnBayes, rjags, R2jags, dclone, snow, grid, gridExtra, tidyverse, devtools, hrbrthemes, ggridges, RColorBrewer, stargazer, xtable, pbapply, tictoc, extrafont, R.cache, here, RhpcBLASctl))
 devtools::install_github("johnbaums/jagstools")
 pacman::p_update()
 ```
