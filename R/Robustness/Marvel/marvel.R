@@ -4,10 +4,10 @@ source(here::here("R/sceptic_funcs.R"))
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
-## The below below tries to optimize the number of parallel MCMC chains given
-## available CPUs, but balanced against the diminishing returns brought on by
-## repeating the burn-in period for each parallel worker. 
-n_chains <- n_chains_func(chain_length)
+## Now set the JAGS parallel MCMC parameters
+n_chains <- detectCores() ## no. of parallel chains. Use `detectCores()-1` if you are worried about CPU resources
+n_adapt = 5000 ## no. of tuning or adaptation steps
+burn_in = 1000 ## no. of burn-in steps
 
 rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855)
 
@@ -42,14 +42,15 @@ url2 <- "_MIDYEAR_RADFORCING.DAT"
 rcps <-
   bind_rows(
     mapply(function(x, y) {
-      tbl_df(read.table(paste0(url1, x, url2), skip = 59, header = T)) %>%
+      read.table(paste0(url1, x, url2), skip = 59, header = T) %>%
+        as_tibble() %>%
         mutate(rcp = y)
-    },
-    c("3PD", "45", "6", "85"), ## "x" variable vector
-    paste0("rcp", c(26, 45, 60, 85)), ## "y" variable vector
-    SIMPLIFY = F
+      },
+      c("3PD", "45", "6", "85"), ## "x" variable vector
+      paste0("rcp", c(26, 45, 60, 85)), ## "y" variable vector
+      SIMPLIFY = F
+      )
     )
-  )
 
 colnames(rcps) <- gsub("_rf", "", tolower(colnames(rcps)))
 
@@ -134,25 +135,53 @@ tcr_eff1 <-
         climate_eff %>%
         filter(rcp == "rcp26") %>%
         filter(year <= 2005) %>%
-        select_("had", x, "volc_eff", "soi", "amo") %>%
+        select_("had", x, "volc_eff", "soi_mean", "amo_mean") %>%
         rename_("trf_eff" = x)
       
-      theta_sample_eff <- 
-        blinreg(
-          y = clim_df$had, 
-          X = cbind(alpha=1, beta=clim_df$trf_eff, gamma=clim_df$volc_eff, delta=clim_df$soi, eta=clim_df$amo), 
-          m = chain_length
+      ## Get noninformative priors
+      m <- filter(priors_df, prior_type=="ni")$mu
+      s <- filter(priors_df, prior_type=="ni")$sigma
+      
+      mu_beta <- m/3.71
+      sigma_beta <- s/3.71
+      
+      N <- nrow(clim_df)
+      
+      ##------------------------------------------------------------------------------
+      ## THE BUGS/JAGS MODEL.
+      bugs_file <- bugs_model_func
+      
+      ## Tell JAGS where the data are coming from
+      data_list <- 
+        list(
+          "N" = N, "had" = clim_df$had, "trf" = clim_df$trf_eff, 
+          "volc" = clim_df$volc_eff, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
+          "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
           )
       
-      tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
+      ## Give JAGS some initialization values for the model parameters
+      inits_list <- 
+        function() {
+          list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
+          }
       
-      tcr_df <- data_frame(tcr, series = x)
+      ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
+      parameters <- c("beta")
       
-      rm(theta_sample_eff)
+      ## Run the parallel JAGS model
+      mod_samples_eff <- 
+        jags_par_model(
+          bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+          )
+      
+      ## Get TCR
+      tcr <- as.vector(as.matrix(mod_samples_eff, iters = F)) * rf2x
+      ## Put in a DF
+      tcr_df <- tibble(tcr, series = x)
       
       return(tcr_df)
     }
-  ) %>%
+    ) %>%
   bind_rows()
 
 tcr_eff1 %>%
@@ -207,11 +236,11 @@ eff_func(1.55, 1.05)
 
 ## Set chain (and rf2x) length to reduce time needed for large loop over the
 ## t-distribution sampling below
-chain_length <- 9000
-rf2x <- rf2x[1:chain_length]
+old_chain_length <- chain_length; chain_length <- 9000
+old_rf2x <- rf2x; rf2x <- rf2x[1:chain_length]
 
 tcr_eff2 <-
-  pblapply(1:10000, function(x) {
+  pblapply(1:1000, function(x) {
     
     rcps_eff <-
       rcps %>%
@@ -244,26 +273,56 @@ tcr_eff2 <-
       filter(rcp == "rcp26") %>%
       filter(year <= 2005)
     
-    theta_sample_eff <- 
-      blinreg(
-        y = clim_df$had, 
-        X = cbind(alpha=1, beta=clim_df$trf_eff, gamma=clim_df$volc_eff, delta=clim_df$soi, eta=clim_df$amo), 
-        m = chain_length
+    ## Get noninformative priors
+    m <- filter(priors_df, prior_type=="ni")$mu
+    s <- filter(priors_df, prior_type=="ni")$sigma
+    # prior_type <- priors_df[j, ]$prior_type
+    # convic_type <- priors_df[j, ]$convic_type 
+    
+    mu_beta <- m/3.71
+    sigma_beta <- s/3.71
+    
+    N <- nrow(clim_df)
+    
+    ##------------------------------------------------------------------------------
+    ## THE BUGS/JAGS MODEL.
+    bugs_file <- bugs_model_func
+    
+    ## Tell JAGS where the data are coming from
+    data_list <- 
+      list(
+        "N" = N, "had" = clim_df$had, "trf" = clim_df$trf_eff, 
+        "volc" = clim_df$volc_eff, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
+        "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
         )
     
-    tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
+    ## Give JAGS some initialization values for the model parameters
+    inits_list <- 
+      function() {
+        list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
+        }
     
+    ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
+    parameters <- c("beta")
+    
+    ## Run the serial JAGS model
+    mod_samples_eff <- 
+      jags_model(
+        bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+        )
+    
+    ## Get TCR
+    tcr <- (as.matrix(as.mcmc(mod_samples_eff)))[, "beta"] * rf2x
+    ## Put in DF
     tcr_df <- 
-      data_frame(tcr, series = x) %>%
+      tibble(tcr, series = x) %>%
       sample_frac(0.05) ## Sample 5% (to reduce size of combined data frame)
-    
-    rm(theta_sample_eff)
     
     return(tcr_df)
     
-  },
-  cl = n_chains ## parallel option for pbapply package
-  ) %>%
+    },
+    cl = n_chains ## parallel option for pbapply package
+    ) %>%
   bind_rows()
 
 tcr_eff2 %>%
@@ -306,7 +365,11 @@ bind_rows(
   ) %>%
   write_csv(here("Results/Robustness/tcr-marvel.csv"))
 
-rm(tcr_eff1, tcr_eff2)
+## Restore old chain_length and rf2x
+chain_length <- old_chain_length
+rf2x <- old_rf2x
+
+rm(tcr_eff1, tcr_eff2, old_chain_length, old_rf2x)
 
 
 

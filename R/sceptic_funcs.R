@@ -34,7 +34,7 @@ climate <- read_csv(here("Data/climate.csv"))
 
 ## Priors data frame
 priors_df <- 
-  data_frame(
+  tibble(
     mu = c(0, 1, 1, 0, 0),
     sigma = c(100, 0.25, 0.065, 0.25, 0.065),
     prior_type = c("ni", "luke", "luke", "den", "den"),
@@ -243,6 +243,76 @@ bugs_model_func_me <-
   }
 
 
+###############################################
+###############################################
+## JAGS model (instead of rewriting every time)
+## Function arguments are:
+## (1) `data_list`: Tell JAGS where the data are coming from.
+## (2) `inits_list`: Initialization values for the model parameters
+## (3) `parameters`: Which parameters to keep track of (i.e. return posterior distributions for)?
+
+## Serial (i.e. non-parallel) version
+jags_model <-
+  function(bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters) {
+    
+    ## Create the JAGS model object
+    jags_mod <- 
+      jags(
+        model.file = bugs_file,
+        data = data_list,
+        inits = inits_list,
+        parameters.to.save = parameters,
+        n.chains = 1, 
+        n.iter = chain_length + burn_in, 
+        n.burnin = burn_in, 
+        n.thin=1,
+        progress.bar = "none"
+        )
+    
+    return(jags_mod)
+  }
+
+
+## Parallel version of the above
+jags_par_model <-
+  function(bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters) {
+    
+    ##------------------------------------------------------------------------------
+    ## PARALLEL SETUP.
+    cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
+    parLoadModule(cl, "lecuyer", quiet = T)
+    clusterSetRNGStream(cl, 123)
+    
+    
+    ##------------------------------------------------------------------------------
+    ## RUN THE MODEL IN PARALLEL.
+    ## Initialisation
+    par_inits <- parallel.inits(inits_list, n.chains = n_chains) 
+    ## Create the JAGS model object
+    parJagsModel(
+      cl, name = "jags_mod", file = bugs_file, 
+      data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = n_adapt,
+      quiet = T
+      )
+    ## Burn-in
+    parUpdate(cl, "jags_mod", n.iter = burn_in, progress.bar = "none")
+    ## Now we run the full model samples
+    mod_iters <- chain_length/n_chains
+    mod_samples <- 
+      parCodaSamples(
+        cl, model = "jags_mod", 
+        variable.names = parameters,
+        n.iter = mod_iters,
+        progress.bar = "none"
+        )
+    
+    ##------------------------------------------------------------------------------
+    ## STOP PARALLEL PROCESS
+    parallel::stopCluster(cl)
+    
+    return(mod_samples)
+    }
+
 
 ######################################
 ######################################
@@ -362,7 +432,7 @@ tcr_plot <-
       lapply(prior_names[1:4], function(x){
         df <- p_df %>% filter(prior==x)
         tcr_grid <- seq(from=qnorm(0.0001,df$mu,df$sigma), to=qnorm(0.9999,df$mu,df$sigma), length=100)
-        data_frame(
+        tibble(
           tcr = tcr_grid,
           height = dnorm(tcr_grid, mean=df$mu, sd=df$sigma),
           prior = x
@@ -375,7 +445,7 @@ tcr_plot <-
         tcr_df <- filter(tcr, prior==x)
         tcr_df <- density(tcr_df$tcr)
         out <- 
-          data_frame(
+          tibble(
             tcr=tcr_df$x, 
             height=tcr_df$y,
             prior = x
@@ -426,7 +496,7 @@ tcr_plot_priors <-
       lapply(prior_names[1:4], function(x){
         df <- p_df %>% filter(prior==x)
         tcr_grid <- seq(from=qnorm(0.0001,df$mu,df$sigma), to=qnorm(0.9999,df$mu,df$sigma), length=100)
-        data_frame(
+        tibble(
           tcr = tcr_grid,
           height = dnorm(tcr_grid, mean=df$mu, sd=df$sigma),
           prior = x
@@ -439,7 +509,7 @@ tcr_plot_priors <-
         tcr_df <- filter(tcr, prior==x)
         tcr_df <- density(tcr_df$tcr)
         out <- 
-          data_frame(
+          tibble(
             tcr=tcr_df$x, 
             height=tcr_df$y,
             prior = x

@@ -24,55 +24,38 @@ rcp_loop <-
   ## THE BUGS/JAGS MODEL.
   
   bugs_file <- bugs_model_func_me
+
   
   ##------------------------------------------------------------------------------
-  ## PARALLEL SETUP.
+  ## SPECIFY THE DATA, INITIALIZATION VALUES AND PARAMETERS OF INTEREST.
   
-  cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
-  parLoadModule(cl, "lecuyer", quiet = T)
-  clusterSetRNGStream(cl, 123)
-  
-  ##------------------------------------------------------------------------------
-  ## SPECIFY THE DATA AND INITIALIZE THE CHAINS.
+  ## Tell JAGS where the data are coming from
   ## Notes: Adding "had_omega" (or cw_omega) to account for measurement errors
-  
   data_list <- 
     list(
       "N" = N, "had" = clim_df$had, "trf" = clim_df$trf, 
       "volc" = clim_df$volc_mean, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
       "mu_beta" = mu_beta, "sigma_beta" = sigma_beta, 
       "had_omega" = clim_df$had_omega
-    )
+      )
+  
+  ## Give JAGS some initialization values for the model parameters
   inits_list <- 
     function() {
       list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0)
       }
 
-  ##------------------------------------------------------------------------------
-  ## RUN THE CHAINS/MCMC SAMPLES.
-  
-  ## Which parameters should R keep track of?
+  ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
   parameters <- c("alpha", "beta", "gamma", "delta", "eta", "sigma", "phi", "y_pred")
-  ## Initialisation
-  par_inits <- parallel.inits(inits_list, n.chains = n_chains) 
-  ## Create the JAGS model object
-  parJagsModel(
-    cl, name = "jags_mod", file = bugs_file, 
-    data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000,
-    quiet = T
-    )
-  ## Burn-in
-  parUpdate(cl, "jags_mod", n.iter = 1000, progress.bar = "none")
-  ## Now we run the full model samples
-  mod_iters <- chain_length/n_chains
-  mod_samples <- 
-    parCodaSamples(
-      cl, "jags_mod", variable.names = parameters,
-      n.iter = mod_iters, n.chain = n_chains,
-      progress.bar = "none"
-      )
   
-  parallel::stopCluster(cl)
+  
+  ##------------------------------------------------------------------------------
+  ## RUN THE PARALLEL JAGS MODEL.
+  
+  mod_samples <- 
+    jags_par_model(
+      bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+      )
   
   ##------------------------------------------------------------------------------
   ## SUMMARY AND DIAGNOSTICS
@@ -94,7 +77,7 @@ rcp_loop <-
     coefs_df <-
       as.matrix(mod_samples[, c(1:7)], iters = F) %>%
       # data.frame() %>% 
-      as_data_frame() %>%
+      as_tibble() %>%
       gather(coef, values)
     
     ## Get summary statistics for tables ##
@@ -112,7 +95,7 @@ rcp_loop <-
     
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
     tcr <- 
-      data_frame(
+      tibble(
         beta = filter(coefs_df, coef == "beta")$values,
         prior = paste0(prior_type, convic_type)
         ) 
@@ -150,7 +133,7 @@ rcp_loop <-
   ## Summarise temperature predictions over 1866-2100 ##
   
   predictions <- jagsresults(mod_samples, params = "y_pred", regex = T)
-  predictions <- as_data_frame(predictions[, c("mean", "2.5%", "97.5%")])
+  predictions <- as_tibble(predictions[, c("mean", "2.5%", "97.5%")])
   colnames(predictions) <- c("mean", "q025", "q975")
   
   predictions$series <- i #rcp_type
@@ -161,7 +144,7 @@ rcp_loop <-
     select(year, everything())
   
   ## Full distribution of temps in 2100 by themselves 
-  temp2100 <- as_data_frame(as.matrix(mod_samples[, "y_pred[235]"]))
+  temp2100 <- as_tibble(as.matrix(mod_samples[, "y_pred[235]"]))
   colnames(temp2100) <- "temp"
   temp2100$rcp <- i #rcp_type 
   temp2100$prior <- paste0(prior_type, convic_type) 
@@ -183,7 +166,7 @@ N <- rcp_loop$N[1,"N"]
 ## Add historic temperature obs to predictions data frame
 predictions <- 
   bind_rows(
-    data_frame(
+    tibble(
       year = climate$year[1:N],
       series = "had_full",
       stat = "mean",
@@ -229,7 +212,7 @@ rm(fig_4, fig_4_dir, fig_4_lab)
 
 ## Zoom in on historic record with comparison between model and measurement error
 bind_rows(
-  data_frame(
+  tibble(
     year = climate$year[c(1:N)],
     series = "had_full",
     mean = climate$had_full[c(1:N)],

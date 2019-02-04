@@ -1,5 +1,5 @@
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source(here("R/sceptic_funcs.R"))
+source(here::here("R/sceptic_funcs.R"))
 
 ## Optional for replication
 set.seed(123) 
@@ -7,13 +7,14 @@ set.seed(123)
 ## Load climate data
 climate <- read_csv(here("Data/climate.csv"))
 
-## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
+## Decide on total length of MCMC chains (i.e. summed parallel chains of the JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
-## The below below tries to optimize the number of parallel MCMC chains given
-## available CPUs, but balanced against the diminishing returns brought on by
-## repeating the burn-in period for each parallel worker. 
-n_chains <- n_chains_func(chain_length)
+
+## Now set the JAGS parallel MCMC parameters
+n_chains <- detectCores() ## no. of parallel chains. Use `detectCores()-1` if you are worried about CPU resources
+n_adapt = 5000 ## no. of tuning or adaptation steps
+burn_in = 1000 ## no. of burn-in steps
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
@@ -33,26 +34,55 @@ tcr_secondary <-
     
     clim_df <-
       climate %>%
-      filter(rcp == "rcp26") %>%
+      filter(rcp == rcp_type) %>%
       filter(year <= 2005) %>%
-      select(had, cw, giss, trf, volc, soi, amo) %>%
+      select(had, cw, giss, trf, volc, soi_mean, amo_mean) %>%
       gather(series, temp, had:giss) %>%
-      filter(series == x)
+      filter(series == x) %>%
+      filter(!is.na(temp))
     
-    ## Using the automated LearnBayes commands
-    theta_sample <- blinreg(clim_df$temp, 
-                            cbind(alpha = 1, 
-                                  beta = clim_df$trf, 
-                                  gamma = clim_df$volc, 
-                                  delta = clim_df$soi, 
-                                  eta = clim_df$amo), 
-                            chain_length)
+    ## Get noninformative priors
+    m <- filter(priors_df, prior_type=="ni")$mu
+    s <- filter(priors_df, prior_type=="ni")$sigma
     
-    tcr <- as.data.frame(theta_sample[[1]])$Xbeta * rf2x
+    mu_beta <- m/3.71
+    sigma_beta <- s/3.71
     
-    tcr_df <- data_frame(tcr, series = x)
+    N <- nrow(clim_df)
     
-    rm(theta_sample)
+    ##------------------------------------------------------------------------------
+    ## THE BUGS/JAGS MODEL.
+    bugs_file <- bugs_model_func
+    
+    ## Tell JAGS where the data are coming from
+    ## Notes: Using "clim_df$temp" for the "had" variable, since this is actually changing
+    ## depending on the data source. (Easier than re-writing the BUGS model func.)
+    data_list <- 
+      list(
+        "N" = N, "had" = clim_df$temp, "trf" = clim_df$trf, 
+        "volc" = clim_df$volc, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
+        "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
+        )
+    
+    ## Give JAGS some initialization values for the model parameters
+    inits_list <- 
+      function() {
+        list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
+        }
+    
+    ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
+    parameters <- c("beta")
+    
+    ## Run the parallel JAGS model
+    mod_samples <- 
+      jags_par_model(
+        bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+        )
+    
+    ## Get TCR
+    tcr <- as.vector(as.matrix(mod_samples, iters = F)) * rf2x
+    ## Put in a DF
+    tcr_df <- tibble(tcr, series = x)
     
     return(tcr_df)
     
@@ -133,5 +163,5 @@ stargazer(tcr_secondary_tab,
           notes.align = "l",
           notes = c("\\footnotesize All estimates are computed using noninformative priors."),
           # type = "text" 
-          out = here("Robustness/TablesFigures/tcr-secondary.tex")
+          out = here("TablesFigures/Untracked/Robustness/tcr-secondary.tex")
           )

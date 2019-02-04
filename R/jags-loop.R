@@ -38,38 +38,13 @@ rcp_loop <-
   
   
   ##------------------------------------------------------------------------------
-  ## PARALLEL SETUP.
-  
-  cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
-  parLoadModule(cl, "lecuyer", quiet = T)
-  clusterSetRNGStream(cl, 123)
-  
-  
-  ##------------------------------------------------------------------------------
-  ## RUN THE MODEL IN PARALLEL.
-  
-  ## Initialisation
-  par_inits <- parallel.inits(inits_list, n.chains = n_chains) 
-  ## Create the JAGS model object
-  parJagsModel(
-    cl, name = "jags_mod", file = bugs_file, 
-    data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = n_adapt,
-    quiet = T
-    )
-  ## Burn-in
-  parUpdate(cl, "jags_mod", n.iter = burn_in, progress.bar = "none")
-  ## Now we run the full model samples
-  mod_iters <- chain_length/n_chains
+  ## RUN THE PARALLEL JAGS MODEL.
+
   mod_samples <- 
-    parCodaSamples(
-      cl, model = "jags_mod", 
-      variable.names = parameters,
-      n.iter = mod_iters,
-      progress.bar = "none"
+    jags_par_model(
+      bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
       )
-  
-  parallel::stopCluster(cl)
-  
+
   
   ##------------------------------------------------------------------------------
   ## SUMMARY AND DIAGNOSTICS
@@ -93,7 +68,7 @@ rcp_loop <-
     coefs_df <-
       as.matrix(mod_samples[, c(1:7)], iters = F) %>%
       # data.frame() %>% 
-      as_data_frame() %>%
+      as_tibble() %>%
       gather(coef, values)
     
     ## Get summary statistics for tables ##
@@ -111,7 +86,7 @@ rcp_loop <-
     
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
     tcr <- 
-      data_frame(
+      tibble(
         beta = filter(coefs_df, coef == "beta")$values,
         prior = paste0(prior_type, convic_type)
         ) 
@@ -148,7 +123,7 @@ rcp_loop <-
   
   ## Summarise temperature predictions over 1866-2100 ##
   predictions <- jagsresults(mod_samples, params = "y_pred", regex = T)
-  predictions <- as_data_frame(predictions[, c("mean", "2.5%", "97.5%")])
+  predictions <- as_tibble(predictions[, c("mean", "2.5%", "97.5%")])
   colnames(predictions) <- c("mean", "q025", "q975")
   
   predictions$series <- i #rcp_type
@@ -159,7 +134,7 @@ rcp_loop <-
     select(year, everything())
   
   ## Full distribution of temps in 2100 by themselves 
-  temp2100 <- as_data_frame(as.matrix(mod_samples[, "y_pred[235]"]))
+  temp2100 <- as_tibble(as.matrix(mod_samples[, "y_pred[235]"]))
   colnames(temp2100) <- "temp"
   temp2100$rcp <- i #rcp_type 
   temp2100$prior <- paste0(prior_type, convic_type) 
@@ -181,7 +156,7 @@ N <- rcp_loop$N[1,"N"]
 ## Add historic temperature obs to predictions data frame
 predictions <- 
   bind_rows(
-    data_frame(
+    tibble(
       year = climate$year[1:N],
       series = "had_full",
       stat = "mean",
@@ -247,5 +222,3 @@ rm(N, predictions)
 rcp_loop <- rcp_loop[c("coefs_tab", "tcr", "temp2100")]
 
 return(rcp_loop=rcp_loop)
-
-gc()

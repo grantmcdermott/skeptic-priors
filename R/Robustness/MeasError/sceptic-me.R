@@ -31,21 +31,21 @@ climate <-
     cw_omega = cw_1sigma
     )
 
-## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
+## Decide on total length of MCMC chains (i.e. summed parallel chains of the JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
-## The below below tries to optimize the number of parallel MCMC chains given
-## available CPUs, but balanced against the diminishing returns brought on by
-## repeating the burn-in period for each parallel worker. 
-n_chains <- n_chains_func(chain_length)
+
+## Now set the JAGS parallel MCMC parameters
+n_chains <- detectCores() ## no. of parallel chains. Use `detectCores()-1` if you are worried about CPU resources
+n_adapt = 5000 ## no. of tuning or adaptation steps
+burn_in = 1000 ## no. of burn-in steps
 
 ## Set radiative forcing distribution used for calulating TCRs later in code.
 ## Centered around 3.71 °C +/- 10% (within 95% CI). 
 ## Length of disbn equals length of MCMC chain for consistency
 rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
 
-## Run the nested loop (takes about two and a half minutes on my laptop)
-
+## Run the nested loop (takes about 15 minutes on my laptop)
 ## Outer: Loop over priors ##
 priors_loop <-
   pblapply(1:nrow(priors_df), function(j){

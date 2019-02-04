@@ -19,7 +19,7 @@ burn_in = 1000 ## no. of burn-in steps
 ## Length of disbn equals length of MCMC chain for consistency
 rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855) 
 
-# Run the nested loop (takes about 1min on my laptop)
+# Run the nested loop (takes about 10min on my laptop)
 ## Outer: Loop over priors ##
 priors_loop <-
   pblapply(1:nrow(priors_df), function(j){
