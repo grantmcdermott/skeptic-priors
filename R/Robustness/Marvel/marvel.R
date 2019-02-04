@@ -194,7 +194,7 @@ tcr_eff1 %>%
 #      series  mean  q025  q975
 #       <chr> <dbl> <dbl> <dbl>
 #     trf_eff   2.1   1.9   2.4
-# trf_eff_sig   1.6   1.4   1.7
+# trf_eff_sig   1.6   1.4   1.8
 
 tcr_eff1 %>%
   ggplot(aes(x = tcr, col = series)) +
@@ -331,9 +331,10 @@ tcr_eff2 %>%
     q025 = round(quantile(tcr, .025), 1),
     q975 = round(quantile(tcr, .975), 1)
     )
-#  mean  q025  q975
-# <dbl> <dbl> <dbl>
-#   1.9   0.4   3.4
+# # A tibble: 1 x 3
+#    mean  q025  q975
+#   <dbl> <dbl> <dbl>
+# 1   1.9  -0.1   3.4
 
 tcr_eff2 %>%
   # sample_frac(0.1) %>%
