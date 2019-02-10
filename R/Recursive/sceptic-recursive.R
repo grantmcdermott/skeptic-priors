@@ -5,11 +5,12 @@ run_type <- "recursive"
 source(here::here("R/sceptic_funcs.R"))
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
+
+## Now set the JAGS parallel MCMC parameters
 chain_length <- 15000
-## The below below tries to optimize the number of parallel MCMC chains given
-## available CPUs, but balanced against the diminishing returns brought on by
-## repeating the burn-in period for each parallel worker. 
-n_chains <- n_chains_func(chain_length)
+n_chains <- detectCores() ## no. of parallel chains. Use `detectCores()-1` if you are worried about CPU resources
+n_adapt = 5000 ## no. of tuning or adaptation steps
+burn_in = 1000 ## no. of burn-in steps
 
 ## NB: Decide whether using historical data only (and work *backwards* from most recent 
 ## date), or whether using simulated future data (and work *fowards* from earliest date).
