@@ -1,5 +1,5 @@
 ## NB: This script is best run from the shell ("~$ Rscript evidence.R"), *not* from
-## within the RStudio IDE. See description of `evid_func` below (+/- line 55).
+## within the RStudio IDE. See description of `evid_func` below (+/- line 58).
 
 ## Choose run type
 run_type <- "evidence"
@@ -223,8 +223,10 @@ df <-
 
 ####
 ## Run the function over the full range of sceptic priors
-## NOTE: Takes about 20 min to run on my laptop (12 core, 32 GB RAM). You may wish to skip 
-## diectly to the already-exported file ("Data/Evidence/tcr-evidence.csv") to avoid this wait.
+## NOTE: Takes about several hours to complete, even on a 16 core Linux server. (Admittedly, 
+## far from the biggest server, but much more powerful than most personal computers.) You 
+## may wish to skip directly to the already-exported file ("Data/Evidence/tcr-evidence.csv") 
+## to avoid this wait.
 tic()
 evid <- evid_func(df)
 toc()

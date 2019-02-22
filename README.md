@@ -12,7 +12,9 @@ The scripts for running the analysis can be found in the `R/` sub-directory. Cli
 
 ### Step 1. Install *R* (and RStudio)
 
-All of the analysis is conducted in the *R* programming environment. *R* is free, open-source and available for download [**here**](https://www.r-project.org/).  I highly recommend running *R* in the RStudio IDE, which you can also download for free [**here**](https://www.rstudio.com/products/rstudio/download/). 
+All of the analysis is conducted in the *R* programming environment. *R* is free, open-source and available for download [**here**](https://www.r-project.org/).  
+
+*Optional:* I normally recommend running *R* in the RStudio IDE, which you can also download for free [**here**](https://www.rstudio.com/products/rstudio/download/). However, note that most computationally-intensive model runs should be called directly from the terminal (e.g. using `Rscript`), since they employ a parallel forking process that, while very efficient, can cause problems if run through an IDE like RStudio. More details are provided in the relevant README files (e.g. [here](https://github.com/grantmcdermott/sceptic-priors/blob/master/R/Evidence/README.md).
 
 ### Step 2. Install JAGS
 
