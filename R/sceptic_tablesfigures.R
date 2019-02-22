@@ -90,7 +90,7 @@ if (run_type == "main") {
   ## Format for LaTeX export
   tcr_robust_tab <-
     tcr_robust %>%
-    rename_("Mean" = "mean", "Series" = "series") %>%
+    rename("Mean" = "mean", "Series" = "series") %>%
     mutate(
       Mean = 
         decimals(Mean, 1), "95% C.I." = paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]")
