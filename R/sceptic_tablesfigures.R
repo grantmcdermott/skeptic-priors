@@ -1,3 +1,6 @@
+## Default TablesFigures directory prefix if not already set by run type
+pref <- ifelse(!exists("pref"), here("TablesFigures/"), pref)
+
 ##########################
 ##########################
 ####    * TABLES *    ####
@@ -67,6 +70,8 @@ if (run_type == "main") {
       out = paste0(pref, "tab-3", suff, ".tex")
       )
   
+  rm(coefs_tab)
+  
   
   ########################################
   ### Table 4: Robustness checks (TCR) ###
@@ -74,20 +79,18 @@ if (run_type == "main") {
   
   ## Read and combine the main (noninformative) TCR outputs in a single table
   tcr_robust <- 
-    lapply(list.files("Results/Robustness", full.names = T), read_csv) %>%
+    lapply(list.files(here("Results/Robustness"), full.names = T), read_csv) %>%
     bind_rows()
   
   tcr_robust <-
     tcr_robust %>%
-    mutate(series = 
-             factor(series, levels = c("had", "cw", "giss", "me", "marvel_a", "marvel_b"))
-           ) %>%
+    mutate(series = factor(series, levels=c("had","cw","giss","me","marvel_a","marvel_b"))) %>%
     arrange(series)
   
   ## Format for LaTeX export
   tcr_robust_tab <-
     tcr_robust %>%
-    rename_("Mean" = "mean", "Series" = "series") %>%
+    rename("Mean" = "mean", "Series" = "series") %>%
     mutate(
       Mean = 
         decimals(Mean, 1), "95% C.I." = paste0("[", decimals(q025, 1), ", ", decimals(q975, 1), "]")
@@ -125,15 +128,17 @@ if (run_type == "main") {
       notes.align = "l",
       notes = c("\\footnotesize All estimates are computed using noninformative priors. See text for details."),
       # type = "text"
-      out = "TablesFigures/tab-4.tex"
+      out = paste0(pref, "tab-4.tex")
       )
+  
+  rm(tcr_robust, tcr_robust_tab)
   
   
   ####################
   ### Table 6: SCC ###
   ####################
   
-  scc <- read_csv("Results/PAGE09/scc.csv")
+  scc <- read_csv(here("Results/PAGE09/scc.csv"))
   
   scc_tab <-
     scc %>%
@@ -167,8 +172,10 @@ if (run_type == "main") {
     print(
       booktabs = T, caption.placement = "top", 
       table.placement = "t", include.rownames = F,
-      file = "TablesFigures/tab-6.tex"
+      file = paste0(pref, "tab-6.tex")
       )
+  
+  rm(scc, scc_tab)
 
 }
 
@@ -220,30 +227,32 @@ if (run_type == "main") {
 ## Summarise in tabular form
 tcr %>%
   group_by(prior) %>%
-  summarise(tcr_mean = decimals(mean(tcr), 1),
-            q025 = decimals(quantile(tcr, .025), 1),
-            q975 = decimals(quantile(tcr, .975), 1)) %>%
+  summarise(
+    tcr_mean = decimals(mean(tcr), 1),
+    q025 = decimals(quantile(tcr, .025), 1),
+    q975 = decimals(quantile(tcr, .975), 1)
+    ) %>%
   mutate(prior = match_priors(prior)) %>% 
   arrange(desc(tcr_mean)) %>% 
   mutate(run_type = run_type)
 
 
-###############################
-### Figure 2: TCR densities ###
-###############################
+#########################################
+### Figure 2: Recursive TCR estimates ###
+#########################################
 
 ## Only plot this figure for the main run
 if (run_type == "main") {
   lapply(c("historic", "future"), function(recurse_type) {
-    tcr_rec <- read_csv(paste0("Results/Recursive/tcr-rec-", recurse_type, ".csv"))
+    tcr_rec <- read_csv(here(paste0("Results/Recursive/tcr-rec-", recurse_type, ".csv")))
     fig_2 <- recursive_plot(tcr_rec)
-    fig_2_pref <- "TablesFigures/Untracked/"
+    fig_2_pref <- here("TablesFigures/Untracked/")
     fig_2_suff <- paste0("-", recurse_type)
     if(recurse_type == "historic"){
       fig_2 <- 
         fig_2 + 
         scale_x_reverse(breaks = seq(max(tcr_rec$year_to), min(tcr_rec$year_to), by = -30))
-      fig_2_pref <- "TablesFigures/"
+      fig_2_pref <- here("TablesFigures/")
       fig_2_suff <- ""
     }
     fig_2 +
@@ -268,19 +277,19 @@ if (run_type == "main") {
 
 if (run_type=="main") {
   ## Read data
-  evid <- read_csv("Results/Evidence/tcr-evidence.csv")
+  evid <- read_csv(here("Results/Evidence/tcr-evidence.csv"))
   
   ## Plot the data
   ## Years with red-white-blue colour scheme
   fig_3 <- evid_plot(evid)
   fig_3 +
     ggsave(
-      file = "TablesFigures/PNGs/fig-3.png",
+      file = paste0(pref, "PNGs/fig-3.png"),
       width = 8, height = 4
       )
   fig_3 +
     ggsave(
-      file = "TablesFigures/fig-3.pdf",
+      file = paste0(pref, "fig-3.pdf"),
       width = 8, height = 4,
       device = cairo_pdf
       )
@@ -290,12 +299,12 @@ if (run_type=="main") {
   fig_3_lines <- evid_plot_lines(evid) 
   fig_3_lines +
     ggsave(
-      file = "TablesFigures/Untracked/PNGs/fig-3-lines.png",
+      file = paste0(pref, "Untracked/PNGs/fig-3-lines.png"),
       width = 8, height = 4
     )
   fig_3_lines +
     ggsave(
-      file = "TablesFigures/Untracked/fig-3-lines.pdf",
+      file = paste0(pref, "Untracked/fig-3-lines.pdf"),
       width = 8, height = 4,
       device = cairo_pdf
     )
@@ -333,12 +342,14 @@ rm(fig_5)
 ## Summarise in tabular form
 temp2100 %>%
   group_by(rcp, prior) %>%
-  summarise(mean_2100 = decimals(mean(temp), 1),
-            q025 = decimals(quantile(temp, .025), 1),
-            q975 = decimals(quantile(temp, .975), 1)) %>%
+  summarise(
+    mean_2100 = decimals(mean(temp), 1),
+    q025 = decimals(quantile(temp, .025), 1),
+    q975 = decimals(quantile(temp, .975), 1)
+    ) %>%
   mutate(prior = match_priors(prior)) %>% 
-  group_by(prior) %>%
-  arrange(desc(mean_2100)) %>%
+  # group_by(rcp) %>%
+  arrange(desc(rcp), desc(mean_2100)) %>%
   mutate(run_type = run_type)
 
 
@@ -356,17 +367,17 @@ temp2100 %>%
 
 if (run_type=="main") {
   
-  scc <- read_csv("Results/PAGE09/scc.csv")
+  scc <- read_csv(here("Results/PAGE09/scc.csv"))
   
   fig_s2 <- scc_plot(scc)
   fig_s2 +
     ggsave(
-      file = "TablesFigures/PNGs/fig-s2.png",
+      file = paste0(pref, "PNGs/fig-s2.png"),
       width = 6, height = 4.5
       )
   fig_s2 +
     ggsave(
-      file = "TablesFigures/fig-s2.pdf",
+      file = paste0(pref, "fig-s2.pdf"),
       width = 6, height = 4.5,
       device = cairo_pdf
       )

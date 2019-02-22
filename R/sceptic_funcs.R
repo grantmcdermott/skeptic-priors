@@ -1,6 +1,8 @@
 ## Load packages ##
 library(LearnBayes) ## For simulating noninformative prior (using random multivarite normal command)
 library(rjags) ## For running the MCMC (Gibbs) sampler
+load.module("lecuyer") ## Extend JAGS with lecuyer module for RNG that avoids duplication across parallel chains
+library(R2jags) ## Mostly for writing JAGS/BUGS models as functions directly in R
 library(dclone) ## Allows parallel updating of JAGS models
 library(parallel) ## For parallel computing in R (either fork-based for *nix, or socket-based for Windows)
 library(jagstools) ## devtools::install_github("johnbaums/jagstools") Extract summary statistics from MCMC objects
@@ -15,14 +17,50 @@ library(extrafont) ## For additional fonts in ggplot2
 library(stargazer) ## For nice LaTeX tables
 library(xtable) ## Another LaTeX table option
 library(pbapply) ## Add progress bar to *apply functions
-
+library(tictoc) ## Simple timing wrappers
+library(R.cache) ## For caching results of long or complex functions 
+library(here) ## Smart management of relative paths and project files
+library(RhpcBLASctl) ## To control the number of optimized BLAS threads (e.g. OpenBLAS or MKL)
 
 ##################################
 ### GLOBAL ELEMENTS AND THEMES ###
 ##################################
 
+## Optional for replication
+set.seed(123) 
+
+## Load climate data
+climate <- read_csv(here("Data/climate.csv"))
+
+## Priors data frame
+priors_df <- 
+  tibble(
+    mu = c(0, 1, 1, 0, 0),
+    sigma = c(100, 0.25, 0.065, 0.25, 0.065),
+    prior_type = c("ni", "luke", "luke", "den", "den"),
+    convic_type = c("", "mod", "strong", "mod", "strong")
+    )
+
+
+#################
+#################
+## Parallel setup
+
 ## Cluster type for parallel implementation (OS-dependent)
-cl_type <- ifelse(.Platform$OS.type == "windows", "SOCK", "FORK")
+cl_type <- ifelse(.Platform$OS.type == "windows", "PSOCK", "FORK")
+
+### NOTE: Rather set this in the main script:
+# ## Number of chains (i.e. parallel workers), although note diminshing returns
+# ## due to Amdahl's law: https://en.wikipedia.org/wiki/Amdahl%27s_law
+# n_chains <- parallel::detectCores()
+
+## Turn off BLAS multithreading (relevent if R is linked to OpenBLAS or MKL) to
+## avoid resource competition with explicit parallel processes called from R.
+RhpcBLASctl::blas_set_num_threads(1)
+
+##########
+##########
+## Figures
 
 ## Fira Sans font for figures. Download here: https://bboxtype.com/typefaces/FiraSans/#!layout=specimen
 ## Must then register with R. See here: https://github.com/wch/extrafont 
@@ -75,8 +113,8 @@ gcd <-
 
 #######################################
 #######################################
-### Decimal function 
-### (To make sure, e.g. three decimals places are always printed in tables)
+## Decimal function 
+## (To make sure, e.g. three decimals places are always printed in tables)
 
 decimals <- function(x, k) {
   as.double(format(round(x, k), nsmall = k))
@@ -120,6 +158,162 @@ match_rcps <- function(x) {
 }
 
 
+
+#######################################################
+#######################################################
+## The BUGS model depending on beta priors and run type
+
+## Main and derivative runs (evidence and recursive)
+bugs_model_func <- 
+  function() {
+    
+    ## Regression model
+    
+    ### Initial values 
+    mu[1] <- alpha + beta*trf[1] + gamma*volc[1] + delta*soi[1] + eta*amo[1]
+    # had[1]  ~ dnorm(mu[1], tau)
+    # y_pred[1] ~ dnorm(mu[1], tau) ## Predictions
+    y_pred[1] <- mu[1]
+    epsilon[1] <- had[1] - mu[1]
+    ### Subsequent periods
+    for(t in 2:N) {
+      mu[t] <- alpha + beta*trf[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
+      had[t]  ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1)
+      y_pred[t] ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1) ## Predictions
+      epsilon[t] <- y_pred[t] - mu[t] - phi*epsilon[t-1] 
+    }
+    
+    ## Priors on all parameters
+    alpha ~ dnorm(0, 0.0001)            ## intercept
+    beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
+    tau_beta <- pow(sigma_beta, -2)
+    gamma ~ dnorm(0, 0.0001)            ## volc coef
+    delta ~ dnorm(0, 0.0001)            ## soi coef
+    eta ~ dnorm(0, 0.0001)              ## amo coef
+    sigma ~ dunif(0, 100)               ## Residual std dev
+    tau <- pow(sigma, -2)               ## Precision
+    phi ~ dunif(-1,1)                   ## AR(1) coef
+    tau_ar1 <- tau / (1-phi*phi)        ## AR(1)-adjusted precision
+    
+  }
+
+
+## "Measure error" version of the above
+bugs_model_func_me <- 
+  function() {
+    
+    ## Regression model
+    
+    ### Initial values 
+    mu[1] <- alpha + beta*trf[1] + gamma*volc[1] + delta*soi[1] + eta*amo[1]
+    # # Meas. error in variance of y, i.e.: y[t]* = y[t] + v[t], where Var(v[t]) = omega[t]
+    # # Note change in variance and tau formula because of combined normal distributions
+    # # See: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
+    # sigmasq_tot[1] <- pow(tau, -1) + pow(had_omega[t], 2)
+    # tau_tot[1] <- pow(sigmasq_tot[1], -1)
+    # had[1]  ~ dnorm(mu[1], tau_tot[1])
+    # y_pred[1] ~ dnorm(mu[1], tau_tot[1]) ## Predictions
+    y_pred[1] <- mu[1]
+    epsilon[1] <- had[1] - mu[1]
+    
+    ### Subsequent periods
+    for(t in 2:N) {
+      mu[t] <- alpha + beta*trf[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
+      # Meas. error in variance of y, i.e.: y[t]* = y[t] + v[t], where Var(v[t]) = omega[t]
+      # Note change in variance and tau formula because of combined normal distributions
+      # See: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
+      sigmasq_tot[t] <- pow(tau_ar1, -1) + pow(had_omega[t], 2)
+      tau_tot[t] <- pow(sigmasq_tot[t], -1)
+      had[t]  ~ dnorm(mu[t] + phi*epsilon[t-1], tau_tot[t])
+      y_pred[t] ~ dnorm(mu[t] + phi*epsilon[t-1], tau_tot[t]) ## Predictions
+      epsilon[t] <- y_pred[t] - mu[t] - phi*epsilon[t-1] 
+    }
+    
+    ## Priors on all parameters
+    alpha ~ dnorm(0, 0.0001)            ## intercept
+    beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
+    tau_beta <- pow(sigma_beta, -2)
+    gamma ~ dnorm(0, 0.0001)            ## volc coef
+    delta ~ dnorm(0, 0.0001)            ## soi coef
+    eta ~ dnorm(0, 0.0001)              ## amo coef
+    sigma ~ dunif(0, 100)               ## Residual std dev
+    tau <- pow(sigma, -2)               ## Precision
+    phi ~ dunif(-1,1)                   ## AR(1) coef
+    tau_ar1 <- tau / (1-phi*phi)        ## AR(1)-adjusted precision
+  }
+
+
+###############################################
+###############################################
+## JAGS model (instead of rewriting every time)
+## Function arguments are:
+## (1) `data_list`: Tell JAGS where the data are coming from.
+## (2) `inits_list`: Initialization values for the model parameters
+## (3) `parameters`: Which parameters to keep track of (i.e. return posterior distributions for)?
+
+## Serial (i.e. non-parallel) version
+jags_model <-
+  function(bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters) {
+    
+    ## Create the JAGS model object
+    jags_mod <- 
+      jags(
+        model.file = bugs_file,
+        data = data_list,
+        inits = inits_list,
+        parameters.to.save = parameters,
+        n.chains = 1, 
+        n.iter = chain_length + burn_in, 
+        n.burnin = burn_in, 
+        n.thin=1,
+        progress.bar = "none"
+        )
+    
+    return(jags_mod)
+  }
+
+
+## Parallel version of the above
+jags_par_model <-
+  function(bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters) {
+    
+    ##------------------------------------------------------------------------------
+    ## PARALLEL SETUP.
+    cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
+    parLoadModule(cl, "lecuyer", quiet = T)
+    clusterSetRNGStream(cl, 123)
+    
+    
+    ##------------------------------------------------------------------------------
+    ## RUN THE MODEL IN PARALLEL.
+    ## Initialisation
+    par_inits <- parallel.inits(inits_list, n.chains = n_chains) 
+    ## Create the JAGS model object
+    parJagsModel(
+      cl, name = "jags_mod", file = bugs_file, 
+      data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = n_adapt,
+      quiet = T
+      )
+    ## Burn-in
+    parUpdate(cl, "jags_mod", n.iter = burn_in, progress.bar = "none")
+    ## Now we run the full model samples
+    mod_iters <- chain_length/n_chains
+    mod_samples <- 
+      parCodaSamples(
+        cl, model = "jags_mod", 
+        variable.names = parameters,
+        n.iter = mod_iters,
+        progress.bar = "none"
+        )
+    
+    ##------------------------------------------------------------------------------
+    ## STOP PARALLEL PROCESS
+    parallel::stopCluster(cl)
+    
+    return(mod_samples)
+    }
+
+
 ######################################
 ######################################
 ####    * PLOTTING FUNCTIONS *    ####
@@ -133,7 +327,7 @@ match_rcps <- function(x) {
 coefs_plot <-
   function(coefs_df) {
     coefs_df %>%
-      mutate(coef = factor(coef, levels=c("alpha","beta","gamma", "delta","eta","sigma"))) %>%
+      mutate(coef = factor(coef, levels=c("alpha","beta","gamma", "delta","eta","sigma","phi"))) %>%
       ggplot(aes(x = values, group = coef)) +
       geom_density(alpha=0.2, fill="black") +
       facet_wrap(~coef, ncol = 2, scales = "free", labeller = label_parsed) +
@@ -238,7 +432,7 @@ tcr_plot <-
       lapply(prior_names[1:4], function(x){
         df <- p_df %>% filter(prior==x)
         tcr_grid <- seq(from=qnorm(0.0001,df$mu,df$sigma), to=qnorm(0.9999,df$mu,df$sigma), length=100)
-        data_frame(
+        tibble(
           tcr = tcr_grid,
           height = dnorm(tcr_grid, mean=df$mu, sd=df$sigma),
           prior = x
@@ -251,7 +445,7 @@ tcr_plot <-
         tcr_df <- filter(tcr, prior==x)
         tcr_df <- density(tcr_df$tcr)
         out <- 
-          data_frame(
+          tibble(
             tcr=tcr_df$x, 
             height=tcr_df$y,
             prior = x
@@ -302,7 +496,7 @@ tcr_plot_priors <-
       lapply(prior_names[1:4], function(x){
         df <- p_df %>% filter(prior==x)
         tcr_grid <- seq(from=qnorm(0.0001,df$mu,df$sigma), to=qnorm(0.9999,df$mu,df$sigma), length=100)
-        data_frame(
+        tibble(
           tcr = tcr_grid,
           height = dnorm(tcr_grid, mean=df$mu, sd=df$sigma),
           prior = x
@@ -315,7 +509,7 @@ tcr_plot_priors <-
         tcr_df <- filter(tcr, prior==x)
         tcr_df <- density(tcr_df$tcr)
         out <- 
-          data_frame(
+          tibble(
             tcr=tcr_df$x, 
             height=tcr_df$y,
             prior = x
@@ -361,7 +555,6 @@ recursive_plot <-
     ## to duplicate the series manually. Start by mutating a label column.
     tcr_rec <- 
       tcr_rec %>%
-      rename(prior = series) %>%
       arrange(prior) %>% 
       mutate(priorlab = prior)
     ## Next "rebind" the ni prior data in the way that can be easily faceted by  
@@ -391,14 +584,14 @@ recursive_plot <-
     ## Now we can plot the figure
     tcr_rec %>%
       mutate(prior = factor(match_priors(prior), levels=prior_names[c(5,1:4)])) %>% ## Plot NI first
-      ggplot(aes(x = year_to, y = mean, col = prior, fill = prior), lwd=0.5) +
-      geom_line(aes(y=q025, lty=prior)) +
-      geom_line(aes(y=q975, lty=prior)) +
+      ggplot(aes(x = year_to, y = tcr_mean, col = prior, fill = prior), lwd=0.5) +
+      geom_line(aes(y=tcr_q025, lty=prior)) +
+      geom_line(aes(y=tcr_q975, lty=prior)) +
       geom_ribbon(
         data= tcr_rec %>%
           filter(prior!="Noninformative") %>%
           mutate(prior = factor(match_priors(prior), levels=prior_names)),
-        aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.5
+        aes(ymin = tcr_q025, ymax = tcr_q975), lty = 0, alpha = 0.5
         ) +
       geom_line(lwd = .75) +
       labs(y = "Temperature anomaly (°C)\n") + 

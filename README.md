@@ -12,7 +12,9 @@ The scripts for running the analysis can be found in the `R/` sub-directory. Cli
 
 ### Step 1. Install *R* (and RStudio)
 
-All of the analysis is conducted in the *R* programming environment. *R* is free, open-source and available for download [**here**](https://www.r-project.org/).  I highly recommend running *R* in the RStudio IDE, which you can also download for free [**here**](https://www.rstudio.com/products/rstudio/download/). 
+All of the analysis is conducted in the *R* programming environment. *R* is free, open-source and available for download [**here**](https://www.r-project.org/).  
+
+*Optional:* I normally recommend running *R* in the RStudio IDE, which you can also download for free [**here**](https://www.rstudio.com/products/rstudio/download/). However, note that the most computationally-intensive model runs should be called directly from the terminal (e.g. using `Rscript`), since they employ a parallel forking process that, while very efficient, can cause problems if run through an IDE like RStudio. More details are provided in the relevant README files (e.g. [here](https://github.com/grantmcdermott/sceptic-priors/blob/master/R/Evidence/README.md)).
 
 ### Step 2. Install JAGS
 
@@ -24,12 +26,12 @@ Once *R* and JAGS are successfully set up on your system, you will need to insta
 
 ```r
 if (!require("pacman")) install.packages("pacman")
-pacman::p_install(c(LearnBayes, rjags, dclone, snow, grid, gridExtra, tidyverse, hrbrthemes, ggridges, RColorBrewer, stargazer, xtable, pbapply, extrafont, here))
+pacman::p_install(c(LearnBayes, rjags, R2jags, dclone, snow, grid, gridExtra, tidyverse, devtools, hrbrthemes, ggridges, RColorBrewer, stargazer, xtable, pbapply, tictoc, extrafont, R.cache, here, RhpcBLASctl))
 devtools::install_github("johnbaums/jagstools")
 pacman::p_update()
 ```
 
-The `extrafont` package is used to embed [Fira Sans](https://fonts.google.com/specimen/Fira+Sans) fonts in the figures. Please note that the Fira Sans font family must be installed separately on your system and also requires some minor setup before *R* recognizes it. See [here](https://github.com/wch/extrafont/blob/master/README.md) for instructions. However, you can also skip this setup if you want; the code is written in such a way that it will revert to *R*'s default font (Arial) if Fira Sans is unavailable.
+The `extrafont` package is used to embed Fira Sans fonts in the figures. Please note that the Fira Sans font family must be installed separately on your system (e.g. from [here](https://fonts.google.com/specimen/Fira+Sans)) and also requires some minor setup before *R* recognizes it (instructions [here](https://github.com/wch/extrafont/blob/master/README.md)). However, you can also skip this setup if you want; the code is written in such a way that it will revert to *R*'s default Arial font if Fira Sans is unavailable.
 
 ## Problems
 

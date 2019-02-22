@@ -1,23 +1,13 @@
-rm(list = ls()) # Clear data
-
 ## Load all packages, as well as some helper functions that will be used for plotting and tables
-source("R/sceptic_funcs.R")
-
-## Optional for replication
-set.seed(123) 
-
-## Load climate data
-climate <- read_csv("Data/climate.csv")
+source(here::here("R/sceptic_funcs.R"))
 
 ## Decide on total length of MCMC chains (i.e. summed parallel chains JAGS model)
 ## Each individual chain will thus be chain_length/n_chains.
 chain_length <- 30000
-## Function below ensures that the individual chains sum exactly to the desired
-## total chain length, whilst still making full use of the available CPUs for
-## for parallel processing power. (Note: If you want to use less than your full
-## CPU allotment, use e.g. "...sapply(1:(detectCores-1)), ...)". The extra 
-## parentheses is important.)
-n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
+## Now set the JAGS parallel MCMC parameters
+n_chains <- detectCores() ## no. of parallel chains. Use `detectCores()-1` if you are worried about CPU resources
+n_adapt = 5000 ## no. of tuning or adaptation steps
+burn_in = 1000 ## no. of burn-in steps
 
 rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855)
 
@@ -52,25 +42,28 @@ url2 <- "_MIDYEAR_RADFORCING.DAT"
 rcps <-
   bind_rows(
     mapply(function(x, y) {
-      tbl_df(read.table(paste0(url1, x, url2), skip = 59, header = T)) %>%
+      read.table(paste0(url1, x, url2), skip = 59, header = T) %>%
+        as_tibble() %>%
         mutate(rcp = y)
-    },
-    c("3PD", "45", "6", "85"), ## "x" variable vector
-    paste0("rcp", c(26, 45, 60, 85)), ## "y" variable vector
-    SIMPLIFY = F
+      },
+      c("3PD", "45", "6", "85"), ## "x" variable vector
+      paste0("rcp", c(26, 45, 60, 85)), ## "y" variable vector
+      SIMPLIFY = F
+      )
     )
-  )
 
 colnames(rcps) <- gsub("_rf", "", tolower(colnames(rcps)))
 
 ## Subset the data and change some column names for convenience.
 rcps <-
   rcps %>%
-  rename(year = years, 
-         trf_inclvolc = total_inclvolcanic, 
-         volc = volcanic_annual, 
-         anthro = total_anthro,
-         aerosols = totaer_dir) %>%
+  rename(
+    year = years, 
+    trf_inclvolc = total_inclvolcanic, 
+    volc = volcanic_annual, 
+    anthro = total_anthro,
+    aerosols = totaer_dir
+    ) %>%
   mutate(trf = trf_inclvolc - volc) 
 
 ## Adjust the relevant columns to match up with the MEA2016 forcings. Note that 
@@ -142,52 +135,79 @@ tcr_eff1 <-
         climate_eff %>%
         filter(rcp == "rcp26") %>%
         filter(year <= 2005) %>%
-        select_("had", x, "volc_eff", "soi", "amo") %>%
+        select_("had", x, "volc_eff", "soi_mean", "amo_mean") %>%
         rename_("trf_eff" = x)
       
-      theta_sample_eff <- blinreg(clim_df$had, 
-                                  cbind(alpha = 1, 
-                                        beta = clim_df$trf_eff,
-                                        gamma = clim_df$volc_eff, 
-                                        delta = clim_df$soi, 
-                                        eta = clim_df$amo), 
-                                  chain_length)
+      ## Get noninformative priors
+      m <- filter(priors_df, prior_type=="ni")$mu
+      s <- filter(priors_df, prior_type=="ni")$sigma
       
-      tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
+      mu_beta <- m/3.71
+      sigma_beta <- s/3.71
       
-      tcr_df <- data_frame(tcr, series = x)
+      N <- nrow(clim_df)
       
-      rm(theta_sample_eff)
+      ##------------------------------------------------------------------------------
+      ## THE BUGS/JAGS MODEL.
+      bugs_file <- bugs_model_func
+      
+      ## Tell JAGS where the data are coming from
+      data_list <- 
+        list(
+          "N" = N, "had" = clim_df$had, "trf" = clim_df$trf_eff, 
+          "volc" = clim_df$volc_eff, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
+          "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
+          )
+      
+      ## Give JAGS some initialization values for the model parameters
+      inits_list <- 
+        function() {
+          list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
+          }
+      
+      ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
+      parameters <- c("beta")
+      
+      ## Run the parallel JAGS model
+      mod_samples_eff <- 
+        jags_par_model(
+          bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+          )
+      
+      ## Get TCR
+      tcr <- as.vector(as.matrix(mod_samples_eff, iters = F)) * rf2x
+      ## Put in a DF
+      tcr_df <- tibble(tcr, series = x)
       
       return(tcr_df)
     }
-  ) %>%
+    ) %>%
   bind_rows()
 
 tcr_eff1 %>%
   group_by(series) %>%
-  summarise(mean = round(mean(tcr), 1),
-            q025 = round(quantile(tcr, .025), 1),
-            q975 = round(quantile(tcr, .975), 1)) 
+  summarise(
+    mean = round(mean(tcr), 1),
+    q025 = round(quantile(tcr, .025), 1),
+    q975 = round(quantile(tcr, .975), 1)
+    ) 
 #      series  mean  q025  q975
 #       <chr> <dbl> <dbl> <dbl>
 #     trf_eff   2.1   1.9   2.4
-# trf_eff_sig   1.6   1.4   1.7
+# trf_eff_sig   1.6   1.4   1.8
 
 tcr_eff1 %>%
   ggplot(aes(x = tcr, col = series)) +
   geom_vline(xintercept = 1.55, lwd = .25, lty = 4) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   xlim(-1, 3) + 
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2) +
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
   scale_colour_brewer(palette = "Set1", name = "") +
   scale_linetype(name = "Landuse separate?") +
   theme(
-    text = element_text(family = font_type),
     legend.position = "bottom"
-  )
+    )
 
 
 #######################################################
@@ -207,22 +227,20 @@ tcr_eff1 %>%
 ## Simplifying, we can write this as a function that takes the mean (m) and lower
 # 95% CI (lc) as inputs, before returning a single, random draw from the 
 # resulting t distribution.
-eff_func <- function(m, lc){
-  rt(1, df=4)*(m - lc)/2.78 + m
-}
+eff_func <- 
+  function(m, lc){
+    rt(1, df=4)*(m - lc)/2.78 + m
+    }
 # E.g. For aerosols:
 eff_func(1.55, 1.05)
 
-## Load climate data
-# climate <- read_csv("Data/climate.csv")
-
 ## Set chain (and rf2x) length to reduce time needed for large loop over the
 ## t-distribution sampling below
-chain_length <- 9000
-rf2x <- rf2x[1:chain_length]
+old_chain_length <- chain_length; chain_length <- 9000
+old_rf2x <- rf2x; rf2x <- rf2x[1:chain_length]
 
 tcr_eff2 <-
-  pblapply(1:10000, function(x){
+  pblapply(1:1000, function(x) {
     
     rcps_eff <-
       rcps %>%
@@ -255,46 +273,77 @@ tcr_eff2 <-
       filter(rcp == "rcp26") %>%
       filter(year <= 2005)
     
-    theta_sample_eff <- blinreg(clim_df$had, 
-                                cbind(alpha = 1, 
-                                      beta = clim_df$trf_eff,
-                                      gamma = clim_df$volc_eff, 
-                                      delta = clim_df$soi, 
-                                      eta = clim_df$amo), 
-                                chain_length)
+    ## Get noninformative priors
+    m <- filter(priors_df, prior_type=="ni")$mu
+    s <- filter(priors_df, prior_type=="ni")$sigma
+    # prior_type <- priors_df[j, ]$prior_type
+    # convic_type <- priors_df[j, ]$convic_type 
     
-    tcr <- as.data.frame(theta_sample_eff[[1]])$Xbeta * rf2x
+    mu_beta <- m/3.71
+    sigma_beta <- s/3.71
     
+    N <- nrow(clim_df)
+    
+    ##------------------------------------------------------------------------------
+    ## THE BUGS/JAGS MODEL.
+    bugs_file <- bugs_model_func
+    
+    ## Tell JAGS where the data are coming from
+    data_list <- 
+      list(
+        "N" = N, "had" = clim_df$had, "trf" = clim_df$trf_eff, 
+        "volc" = clim_df$volc_eff, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
+        "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
+        )
+    
+    ## Give JAGS some initialization values for the model parameters
+    inits_list <- 
+      function() {
+        list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
+        }
+    
+    ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
+    parameters <- c("beta")
+    
+    ## Run the serial JAGS model
+    mod_samples_eff <- 
+      jags_model(
+        bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+        )
+    
+    ## Get TCR
+    tcr <- (as.matrix(as.mcmc(mod_samples_eff)))[, "beta"] * rf2x
+    ## Put in DF
     tcr_df <- 
-      data_frame(tcr, series = x) %>%
+      tibble(tcr, series = x) %>%
       sample_frac(0.05) ## Sample 5% (to reduce size of combined data frame)
-    
-    rm(theta_sample_eff)
     
     return(tcr_df)
     
-  },
-  cl = n_chains ## parallel option for pbapply package
-  ) %>%
+    },
+    cl = n_chains ## parallel option for pbapply package
+    ) %>%
   bind_rows()
 
 tcr_eff2 %>%
-  summarise(mean = round(mean(tcr), 1),
-            q025 = round(quantile(tcr, .025), 1),
-            q975 = round(quantile(tcr, .975), 1))
-#  mean  q025  q975
-# <dbl> <dbl> <dbl>
-#   1.9   0.4   3.4
+  summarise(
+    mean = round(mean(tcr), 1),
+    q025 = round(quantile(tcr, .025), 1),
+    q975 = round(quantile(tcr, .975), 1)
+    )
+# # A tibble: 1 x 3
+#    mean  q025  q975
+#   <dbl> <dbl> <dbl>
+# 1   1.9  -0.1   3.4
 
 tcr_eff2 %>%
   # sample_frac(0.1) %>%
   ggplot(aes(x = tcr)) +
   geom_line(stat = "density") +
-  labs(x = expression(~degree*C), y = "Density") +
+  labs(x = expression("TCR"~"("*degree*C*")"), y = "Density") +
   # xlim(-1, 3) + 
   coord_cartesian(xlim=c(-1, 3)) + 
-  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf,
-           alpha = .2)  
+  annotate("rect", xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2)  
 
 bind_rows(
   tcr_eff1 %>%
@@ -315,9 +364,13 @@ bind_rows(
       q975 = quantile(tcr, .975)
       )
   ) %>%
-  write_csv("Data/Robustness/tcr-marvel.csv")
+  write_csv(here("Results/Robustness/tcr-marvel.csv"))
 
-rm(tcr_eff1, tcr_eff2)
+## Restore old chain_length and rf2x
+chain_length <- old_chain_length
+rf2x <- old_rf2x
+
+rm(tcr_eff1, tcr_eff2, old_chain_length, old_rf2x)
 
 
 
