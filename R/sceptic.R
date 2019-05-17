@@ -57,6 +57,8 @@ priors_loop <-
 list2env(priors_loop, .GlobalEnv) ## will take extract all the data frames
 rm(priors_loop)
 
+
+## Export the TCR values as parameterized normal distributions (used as input to the SCC calculations)
 if (run_type == "main") {
   tcr_distr <-
     map_df(
