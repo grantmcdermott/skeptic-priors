@@ -8,6 +8,7 @@ library(parallel) ## For parallel computing in R (either fork-based for *nix, or
 library(jagstools) ## devtools::install_github("johnbaums/jagstools") Extract summary statistics from MCMC objects
 library(grid) ## To adjust legend key width and size in ggplot2 themes that don't naturally support a grid
 library(gridExtra) ## Easier labelling in ggplot2 (e.g. annote with extrafont fonts)
+library(MASS) ## Just to fit/estimate parametric distributions for SCC calculation
 library(tidyverse)
 library(hrbrthemes) ## For the theme_ipsum() ggplot2 theme
 # library(cowplot) ## Added ggplot2 functionality and theme_cowplot() theme

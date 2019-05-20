@@ -58,6 +58,20 @@ list2env(priors_loop, .GlobalEnv) ## will take extract all the data frames
 rm(priors_loop)
 
 
+## Export the TCR values as parameterized normal distributions (used as input to the SCC calculations)
+if (run_type == "main") {
+  tcr_distr <-
+    map_df(
+      unique(tcr$prior),
+      function(p) {
+        fit <- fitdistr(filter(tcr, prior==p)$tcr, "normal")[[1]]
+        df <- tibble(prior = p, mean = fit["mean"], sd = fit["sd"])
+        }
+      )
+  write_csv(tcr_distr, here("Results/PAGE09/tcr-distr.csv"))
+}
+
+
 ##################################
 ### COMBINED TABLES AND GRAPHS ###
 ##################################
