@@ -1,4 +1,4 @@
-# Sceptic priors and climate policy
+# Sceptic priors and climate consensus
 
 This repository contains code and data for replicating my working paper, ["Sceptic priors and climate consensus"](https://drive.google.com/file/d/0B6AgOxtQA9dTcjRmZkNjMVhuVFU/view?usp=sharing). 
 
