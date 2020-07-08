@@ -13,7 +13,7 @@ rcp_loop <-
   ##------------------------------------------------------------------------------
   ## THE BUGS/JAGS MODEL.
   
-  bugs_file <- bugs_model_func
+  bugs_file <- bugs_model_func_anthro ## CHANGED
   
   
   ##------------------------------------------------------------------------------
@@ -22,7 +22,8 @@ rcp_loop <-
   ## Tell JAGS where the data are coming from
   data_list <- 
     list(
-      "N" = N, "had" = clim_df$had, "trf" = clim_df$trf, 
+      "N" = N, "had" = clim_df$had, "trf_less_anthro" = clim_df$trf_less_anthro, 
+      "anthro" = clim_df$anthro, ## NEW
       "volc" = clim_df$volc_mean, "soi" = clim_df$soi_mean, "amo" = clim_df$amo_mean,
       "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
       )
@@ -30,11 +31,11 @@ rcp_loop <-
   ## Give JAGS some initialization values for the model parameters
   inits_list <- 
     function() {
-      list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5)
+      list(alpha = 0, beta_anthro = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0.5) ## CHANGED
       }
   
   ## Which parameters should R keep track of (i.e. return the posterior distributions for)?
-  parameters <- c("alpha", "beta", "gamma", "delta", "eta", "sigma", "phi", "y_pred")
+  parameters <- c("alpha", "beta_anthro", "beta", "gamma", "delta", "eta", "sigma", "phi", "y_pred") ## CHANGED
   
   
   ##------------------------------------------------------------------------------
@@ -66,7 +67,7 @@ rcp_loop <-
     ## Convert coefficients MCMC list into data frame for later. First combines
     ## all chains into one matrix.
     coefs_df <-
-      as.matrix(mod_samples[, c(1:7)], iters = F) %>%
+      as.matrix(mod_samples[, c(1:8)], iters = F) %>% ## CHANGED
       # data.frame() %>% 
       as_tibble() %>%
       gather(coef, values)
@@ -80,37 +81,37 @@ rcp_loop <-
         q025 = quantile(values, 0.025),
         q975 = quantile(values, 0.975)
         ) %>% 
-      mutate(coef = factor(coef, levels=c("beta","gamma","delta","eta","alpha","sigma","phi"))) %>% 
+      mutate(coef = factor(coef, levels=c("beta_anthro", "beta","gamma","delta","eta","alpha","sigma","phi"))) %>% 
       mutate(prior = paste0(prior_type, convic_type)) %>%
       arrange(coef)
     
     ## Posterior TCRs, temp prediction at 2100 (and coefficient values) ##  
     tcr <- 
       tibble(
-        beta = filter(coefs_df, coef == "beta")$values,
+        beta_anthro = filter(coefs_df, coef == "beta_anthro")$values, ## CHANGED
         prior = paste0(prior_type, convic_type)
         ) 
-    tcr$tcr <- tcr$beta * rf2x
+    tcr$tcr <- tcr$beta_anthro * rf2x ## CHANGED 
     
   
-    if (prior_type=="ni") {
-      #############################################
-      ### Figure S1: Coefficient densities plot ###
-      #############################################
-      fig_s1 <- coefs_plot(coefs_df)
-      fig_s1 +
-        ggsave(
-          file = here("TablesFigures/PNGs/fig-s1.png"),
-          width = 8, height = 10
-          )
-      fig_s1 +
-        ggsave(
-          file = here("TablesFigures/fig-s1.pdf"),
-          width = 8, height = 10, 
-          device = cairo_pdf
-          )
-      rm(fig_s1)
-    } ## End of mini NI "if" clause
+    # if (prior_type=="ni") {
+    #   #############################################
+    #   ### Figure S1: Coefficient densities plot ###
+    #   #############################################
+    #   fig_s1 <- coefs_plot(coefs_df)
+    #   fig_s1 +
+    #     ggsave(
+    #       file = here("TablesFigures/Untracked/Robustness/PNGs/fig-s1-anthro.png"),
+    #       width = 8, height = 10
+    #       )
+    #   fig_s1 +
+    #     ggsave(
+    #       file = here("TablesFigures/Untracked/Robustness/fig-s1-anthro.pdf"),
+    #       width = 8, height = 10, 
+    #       device = cairo_pdf
+    #       )
+    #   rm(fig_s1)
+    # } ## End of mini NI "if" clause
     
     rm(coefs_df)
     
@@ -184,8 +185,8 @@ predictions <-
 ##########################################
 
 fig_4 <- pred_plot(predictions)
-fig_4_dir <- here(ifelse(prior_type=="ni", "TablesFigures/", "TablesFigures/Untracked/"))
-fig_4_lab <- ifelse(prior_type=="ni", "fig-4", paste0("fig-4-", prior_type, convic_type))
+fig_4_dir <- here("TablesFigures/Untracked/Robustness/")
+fig_4_lab <- paste0("fig-4-", prior_type, convic_type, "-anthro")
 fig_4 +
   ggsave(
     file = paste0(fig_4_dir, "PNGs/", fig_4_lab, ".png"),
@@ -195,26 +196,9 @@ fig_4 +
   ggsave(
     file = paste0(fig_4_dir, fig_4_lab, ".pdf"),
     width = 8, height = 6,
-    device = cairo_pdf
+    device = cairo_pdf 
     )
 rm(fig_4, fig_4_dir, fig_4_lab)
-
-if(prior_type == "ni"){
-  ## Lastly, export the mean, historic predicted temperature series (i.e. "fitted"),
-  ## together with the had obs, to the Evidence data folder. We'll be using the
-  ## difference between these series as noise when simulating future "true" temperatures
-  ## in the evidence section of the paper.
-  y_dev <-
-    predictions %>%
-    filter(series %in% c("had_full", "fitted")) %>%
-    select(year:mean) %>%
-    spread(series, mean) %>%
-    mutate(dev = fitted - had_full) %>%
-    filter(!is.na(dev))
-
-  write_csv(y_dev, here("Results/Evidence/y-dev.csv"))
-  rm(y_dev)
-}
 
 ## Remove data frames no longer needed
 rm(N, predictions)

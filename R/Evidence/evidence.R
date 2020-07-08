@@ -1,18 +1,25 @@
-# rm(list = ls()) # Clear data
+## NB: This script is best run from the shell ("~$ Rscript evidence.R"), *not* from
+## within the RStudio IDE. See description of `evid_func` below (+/- line 58).
 
-## Load all packages, as well as some helper functions that will be used for 
-## plotting and tables
-source("R/sceptic_funcs.R")
+## Choose run type
+run_type <- "evidence"
+
+# library(here)
+## Load all packages, as well as some helper functions that will be used for plotting and tables
+source(here::here("R/sceptic_funcs.R"))
 
 ## Optional for replication
 set.seed(123) 
 
-# ## Load climate data
-# climate <- read_csv("Data/climate.csv")
+## Load climate data
+climate <- read_csv(here("Data/climate.csv"))
 
 ## Decide on length of MCMC chains (including no. of chains in parallel JAGS model)
 chain_length <- 9000
-n_chains <- max(sapply(1:detectCores(), function(x) gcd(x, chain_length)))
+## The below below tries to optimize the number of parallel MCMC chains given
+## available CPUs, but balanced against the diminishing returns brought on by
+## repeating the burn-in period for each parallel worker. 
+n_chains <- n_chains_func(chain_length)
 
 ## Only need to compare forcings and (relevant) predicted temps, so which RCP  
 ## doesn't really matter.
@@ -21,9 +28,9 @@ rcp_type <- "rcp26"
 ## Limit climate DF to one RCP (doesn't matter which one) and then add model-derived 
 ## standard errors (deviations) to simulate "true" future values.
 climate <- 
-  read_csv("Data/climate.csv") %>%
+  climate %>%
   filter(rcp == rcp_type) 
-y_dev <- read_csv("Results/Evidence/y-dev.csv")
+y_dev <- read_csv(here("Results/Evidence/y-dev.csv"))
 climate$noise <- sample(y_dev$dev, nrow(climate), replace = T)
 
 ## Also add noise to future "mean" covariate values; otherwise collinearity 
@@ -57,9 +64,32 @@ rf2x <- rnorm(chain_length, mean = 3.71, sd = 0.1855)
 ## adjusted  if different thresholds are chosen.) The mean posterior TCR values  
 ## must be at least as big as the relevant threshold to qualify as fully converged  
 ## with mainstream. 
+## NOTE: This function, and hence the whole script, is best run from the shell
+## ("~$ Rscript evidence.R") and not from within the RStudio IDE when the cluster 
+## type (cl_type) is FORK. Otherwise the function will hang at random points in 
+## the loop, requiring manual stopping. See ?mcfork for more details. I still 
+## recommend FORK over SOCK when it is available (i.e. Linux or MacOS) because it 
+## is considerably (3x) faster and less memory intensive. That all being said, the
+## function also allows caching for recovering completed runs if a manual override
+## or exit does occur.
 evid_func <- 
   function(d){
-    pblapply(1:nrow(d), function(x){
+    lapply(1:nrow(d), function(x){
+    # pblapply(1:nrow(d), function(x){
+      
+      
+      # 1. Try to load cached data, if already generated
+      key <- list(x)
+      df_evid <- loadCache(key)
+      if (!is.null(df_evid)) {
+        cat(paste0("\nLoaded cached results ", x, " of ", nrow(d),"\n"))
+        return(df_evid);
+        yrs <<- df_evid$yrs[nrow(df_evid)]
+        yrs_j <<- df_evid$yrs_j[nrow(df_evid)]
+      }
+      
+      # 2. If not available, generate it.
+      cat(paste0("Generating new results ", x, " of ", nrow(d), "..."))
       
       m <- d[x, ]$mu
       s <- d[x, ]$sigma
@@ -67,14 +97,24 @@ evid_func <-
       thresh <- d[x, ]$threshold
       
       yr_max <- 2100
+      
+      yrs_j <<- ifelse(!exists("yrs_j"), 65, yrs_j)
 
-      yrs <<- ifelse(thresh == 1.5 & round(m, 1) == 1.0 & round(s, 3) == 0.250, #x == 122, ## i.e. first row where thresh == 1.5
-                     100, 
-                     ifelse(thresh == 1.3 & x == 1, 
-                            65, 
-                            ifelse(max_m != 1, 
-                                   yrs - 1, 
-                                   yrs_j))) 
+      yrs <<- 
+        ifelse(
+          !exists("yrs"),
+          65, ## If yrs variable doesn't exist, start from 65, else...
+          ifelse(
+            thresh==1.5 & round(m, 1)==1.0 & round(s, 3)==0.250, #x == 122, ## i.e. first row where thresh == 1.5
+            100,
+            ifelse(
+              max_m!=1,
+              yrs - 1,
+              yrs_j
+              )
+            )
+          )
+
       
       tcr_mean <- 0 ## Place holder value
       
@@ -88,78 +128,45 @@ evid_func <-
           climate %>%
           filter(year <= min(year) + yrs)
         
-        ##----------------------------------------------------------------------
-        ## THE BUGS/JAGS MODEL.
-        ## Note: Removing y_pred b/c predictions into the future not needed for
-        ## recursive regs.
         N <- nrow(clim_df)
         
         mu_beta <- m/3.71
         sigma_beta <- s/3.71
         
-        mod_string <- paste(
-          "model{
-          
-          for(t in 1:N) {
-          mu[t] <- alpha + beta*trf[t] + gamma*volc_sim[t] + delta*soi_sim[t] + eta*amo_sim[t]
-          had_sim[t]  ~ dnorm(mu[t], tau)
-          # y_pred[t] ~ dnorm(mu[t], tau) ## For predictions into the future
-          }
-          ", 
-          paste0(
-            "
-            mu_beta <- ", mu_beta),
-          paste0(
-            "
-            sigma_beta <- ", sigma_beta),
-          "
-          
-          ## Priors for all parameters   
-          alpha ~ dnorm(0, 0.0001)            ## intercept
-          beta ~ dnorm(mu_beta, tau_beta)     ## trf coef
-          tau_beta <- pow(sigma_beta, -2)
-          gamma ~ dnorm(0, 0.0001)            ## volc coef
-          delta ~ dnorm(0, 0.0001)            ## soi coef
-          eta ~ dnorm(0, 0.0001)              ## amo coef
-          sigma ~ dunif(0, 100)               ## Residual std dev
-          tau <- pow(sigma, -2)  	          
-          had0 ~ dnorm(0.0, 1.0E-6)           ## Initialising value
-          
-      }" 
-        ) 
+        ##------------------------------------------------------------------------------
+        ## THE BUGS/JAGS MODEL.
         
-        bugs_file <- paste("BUGSFiles/Evidence/evidence-bugs.txt")
-        writeLines(mod_string, con = bugs_file)
+        bugs_file <- bugs_model_func
         
-        load.module("lecuyer") ## JAGS module uses lecuyer random number generator (to avoid overlap/correlation in a parallel format)
-        
-        cl <- parallel::makeCluster(n_chains, type = cl_type) # no. of clusters (i.e. MCMC chains)
-        parLoadModule(cl, "lecuyer", quiet = T)
         
         ##------------------------------------------------------------------------------
-        ## INTIALIZE THE CHAINS.
+        ## SPECIFY THE DATA, INITIALIZATION VALUES AND PARAMETERS OF INTEREST.
         
-        data_list <- list("N" = N, "had_sim" = clim_df$had_sim, "trf" = clim_df$trf, 
-                          "volc_sim" = clim_df$volc_sim, 
-                          "soi_sim" = clim_df$soi_sim, "amo_sim" = clim_df$amo_sim)
-        inits_list <- function() {
-          list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1)
-        }
+        ## Tell JAGS where the data are coming from
+        ## Notes: Using "_sim" versions in case of future recursive type.
+        data_list <- 
+          list(
+            "N" = N, "had" = clim_df$had_sim, "trf" = clim_df$trf, 
+            "volc" = clim_df$volc_sim, "soi" = clim_df$soi_sim, "amo" = clim_df$amo_sim,
+            "mu_beta" = mu_beta, "sigma_beta" = sigma_beta
+            )
+        ## Give JAGS some initialization values for the model parameters
+        inits_list <- 
+          function() {
+            list(alpha = 0, beta = 0, gamma = 0, delta = 0, eta = 0, sigma = 0.1, phi = 0)
+            }
+        ## Which parameters should R keep track of (i.e. return the posterior distributions for)
+        parameters <- c("beta") ## Only need beta to calculate TCR
+        
         
         ##------------------------------------------------------------------------------
-        ## RUN THE CHAINS.
+        ## RUN THE PARALLEL JAGS MODEL.
         
-        parameters <- c("alpha", "beta", "gamma", "delta", "eta", "sigma"#, "y_pred"
-                        )
-        par_inits <- parallel.inits(inits_list, n.chains = n_chains) # Initialisation
-        
-        parJagsModel(cl, name = "jags_mod", file = bugs_file, 
-                     data = data_list, inits = par_inits, n.chains = n_chains, n.adapt = 1000)
-        parUpdate(cl, "jags_mod", n.iter = 1000) # burn-in
-        mod_iters <- chain_length/n_chains
-        mod_samples <- parCodaSamples(cl, "jags_mod", variable.names = parameters, 
-                                      n.iter = mod_iters, n.chain = n_chains) 
-        parallel::stopCluster(cl)
+        mod_samples <- 
+          jags_par_model(
+            bugs_file=bugs_file, data_list=data_list, inits_list=inits_list, parameters=parameters
+            )
+  
         
         ##------------------------------------------------------------------------------
         ## Get TCR coefficient (i.e. beta) and then use to get TCR.
@@ -167,7 +174,8 @@ evid_func <-
         tcr <- as.matrix(mod_samples[, "beta"], iters = F) * rf2x
         tcr_mean <- mean(tcr)
         
-        rm(bugs_file, cl, data_list, mod_samples, mod_string, par_inits, parameters, tcr)
+        rm(bugs_file, cl, data_list, mod_samples, par_inits, parameters, tcr)
+        gc()
         
       } ### end of while loop
       
@@ -178,16 +186,23 @@ evid_func <-
       ## Again, use "<<-" to assign value to global workspace for next iteration
       if(max_m == 1){yrs_j <<- yrs - 1}
       
-      df <- 
-        data_frame(mu = m,
-                   sigma = s,
-                   tcr_mean = tcr_mean,
-                   yrs = yrs,
-                   thresh = thresh)
+      df_evid <-
+        data_frame(
+          mu = m,
+          sigma = s,
+          tcr_mean = tcr_mean,
+          yrs = yrs,
+          yrs_j = yrs_j,
+          thresh = thresh
+          )
       
-      return(df)
+      cat("done\n")
+      saveCache(df_evid, key=key, comment="evidence()")
       
-    } ## end of pblapply function
+      return(df_evid)
+      on.exit(stopCluster(cl)) ## In case function crashes
+      
+    } ## end of function
     ) %>% ## end of pbapply
       bind_rows()
   } ## end of entire evid_func function
@@ -208,11 +223,14 @@ df <-
 
 ####
 ## Run the function over the full range of sceptic priors
-## NOTE: Takes about an hour to run on my laptop (16 GB RAM). You may wish to skip diectly
-## to the already-exported file ("Data/Evidence/tcr-evidence.csv") to avoid this wait.
+## NOTE: Takes about several hours to complete, even on a 16 core Linux server. (Admittedly, 
+## far from the biggest server, but much more powerful than most personal computers.) You 
+## may wish to skip directly to the already-exported file ("Data/Evidence/tcr-evidence.csv") 
+## to avoid this wait.
+tic()
 evid <- evid_func(df)
-# |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% Elapsed time: 55m 09s
+toc()
 rm(yrs, yrs_j)
 
 ## Write data
-write_csv(evid, "Results/Evidence/tcr-evidence.csv")
+write_csv(evid, here("Results/Evidence/tcr-evidence.csv"))

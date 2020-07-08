@@ -55,12 +55,12 @@ rcp_loop <-
       fig_s1 <- coefs_plot(coefs_df)
       fig_s1 +
         ggsave(
-          file = paste0("TablesFigures/PNGs/fig-s1.png"),
+          file = here("TablesFigures/PNGs/fig-s1.png"),
           width = 8, height = 10
           )
       fig_s1 +
         ggsave(
-          file = paste0("TablesFigures/fig-s1.pdf"),
+          file = here("TablesFigures/fig-s1.pdf"),
           width = 8, height = 10, 
           device = cairo_pdf
           )
@@ -94,10 +94,11 @@ rcp_loop <-
 
   predictions <-
     as_data_frame(
-      cbind(mean = apply(y_pred, 1, mean),
-            q025 = apply(y_pred, 1, quantile, probs = 0.025),
-            q975 = apply(y_pred, 1, quantile, probs = 0.975)
-            )
+      cbind(
+        mean = apply(y_pred, 1, mean),
+        q025 = apply(y_pred, 1, quantile, probs = 0.025),
+        q975 = apply(y_pred, 1, quantile, probs = 0.975)
+        )
       ) 
   
   predictions$series <- i #rcp_type
@@ -131,11 +132,12 @@ N <- rcp_loop$N[1,"N"]
 ## Add historic temperature obs to predictions data frame
 predictions <- 
   bind_rows(
-    data_frame(year = climate$year[1:N],
-               series = "had_full",
-               stat = "mean",
-               temp = climate$had_full[1:N]
-               ),
+    data_frame(
+      year = climate$year[1:N],
+      series = "had_full",
+      stat = "mean",
+      temp = climate$had_full[1:N]
+      ),
     predictions
     ) 
 
@@ -158,7 +160,7 @@ predictions <-
 ##########################################
 
 fig_4 <- pred_plot(predictions)
-fig_4_dir <- ifelse(prior_type=="ni", "TablesFigures/", "TablesFigures/Untracked/")
+fig_4_dir <- here(ifelse(prior_type=="ni", "TablesFigures/", "TablesFigures/Untracked/"))
 fig_4_lab <- ifelse(prior_type=="ni", "fig-4", paste0("fig-4-", prior_type, convic_type))
 fig_4 +
   ggsave(
@@ -185,7 +187,7 @@ y_dev <-
   mutate(dev = fitted - had_full) %>%
   filter(!is.na(dev))
 
-write_csv(y_dev, "Results/Evidence/y-dev.csv")
+write_csv(y_dev, here("Results/Evidence/y-dev.csv"))
 
 ## Remove data frames no longer needed
 rm(y_dev, N, predictions)
