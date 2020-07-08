@@ -1,6 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+renv/
 TESTING/
 Robustness/MeasError/test
 Data/rcp_flowchart.odp
