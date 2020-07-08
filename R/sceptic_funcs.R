@@ -199,6 +199,78 @@ bugs_model_func <-
   }
 
 
+## "CO2" version of the above
+bugs_model_func_co2 <- 
+  function() {
+    
+    ## Regression model
+    
+    ### Initial values 
+    mu[1] <- alpha + beta_co2*co2[1] + beta*trf_less_co2[1] + gamma*volc[1] + delta*soi[1] + eta*amo[1]
+    # had[1]  ~ dnorm(mu[1], tau)
+    # y_pred[1] ~ dnorm(mu[1], tau) ## Predictions
+    y_pred[1] <- mu[1]
+    epsilon[1] <- had[1] - mu[1]
+    ### Subsequent periods
+    for(t in 2:N) {
+      mu[t] <- alpha + beta_co2*co2[t] + beta*trf_less_co2[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
+      had[t]  ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1)
+      y_pred[t] ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1) ## Predictions
+      epsilon[t] <- y_pred[t] - mu[t] - phi*epsilon[t-1] 
+    }
+    
+    ## Priors on all parameters
+    alpha ~ dnorm(0, 0.0001)            ## intercept
+    beta_co2 ~ dnorm(mu_beta, tau_beta_co2) ## co2 coef
+    tau_beta_co2 <- pow(sigma_beta, -2)
+    beta ~ dnorm(0, 0.0001)             ## trc_less_co2 coef
+    gamma ~ dnorm(0, 0.0001)            ## volc coef
+    delta ~ dnorm(0, 0.0001)            ## soi coef
+    eta ~ dnorm(0, 0.0001)              ## amo coef
+    sigma ~ dunif(0, 100)               ## Residual std dev
+    tau <- pow(sigma, -2)               ## Precision
+    phi ~ dunif(-1,1)                   ## AR(1) coef
+    tau_ar1 <- tau / (1-phi*phi)        ## AR(1)-adjusted precision
+    
+  }
+
+
+## "anthro" version of the above
+bugs_model_func_anthro <- 
+  function() {
+    
+    ## Regression model
+    
+    ### Initial values 
+    mu[1] <- alpha + beta_anthro*anthro[1] + beta*trf_less_anthro[1] + gamma*volc[1] + delta*soi[1] + eta*amo[1]
+    # had[1]  ~ dnorm(mu[1], tau)
+    # y_pred[1] ~ dnorm(mu[1], tau) ## Predictions
+    y_pred[1] <- mu[1]
+    epsilon[1] <- had[1] - mu[1]
+    ### Subsequent periods
+    for(t in 2:N) {
+      mu[t] <- alpha + beta_anthro*anthro[t] + beta*trf_less_anthro[t] + gamma*volc[t] + delta*soi[t] + eta*amo[t]
+      had[t]  ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1)
+      y_pred[t] ~ dnorm(mu[t] + phi*epsilon[t-1], tau_ar1) ## Predictions
+      epsilon[t] <- y_pred[t] - mu[t] - phi*epsilon[t-1] 
+    }
+    
+    ## Priors on all parameters
+    alpha ~ dnorm(0, 0.0001)            ## intercept
+    beta_anthro ~ dnorm(mu_beta, tau_beta_anthro) ## anthro coef
+    tau_beta_anthro <- pow(sigma_beta, -2)
+    beta ~ dnorm(0, 0.0001)             ## trc_less_anthro coef
+    gamma ~ dnorm(0, 0.0001)            ## volc coef
+    delta ~ dnorm(0, 0.0001)            ## soi coef
+    eta ~ dnorm(0, 0.0001)              ## amo coef
+    sigma ~ dunif(0, 100)               ## Residual std dev
+    tau <- pow(sigma, -2)               ## Precision
+    phi ~ dunif(-1,1)                   ## AR(1) coef
+    tau_ar1 <- tau / (1-phi*phi)        ## AR(1)-adjusted precision
+    
+  }
+
+
 ## "Measure error" version of the above
 bugs_model_func_me <- 
   function() {

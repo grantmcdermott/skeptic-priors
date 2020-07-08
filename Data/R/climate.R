@@ -1,5 +1,3 @@
-# rm(list = ls()) # Clear data
-
 library(tidyverse)
 
 
@@ -17,7 +15,7 @@ had <-
     col.names = c("year","med","bias_025","bias_975","me_025","me_975","cvrg_025","cvrg_975",
                   "me_bias_025","me_bias_975","uncert_025", "uncert_975")
     ) %>%
-  as_data_frame()
+  as_tibble()
 
 ## Rename some columns and subset the data as needed
 had <- 
@@ -37,7 +35,7 @@ cw <-
     "http://www-users.york.ac.uk/~kdc3/papers/coverage2013/had4_krig_annual_v2_0_0.txt",
     col.names = c("year", "cw", "cw_1sigma", "cw_cvrg_1sigma", "cw_ensmbl_1sigma")
     ) %>%
-  as_data_frame()
+  as_tibble()
   
 cw <-
   cw %>%
@@ -55,7 +53,7 @@ giss <-
     "https://data.giss.nasa.gov/gistemp/tabledata_v3/GLB.Ts+dSST.csv",
     na.strings = c("***", "****"), stringsAsFactors = F, skip = 1
     ) %>%
-  as_data_frame()
+  as_tibble()
 
 ## Subset data
 giss <- 
@@ -121,7 +119,7 @@ rcps <-
   bind_rows(
     mapply(function(x, y) {
       read.table(paste0(url1, x, url2), skip = 59, header = T) %>%
-        as_data_frame() %>%
+        as_tibble() %>%
         mutate(rcp = y)
       },
       c("3PD", "45", "6", "85"), ## "x" variable vector
@@ -149,10 +147,9 @@ rcps <-
     other = cloud_tot + stratoz + tropoz + ch4oxstrath2o + landuse + bcsnow
     ) %>%
   select(
-    year, trf, volc, solar, anthro, ghg, co2ch4n2o, 
+    year, trf, volc, solar, anthro, ghg, co2ch4n2o, co2,
     fgassum, mhalosum, aerosols, other, rcp
     ) %>% 
-  # select(year, trf, volc, solar, anthro, co2, rcp) %>%
   group_by(rcp)
 
 
@@ -168,7 +165,7 @@ soi <-
     "http://www.cgd.ucar.edu/cas/catalog/climind/SOI.signal.ascii",
     na.strings = c("-99.9"), col.names = c("year", tolower(month.abb))
     ) %>%
-  as_data_frame()
+  as_tibble()
 
 soi <- 
   soi %>%
