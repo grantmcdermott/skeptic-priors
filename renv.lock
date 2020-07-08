@@ -272,10 +272,10 @@
     },
     "curl": {
       "Package": "curl",
-      "Version": "3.3",
+      "Version": "4.3",
       "Source": "Repository",
       "Repository": "RSPM",
-      "Hash": "c71bf321a357db97242bc233a1f99a55"
+      "Hash": "2b7d10581cc730804e9ed178c8374bd6"
     },
     "dbplyr": {
       "Package": "dbplyr",
@@ -349,7 +349,7 @@
     },
     "fansi": {
       "Package": "fansi",
-      "Version": "0.4.0",
+      "Version": "0.4.1",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "b31d9e5d051553d1177083aeba04b5b9"
@@ -433,10 +433,10 @@
     },
     "git2r": {
       "Package": "git2r",
-      "Version": "0.24.0",
+      "Version": "0.27.1",
       "Source": "Repository",
       "Repository": "RSPM",
-      "Hash": "471e9fdeac52a8cbe141ea293e9d64a7"
+      "Hash": "531a82d1beed1f545beb25f4f5945bf7"
     },
     "glue": {
       "Package": "glue",
