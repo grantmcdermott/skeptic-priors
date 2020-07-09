@@ -37,7 +37,7 @@ renv::restore()  ## Enter "y" when prompted
 
 ### Docker
 
-For those of you who don't feel like configuring a manual setup, I also provide a [Docker image](https://hub.docker.com/repository/docker/grantmcd/sceptic) that bundles all of the necessary elements. You'll also want to mount this repo on the running container so that you can access the actual scripts. For example, say that you've cloned this repo to `/home/yourname/sceptic-priors` on your computer. Then you would run
+For those of you who don't feel like configuring a manual setup, I also provide a [Docker image](https://hub.docker.com/repository/docker/grantmcd/sceptic) that bundles all of the necessary elements. You'll also want to mount this repo on the running container so that you can access the actual data and scripts. For example, say that you've cloned this repo to `/home/yourname/sceptic-priors` on your computer. Then you would run
 
 ```sh
 docker run -it --rm -v /home/yourname/sceptic-priors:/mnt/sceptic-priors grantmcd/sceptic /bin/bash
