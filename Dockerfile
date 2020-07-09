@@ -1,10 +1,12 @@
 FROM rocker/r-ver:3.5.1
-LABEL maintainer="sceptic"
+LABEL maintainer="Grant McDermott <grantmcd@uoregon.edu>"
 RUN export DEBIAN_FRONTEND=noninteractive; apt-get -y update \
   && apt-get install -y git-core \
 	jags \
 	libcairo2-dev \
 	libxml2-dev \
+	libcurl4-openssl-dev \
+	libssl-dev \
 	make \
 	pandoc \
 	pandoc-citeproc
