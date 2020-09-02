@@ -5,9 +5,11 @@ SaveWorkspace: Default
 AlwaysSaveHistory: Default
 
 EnableCodeIndexing: Yes
-UseSpacesForTab: Yes
+UseSpacesForTab: No
 NumSpacesForTab: 2
 Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+BuildType: Makefile
