@@ -131,8 +131,25 @@ climate =
 						amo_mean = fifelse(!is.na(amo), amo, mean(amo, na.rm = TRUE)))]
 
 ## Write the merged dataset to disk
-fwrite(climate, "data/climate.csv")
+fwrite(climate, here("data/climate.csv"))
 
+
+# Priors data frame -------------------------------------------------------
+
+## Define priors for our group of sceptics. For the noninformative prior, I'll
+## actually follow the Stan recommendations -- e.g. see rstanarm documentation --
+## for "weakly informative" priors with mean 0 (for centered data) and a std
+## deviation of 2.5 * sd(y) / sd(x)
+ni_sigma = climate[rcp=='rcp26' & year <= 2005, 2.5 * (sd(had)/sd(trf))]
+priors_df = 
+	data.table(
+		mu = c(0, 1, 1, 0, 0),
+		sigma = c(ni_sigma, 0.25, 0.065, 0.25, 0.065),
+		prior_type = c("ni", "luke", "luke", "den", "den"),
+		convic_type = c("", "mod", "strong", "mod", "strong")
+		)
+
+fwrite(priors_df, here("data/priors.csv"))
 
 
 # Dessler and Forster (2018) ----------------------------------------------
