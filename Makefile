@@ -6,7 +6,7 @@ standir = stan/
 resdir = results/
 
 ## Headline build
-all: $(datdir)climate.csv 
+all: $(datdir)climate.csv $(datdir)df18.fst $(datdir)priors.csv
 
 clean:
 	rm -f $(results_main) $(data) $(rawfiles)
@@ -23,6 +23,14 @@ raw: $(rdir)00-data-raw.R
 
 ## Prep Data
 $(datdir)climate.csv: $(rdir)01-data-prep.R $(rawdir)*
+	Rscript $<
+	rm Rplots.pdf
+
+$(datdir)priors.csv: $(rdir)01-data-prep.R $(datdir)climate.csv
+	Rscript $<
+	rm Rplots.pdf
+
+$(datdir)df18.fst: $(rdir)01-data-prep.R $(rawdir)df18.idlsave
 	Rscript $<
 	rm Rplots.pdf
 
