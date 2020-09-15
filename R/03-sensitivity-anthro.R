@@ -198,7 +198,7 @@ res$params_tab$run = 'anthro'
 
 # Export results ----------------------------------------------------------
 
-res_dir = 'results/robustness'
+res_dir = 'results/sensitivity'
 
 write_fst(res$tcr, here(res_dir, 'tcr-anthro.fst'))
 fwrite(res$params_tab, here(res_dir, 'params-anthro.csv'))
