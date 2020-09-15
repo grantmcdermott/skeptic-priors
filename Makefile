@@ -15,7 +15,7 @@ data: $(datdir)climate.csv $(datdir)priors.csv $(datdir)df18.fst
 stan: $(standir)mod-pred.stan $(standir)mod.stan
 main: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
-robustness: $(resdir)robustness/params-alt-gmst.csv
+robustness: $(resdir)robustness/params-alt-gmst.csv $(resdir)robustness/tcr-alt-gmst.csv
  
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
