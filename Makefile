@@ -12,11 +12,13 @@ resdir = results/
 all: data stan main sensitivity
 
 data: $(datdir)climate.csv $(datdir)priors.csv $(datdir)df18.fst
-stan: $(standir)mod-pred.stan $(standir)mod.stan $(standir)mod-anthro.stan
+stan: $(standir)mod-pred.stan $(standir)mod.stan $(standir)mod-anthro.stan \
+ $(standir)mod-me.stan
 main: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
 sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-alt-gmst.fst \
- $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst
+ $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst \
+ $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/tcr-me-gmst.fst
  
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
@@ -52,6 +54,11 @@ $(results_main) &: $(rdir)02-main.R $(standir)mod-pred.stan $(datdir)climate.csv
 #### a) Alt GMST series
 results_gmst_alt = $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-alt-gmst.fst
 $(results_gmst_alt) &: $(rdir)03-sensitivity-alt-gmst.R $(standir)mod.stan $(datdir)climate.csv
+	Rscript $<
+
+#### b) Measurement error in GMST
+results_me_gmst = $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/tcr-me-gmst.fst
+$(results_me_gmst) &: $(rdir)03-sensitivity-me-gmst.R $(standir)mod-me.stan $(datdir)climate.csv
 	Rscript $<
 
 #### e) Separate out anthropogenic forcings
