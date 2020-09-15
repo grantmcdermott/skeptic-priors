@@ -14,7 +14,8 @@ library(here)
 
 theme_set(theme_ipsum())
 
-## Progress bar output
+## Progress bar options and output
+options(progressr.enable = TRUE) ## For batch mode
 handlers(
   handler_progress(
     format   = ":spin :current/:total (:message) [:bar] :percent in :elapsed ETA: :eta",
@@ -58,8 +59,9 @@ rcps = c('rcp26', 'rcp45', 'rcp60', 'rcp85')
 
 # Set up loop function ----------------------------------------------------
 
-plan(multiprocess, workers = floor(availableCores()/n_chains))
+plan(multisession, workers = floor(availableCores()/n_chains))
 
+# res = 
 priors_loop = function() {
   pb = progressor(along = 1:nrow(priors_df))
   future_lapply(
@@ -73,6 +75,9 @@ priors_loop = function() {
       prior_type = priors_df$prior_type[j]
       convic_type = priors_df$convic_type[j]
       prior_convic = paste0(prior_type, convic_type)
+      
+      ## Progress bar
+      pb(sprintf("Prior = %s", prior_convic), class = "sticky")
       
       ## adjust subjective TCR priors to climate resistance scale 
       if (j!=1) {
@@ -144,13 +149,13 @@ priors_loop = function() {
               sdg = summary(fit$sampler_diagnostics())
               fwrite(sdg, here('stan/diagnostics/main', paste0(prior_convic, '.csv')))
               
-              color_scheme_set('blue')
+              color_scheme_set('blue'); theme_set(theme_ipsum())
               mcmc_trace(fit$draws(params), facet_args = list(labeller = label_parsed)) +
                 ggsave(here('stan/diagnostics/main', paste0('traceplot-', prior_convic, '.png')),
                        width = 8, height = 5)
 
               ## Posterior densities
-              color_scheme_set("darkgray")
+              color_scheme_set("darkgray");theme_set(theme_ipsum())
               mcmc_dens(fit$draws(params),
                         pars = params, alpha = 0.3,
                         facet_args = list(labeller = label_parsed, ncol = 2)) +
@@ -164,8 +169,8 @@ priors_loop = function() {
               ## Summary table
               params_tab = 
                 rbind(
-                  data.table(fit$summary(params, "mean", ~quantile(.x, probs = c(0.025, 0.975)))),
-                  tcr[, .('tcr', mean(tcr), quantile(tcr, .025), quantile(tcr, .975))],
+                  data.table(fit$summary(params, "mean", ~quantile(.x, probs = c(0.025, 0.975), na.rm = TRUE))),
+                  tcr[, .('tcr', mean(tcr), quantile(tcr, .025, na.rm = TRUE), quantile(tcr, .975, na.rm = TRUE))],
                   use.names = FALSE
                   )
               setnames(params_tab, 
@@ -182,31 +187,31 @@ priors_loop = function() {
             gmst_pred = 
               data.table(cbind(
                 year = seq(min(clim_df$year), length.out = nrow(clim_df)),
-                fit$summary(pred_params, "mean", ~quantile(.x, probs = c(0.025, 0.975)))
+                fit$summary(pred_params, "mean", ~quantile(.x, probs = c(0.025, 0.975), na.rm = TRUE))
                 ))[, variable := NULL][]
             setnames(gmst_pred, old = c('2.5%', '97.5%'), new = c('q025', 'q975'))
             gmst_pred$prior = prior_convic
             
             ## 2100 temps (full distributions) 
-            temp2100 = data.table(temp = as.matrix(fit$draws("y_pred[235]"))[, 1])
-            temp2100$rcp = i
-            temp2100$prior = prior_convic
+            gmst2100 = data.table(gmst = as.matrix(fit$draws("y_pred[235]"))[, 1])
+            gmst2100$rcp = i
+            gmst2100$prior = prior_convic
         
             return(list(tcr = tcr, 
                         params_tab = params_tab, 
                         gmst_pred = gmst_pred,
-                        temp2100 = temp2100))
+                        gmst2100 = gmst2100))
             }
           )
       
-      ## Recombine the sub-elements of the list based on their common indexes
-      rcp_loop = 
+      # Recombine the sub-elements of the list based on their common indexes
+      rcp_loop =
         do.call(function(...) {
           mapply(rbind, ..., SIMPLIFY = FALSE)
-          }, 
+          },
           args = rcp_loop)
       
-      ## Progress bar
+      # ## Progress bar
       pb(sprintf("Prior = %s", prior_convic), class = "sticky")
       
       return(rcp_loop)
@@ -218,19 +223,21 @@ priors_loop = function() {
 
 system.time(with_progress({res = priors_loop()}))
 
+# res
+
 ## Recombine the sub-elements of the list based on their common indexes
 res =
   do.call(function(...) mapply(rbind, ..., SIMPLIFY = FALSE), args = res)
 
 ## Get deviations of mean fitted values with actual HadCRUT obs. Will use this
-## series as noise when simulating the future "true" temperatures in the 
+## series as noise when simulating the future "true" temperatures in the
 ## "evidence" section of the code/paper.
-had_dev = 
+had_dev =
   merge(
-    climate[rcp=='rcp60' & !is.na(had_full), .(year, had_full)], 
+    climate[rcp=='rcp60' & !is.na(had_full), .(year, had_full)],
     res$gmst_pred[, .(year, mean)]
   ) %>%
-  .[, .(year, had_dev = mean - had_full)]  
+  .[, .(year, had_dev = mean - had_full)]
 
 # Export results ----------------------------------------------------------
 
@@ -239,7 +246,7 @@ had_dev =
 res_dir = 'results/main'
 
 write_fst(res$tcr, here(res_dir, 'tcr.fst'))
-write_fst(res$temp2100, here(res_dir, 'temp2100.fst'))
+write_fst(res$gmst2100, here(res_dir, 'gmst2100.fst'))
 fwrite(res$gmst_pred, here(res_dir, 'gmst-pred.csv'))
 fwrite(res$params_tab, here(res_dir, 'params-tab.csv'))
 fwrite(had_dev, here(res_dir, 'had-dev.csv'))
