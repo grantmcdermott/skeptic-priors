@@ -9,10 +9,13 @@ resdir = results/
 ## https://stackoverflow.com/a/59877127/4115816
 
 ## Headline build
-all: main robustness
+all: data stan main robustness
 
-main: $(results_main)
-robustness: $(resdir)robustness/params-tab-alt-gmst.csv
+data: $(datdir)climate.csv $(datdir)priors.csv $(datdir)df18.fst
+stan: $(standir)mod-pred.stan $(standir)mod.stan
+main: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
+ $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
+robustness: $(resdir)robustness/params-alt-gmst.csv
  
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
@@ -38,8 +41,8 @@ $(datdir)df18.fst: $(rdir)01-data-prep.R $(rawdir)df18.idlsave
 ## Results
 
 ### Main results
-results_main = $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst $(resdir)gmst-pred.csv \
- $(resdir)main/params-tab.csv $(resdir)main/had-dev.csv
+results_main = $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
+ $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
 $(results_main) &: $(rdir)02-main.R $(standir)mod-pred.stan $(datdir)climate.csv
 	Rscript $<
 
