@@ -1,12 +1,15 @@
 data {
-  int<lower=1> N; // number of obs (historic only)
-  real beta_mu;   // priors on climate resistance (via TCR)        
-  real<lower=0> beta_sigma; // priors on climate resistance (via TCR)
+  int<lower=1> N;            // number of obs (historic only)
+  real beta_mu;              // prior on climate resistance (via TCR)        
+  real<lower=0> beta_sigma;  // prior on climate resistance (via TCR)
+  real<lower=0> gamma_sigma; // weakly informative prior on volc
+  real<lower=0> delta_sigma; // weakly informative prior on soi
+  real<lower=0> eta_sigma;   // weakly informative prior on amo
   vector[N] gmst;
   vector[N] trf;    
-  vector[N] volc;      
+  vector[N] volc;     
+  vector[N] soi;
   vector[N] amo;      
-  vector[N] soi;      
 }
 parameters {
   real<lower=0> sigma;

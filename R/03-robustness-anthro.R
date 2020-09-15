@@ -98,8 +98,18 @@ priors_loop = function() {
 						# ** Specify data list and params -----------------------------
 						
 						N = nrow(clim_df)
-						# beta_other_mu = mean(clim_df$trf_anthro) ## 0
-						beta_other_sigma = 2.5 * sd(clim_df$had) / sd(clim_df$trf_other)
+						
+						## Standard deviation for weakly informative priors. Here I follow
+						## the advice of the Stan core team, using 2.5 * sd(y) / sd(x). The
+						## prior means of the centered data are ofc zero.
+						wi_sigma = function(gmst_var = 'had') {
+							sd_cols = setdiff(names(clim_df), c('year', gmst_var))
+							sd_cols = setdiff(sd_cols, names(which(!sapply(clim_df, is.numeric))))
+							clim_df[year<=2005 , 
+											lapply(.SD, function(x) round(2.5*sd(get(gmst_var))/sd(x), 2)), 
+											.SDcols = sd_cols]
+							}
+						prior_sigmas = wi_sigma()
 						
 						data_list = 
 							list(
@@ -109,7 +119,10 @@ priors_loop = function() {
 								'volc' = clim_df$volc_mean, 'soi' = clim_df$soi_mean, 
 								'amo' = clim_df$amo_mean,
 								'beta_mu' = beta_mu, 'beta_sigma' = beta_sigma,
-								'beta_other_mu' = 0, 'beta_other_sigma' = beta_other_sigma
+								'beta_other_sigma' = prior_sigmas$trf_other,
+								'gamma_sigma' = prior_sigmas$volc_mean,
+								'delta_sigma' = prior_sigmas$soi_mean,
+								'eta_sigma' = prior_sigmas$amo_mean
 							)
 						
 						

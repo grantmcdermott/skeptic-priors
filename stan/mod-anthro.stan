@@ -1,15 +1,17 @@
 data {
-  int<lower=1> N; // number of obs (historic only)
-  real beta_mu;   // priors on climate resistance (via TCR)        
-  real<lower=0> beta_sigma; // priors on climate resistance (via TCR)
-  real beta_other_mu;
-  real<lower=0> beta_other_sigma;
+  int<lower=1> N;                 // number of obs (historic only)
+  real beta_mu;                   // prior on climate resistance (via TCR)        
+  real<lower=0> beta_sigma;       // prior on climate resistance (via TCR)
+  real<lower=0> beta_other_sigma; // weakly informative prior on trf_other
+  real<lower=0> gamma_sigma;      // weakly informative prior on volc
+  real<lower=0> delta_sigma;      // weakly informative prior on soi
+  real<lower=0> eta_sigma;        // weakly informative prior on amo
   vector[N] gmst;
   vector[N] trf_anthro;
   vector[N] trf_other;    
-  vector[N] volc;      
+  vector[N] volc;     
+  vector[N] soi;  
   vector[N] amo;      
-  vector[N] soi;      
 }
 parameters {
   real<lower=0> sigma;
@@ -43,8 +45,8 @@ model {
   sigma ~ cauchy(0,5);
   alpha ~ normal(0, 1);
   beta ~ normal(beta_mu, beta_sigma);
-  beta_other ~ normal(beta_other_mu, beta_other_sigma);
-  gamma ~ normal(0, 1.92);
-  delta ~ normal(0, 0.54);
-  eta ~ normal(0, 3.37);
+  beta_other ~ normal(0, beta_other_sigma);
+  gamma ~ normal(0, gamma_sigma);
+  delta ~ normal(0, delta_sigma);
+  eta ~ normal(0, eta_sigma);
 }

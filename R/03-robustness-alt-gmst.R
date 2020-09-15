@@ -98,13 +98,28 @@ priors_loop = function() {
 						
 						N = nrow(clim_df)
 						
+						## Standard deviation for weakly informative priors. Here I follow
+						## the advice of the Stan core team, using 2.5 * sd(y) / sd(x). The
+						## prior means of the centered data are ofc zero.
+						wi_sigma = function(gmst_var = 'had') {
+							sd_cols = setdiff(names(clim_df), c('year', gmst_var))
+							sd_cols = setdiff(sd_cols, names(which(!sapply(clim_df, is.numeric))))
+							clim_df[year<=2005 , 
+											lapply(.SD, function(x) round(2.5*sd(get(gmst_var))/sd(x), 2)), 
+											.SDcols = sd_cols]
+							}
+						prior_sigmas = wi_sigma('gmst')
+						
 						data_list = 
 							list(
 								'N' = N, 
 								'gmst' = clim_df$gmst, 'trf' = clim_df$trf, 
 								'volc' = clim_df$volc_mean, 'soi' = clim_df$soi_mean, 
 								'amo' = clim_df$amo_mean,
-								'beta_mu' = beta_mu, 'beta_sigma' = beta_sigma
+								'beta_mu' = beta_mu, 'beta_sigma' = beta_sigma,
+								'gamma_sigma' = prior_sigmas$volc_mean,
+								'delta_sigma' = prior_sigmas$soi_mean,
+								'eta_sigma' = prior_sigmas$amo_mean
 							)
 						
 						
@@ -182,5 +197,5 @@ res$params_tab$run = 'alt-gmst'
 
 res_dir = 'results/robustness'
 
-write_fst(res$tcr, here(res_dir, 'tcr.fst'))
+write_fst(res$tcr, here(res_dir, 'tcr-alt-gmst.fst'))
 fwrite(res$params_tab, here(res_dir, 'params-alt-gmst.csv'))

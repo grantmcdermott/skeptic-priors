@@ -1,13 +1,16 @@
 data {
-  int<lower=1> N1; // number of obs (historic only)
-  int<lower=1> N2; // number of obs (incl. future)
-  real beta_mu; // priors on climate resistance (via TCR)        
-  real<lower=0> beta_sigma; // priors on climate resistance (via TCR)
+  int<lower=1> N1;           // number of obs (historic only)
+  int<lower=1> N2;           // number of obs (incl. future)
+  real beta_mu;              // prior on climate resistance (via TCR)        
+  real<lower=0> beta_sigma;  // prior on climate resistance (via TCR)
+  real<lower=0> gamma_sigma; // weakly informative prior on volc
+  real<lower=0> delta_sigma; // weakly informative prior on soi
+  real<lower=0> eta_sigma;   // weakly informative prior on amo
   vector[N1] gmst;
   vector[N2] trf;    
-  vector[N2] volc;      
+  vector[N2] volc;     
+  vector[N2] soi; 
   vector[N2] amo;      
-  vector[N2] soi;      
 }
 parameters {
   real<lower=0> sigma;
@@ -40,9 +43,9 @@ model {
   sigma ~ cauchy(0,5);
   alpha ~ normal(0, 1);
   beta ~ normal(beta_mu, beta_sigma);
-  gamma ~ normal(0, 1.92);
-  delta ~ normal(0, 0.54);
-  eta ~ normal(0, 3.37);
+  gamma ~ normal(0, gamma_sigma);
+  delta ~ normal(0, delta_sigma);
+  eta ~ normal(0, eta_sigma);
 }
 generated quantities {
   // Generating preditions for full sample, including future (N2 periods)
