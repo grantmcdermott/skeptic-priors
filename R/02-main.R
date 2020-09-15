@@ -61,7 +61,6 @@ rcps = c('rcp26', 'rcp45', 'rcp60', 'rcp85')
 
 plan(multisession, workers = floor(availableCores()/n_chains))
 
-# res = 
 priors_loop = function() {
   pb = progressor(along = 1:nrow(priors_df))
   future_lapply(
@@ -222,8 +221,6 @@ priors_loop = function() {
 # Run Stan models (with progress bar) -------------------------------------
 
 system.time(with_progress({res = priors_loop()}))
-
-# res
 
 ## Recombine the sub-elements of the list based on their common indexes
 res =
