@@ -9,15 +9,13 @@ resdir = results/
 ## https://stackoverflow.com/a/59877127/4115816
 
 ## Headline build
-all: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
- $(resdir)main/params-tab.csv $(resdir)main/had-dev.csv
+all: main robustness
+
+main: $(results_main)
+robustness: $(resdir)robustness/params-tab-alt-gmst.csv
+ 
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
-
-## Helpers
-.PHONY: all clean data
-.DELETE_ON_ERROR:
-.SECONDARY:
 
 ## Raw Data
 raw: $(rdir)00-data-raw.R
@@ -44,3 +42,14 @@ results_main = $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst $(resdir)gmst-pr
  $(resdir)main/params-tab.csv $(resdir)main/had-dev.csv
 $(results_main) &: $(rdir)02-main.R $(standir)mod-pred.stan $(datdir)climate.csv
 	Rscript $<
+
+### Robustness checks/results_main
+
+#### a) Alt GMST series
+$(resdir)robustness/params-tab-alt-gmst.csv: $(rdir)03-robustness-alt-gmst.R $(standir)mod.stan $(datdir)climate.csv
+	Rscript $<
+	
+## Helpers
+.PHONY: all clean data
+.DELETE_ON_ERROR:
+.SECONDARY:
