@@ -3,6 +3,7 @@
 library(cmdstanr)
 library(posterior)
 library(data.table)
+library(fst)
 library(future.apply)
 library(progressr)
 library(here)
@@ -147,12 +148,16 @@ priors_loop = function() {
 						# params_tab[ , (num_cols) := lapply(.SD, function(x) sprintf('%.3f', x)), .SDcols = num_cols]
 							
 						
-						return(params_tab)
+						return(list(params_tab = params_tab, tcr = tcr))
 					}
 				)
 			
-			# Bind list in data frame
-			gmst_loop = rbindlist(gmst_loop)
+			# Recombine the sub-elements of the list based on their common indexes
+			gmst_loop =
+				do.call(function(...) {
+					mapply(rbind, ..., SIMPLIFY = FALSE)
+				},
+				args = gmst_loop)
 			
 			# ## Progress bar
 			pb(sprintf("Prior = %s", prior_convic), class = "sticky")
@@ -166,11 +171,16 @@ priors_loop = function() {
 
 system.time(with_progress({res = priors_loop()}))
 
-res = rbindlist(res)
-res$run = 'alt-gmst'
+## Recombine the sub-elements of the list based on their common indexes
+res =
+	do.call(function(...) mapply(rbind, ..., SIMPLIFY = FALSE), args = res)
+
+res$tcr$run = 'alt-gmst'
+res$params_tab$run = 'alt-gmst'
 
 # Export results ----------------------------------------------------------
 
 res_dir = 'results/robustness'
 
-fwrite(res, here(res_dir, 'params-alt-gmst.csv'))
+write_fst(res$tcr, here(res_dir, 'tcr.fst'))
+fwrite(res$params_tab, here(res_dir, 'params-alt-gmst.csv'))
