@@ -173,4 +173,4 @@ res$run = 'alt-gmst'
 
 res_dir = 'results/robustness'
 
-fwrite(res, here(res_dir, 'params-tab-alt-gmst.csv'))
+fwrite(res, here(res_dir, 'params-alt-gmst.csv'))

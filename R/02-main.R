@@ -245,5 +245,5 @@ res_dir = 'results/main'
 write_fst(res$tcr, here(res_dir, 'tcr.fst'))
 write_fst(res$gmst2100, here(res_dir, 'gmst2100.fst'))
 fwrite(res$gmst_pred, here(res_dir, 'gmst-pred.csv'))
-fwrite(res$params_tab, here(res_dir, 'params-tab.csv'))
+fwrite(res$params_tab, here(res_dir, 'params.csv'))
 fwrite(had_dev, here(res_dir, 'had-dev.csv'))
