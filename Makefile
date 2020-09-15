@@ -5,11 +5,14 @@ rdir = R/
 standir = stan/
 resdir = results/
 
-## Headline build
-all: $(datdir)climate.csv $(datdir)df18.fst $(datdir)priors.csv
+## See note about new grouped targets method, i.e. replacing ":" with "&:"
+## https://stackoverflow.com/a/59877127/4115816
 
+## Headline build
+all: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
+ $(resdir)main/params-tab.csv $(resdir)main/had-dev.csv
 clean:
-	rm -f $(results_main) $(data) $(rawfiles)
+	rm -f $(results_main) $(datdir)* $(rawdir)*
 
 ## Helpers
 .PHONY: all clean data
@@ -34,11 +37,10 @@ $(datdir)df18.fst: $(rdir)01-data-prep.R $(rawdir)df18.idlsave
 	Rscript $<
 	rm Rplots.pdf
 
-## Main run
-#main = $(rdir)02-main.R
-#$(main): $(data) $(standir)mod-pred.stan
-
 ## Results
-#results_main = $(resdir)tcr.fst $(resdir)y-dev.fst $(resdir)y-pred.fst
-#$(results_main): $(main)
-#	Rscript $<
+
+### Main results
+results_main = $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst $(resdir)gmst-pred.csv \
+ $(resdir)main/params-tab.csv $(resdir)main/had-dev.csv
+$(results_main) &: $(rdir)02-main.R $(standir)mod-pred.stan $(datdir)climate.csv
+	Rscript $<
