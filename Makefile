@@ -49,7 +49,8 @@ $(results_main) &: $(rdir)02-main.R $(standir)mod-pred.stan $(datdir)climate.csv
 ### Robustness checks/results_main
 
 #### a) Alt GMST series
-$(resdir)robustness/params-alt-gmst.csv: $(rdir)03-robustness-alt-gmst.R $(standir)mod.stan $(datdir)climate.csv
+results_gmst_alt = $(resdir)robustness/params-alt-gmst.csv $(resdir)robustness/tcr-alt-gmst.csv
+$(results_gmst_alt) &: $(rdir)03-robustness-alt-gmst.R $(standir)mod.stan $(datdir)climate.csv
 	Rscript $<
 	
 ## Helpers
