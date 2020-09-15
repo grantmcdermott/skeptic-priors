@@ -1,3 +1,5 @@
+modrun = 'anthro'
+
 # Libraries ---------------------------------------------------------------
 
 library(cmdstanr)
@@ -193,12 +195,12 @@ system.time(with_progress({res = priors_loop()}))
 res =
 	do.call(function(...) mapply(rbind, ..., SIMPLIFY = FALSE), args = res)
 
-res$tcr$run = 'anthro'
-res$params_tab$run = 'anthro'
+res$tcr$run = modrun
+res$params_tab$run = modrun
 
 # Export results ----------------------------------------------------------
 
 res_dir = 'results/sensitivity'
 
-write_fst(res$tcr, here(res_dir, 'tcr-anthro.fst'))
-fwrite(res$params_tab, here(res_dir, 'params-anthro.csv'))
+write_fst(res$tcr, here(res_dir, paste0('tcr-', modrun,'.fst')))
+fwrite(res$params_tab, here(res_dir, paste0('params-', modrun,'.csv')))

@@ -1,3 +1,5 @@
+modrun = 'main'
+
 # Libraries ---------------------------------------------------------------
 
 library(cmdstanr)
@@ -256,6 +258,11 @@ had_dev =
 ## Note: Will compress large files (>5k rows) using FST format
 
 res_dir = 'results/main'
+
+res$tcr$run = modrun
+res$gmst2100$run = modrun
+res$params_tab$run = modrun
+res$gmst_pred$run = modrun
 
 write_fst(res$tcr, here(res_dir, 'tcr.fst'))
 write_fst(res$gmst2100, here(res_dir, 'gmst2100.fst'))
