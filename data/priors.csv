@@ -1,0 +1,6 @@
+mu,sigma,prior_type,convic_type
+0,1.21444765378946,ni,""
+1,0.25,luke,mod
+1,0.065,luke,strong
+0,0.25,den,mod
+0,0.065,den,strong
