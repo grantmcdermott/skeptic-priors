@@ -18,10 +18,17 @@ main: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
 sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-alt-gmst.fst \
  $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst \
- $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/tcr-me-gmst.fst
+ $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/tcr-me-gmst.fst \
+ $(resdir)sensitivity/tcr-me-forcings.fst
  
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
+
+## Draw the Makefile DAG
+## Requires: https://github.com/lindenb/makefile2graph
+dag: makefile-dag.png
+makefile-dag.png: Makefile
+	make -Bnd all | make2graph | dot -Tpng -Gdpi=300 -o makefile-dag.png
 
 ## Raw Data
 raw: $(rdir)00-data-raw.R
@@ -61,6 +68,12 @@ results_me_gmst = $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/t
 $(results_me_gmst) &: $(rdir)03-sensitivity-me-gmst.R $(standir)mod-me.stan $(datdir)climate.csv
 	Rscript $<
 
+#### c) Measurement error in forcings
+results_me_gmst = $(resdir)sensitivity/tcr-me-forcings.fst
+$(results_me_gmst) &: $(rdir)03-sensitivity-me-forcings.R $(standir)mod.stan $(datdir)climate.csv \
+ $(datdir)df18.fst
+	Rscript $<
+
 #### e) Separate out anthropogenic forcings
 results_anthro = $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst
 $(results_anthro) &: $(rdir)03-sensitivity-anthro.R $(standir)mod-anthro.stan $(datdir)climate.csv
@@ -68,6 +81,6 @@ $(results_anthro) &: $(rdir)03-sensitivity-anthro.R $(standir)mod-anthro.stan $(
 	
 	
 ## Helpers
-.PHONY: all clean data
+.PHONY: all clean data main sensitivity
 .DELETE_ON_ERROR:
 .SECONDARY:
