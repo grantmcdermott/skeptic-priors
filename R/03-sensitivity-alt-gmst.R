@@ -103,7 +103,7 @@ priors_loop = function() {
 						## Standard deviation for weakly informative priors. Here I follow
 						## the advice of the Stan core team, using 2.5 * sd(y) / sd(x). The
 						## prior means of the centered data are ofc zero.
-						wi_sigma = function(gmst_var = 'had') {
+						wi_sigma = function(gmst_var) {
 							sd_cols = setdiff(names(clim_df), c('year', gmst_var))
 							sd_cols = setdiff(sd_cols, names(which(!sapply(clim_df, is.numeric))))
 							clim_df[year<=2005 , 
@@ -176,8 +176,6 @@ priors_loop = function() {
 				},
 				args = gmst_loop)
 			
-			# ## Progress bar
-			pb(sprintf("Prior = %s", prior_convic), class = "sticky")
 			
 			return(gmst_loop)
 		})

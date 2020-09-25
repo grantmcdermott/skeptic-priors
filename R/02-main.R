@@ -227,8 +227,6 @@ priors_loop = function() {
           },
           args = rcp_loop)
       
-      # ## Progress bar
-      pb(sprintf("Prior = %s", prior_convic), class = "sticky")
       
       return(rcp_loop)
       })

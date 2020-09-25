@@ -159,8 +159,6 @@ priors_loop = function() {
 			# num_cols = c('mean', 'q025', 'q975')
 			# params_tab[ , (num_cols) := lapply(.SD, function(x) sprintf('%.3f', x)), .SDcols = num_cols]
 			
-			# ## Progress bar
-			pb(sprintf("Prior = %s", prior_convic), class = "sticky")
 			
 			return(list(params_tab = params_tab, tcr = tcr))
 		})

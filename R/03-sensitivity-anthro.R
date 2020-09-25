@@ -179,8 +179,6 @@ priors_loop = function() {
 				},
 				args = anthro_loop)
 			
-			# ## Progress bar
-			pb(sprintf("Prior = %s", prior_convic), class = "sticky")
 			
 			return(anthro_loop)
 		})
