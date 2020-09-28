@@ -1,4 +1,5 @@
 modrun = 'main'
+ptime = proc.time()
 
 # Libraries ---------------------------------------------------------------
 
@@ -229,7 +230,9 @@ priors_loop = function() {
       
       
       return(rcp_loop)
-      })
+      },
+  future.seed = 123L
+  )
 }
 
 
@@ -267,3 +270,14 @@ write_fst(res$gmst2100, here(res_dir, 'gmst2100.fst'))
 fwrite(res$gmst_pred, here(res_dir, 'gmst-pred.csv'))
 fwrite(res$params_tab, here(res_dir, 'params.csv'))
 fwrite(had_dev, here(res_dir, 'had-dev.csv'))
+
+## Performance
+ptime = proc.time() - ptime
+mem_gb = as.numeric(system(
+  "awk '/MemTotal/ { print $2/1024/1024 }' /proc/meminfo", 	
+  intern=TRUE))
+perf = data.table(run = modrun, sec = sprintf('%.3f', ptime[[3]]), 
+                  cores = future::availableCores(),
+                  mem_gb = round(mem_gb),	os = sessionInfo()$running, 
+                  arch = sessionInfo()$platform)
+fwrite(perf, here('performance', paste0('perf-', modrun, '.csv')))
