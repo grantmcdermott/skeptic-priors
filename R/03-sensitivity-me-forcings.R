@@ -168,7 +168,9 @@ sim_loop = function() {
 			
 			
 			return(priors_loop)
-		})
+		},
+		future.seed = 123L
+	)
 	}
 
 
