@@ -1,4 +1,5 @@
 modrun = 'me-gmst'
+ptime = proc.time()
 
 # Libraries ---------------------------------------------------------------
 
@@ -161,7 +162,9 @@ priors_loop = function() {
 			
 			
 			return(list(params_tab = params_tab, tcr = tcr))
-		})
+		},
+		future.seed = 123L
+	)
 }
 
 
@@ -182,3 +185,15 @@ res_dir = 'results/sensitivity'
 
 write_fst(res$tcr, here(res_dir, paste0('tcr-', modrun,'.fst')))
 fwrite(res$params_tab, here(res_dir, paste0('params-', modrun,'.csv')))
+
+
+## Performance
+ptime = proc.time() - ptime
+mem_gb = as.numeric(system(
+	"awk '/MemTotal/ { print $2/1024/1024 }' /proc/meminfo", 	
+	intern=TRUE))
+perf = data.table(run = modrun, sec = sprintf('%.3f', ptime[[3]]), 
+									cores = future::availableCores(),
+									mem_gb = round(mem_gb),	os = sessionInfo()$running, 
+									arch = sessionInfo()$platform)
+fwrite(perf, here('performance', paste0('perf-', modrun, '.csv')))
