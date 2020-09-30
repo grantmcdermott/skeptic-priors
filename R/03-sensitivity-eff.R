@@ -74,20 +74,29 @@ priors_df = fread(here("data/priors.csv"))
 
 ## Marvel et al. (2016), hereafter M2016, provide the following scaled 
 ## efficacies (see table S1 in SI):
-## http://data.giss.nasa.gov/modelforce/Marvel_etal2015.html
-## Aerosols: 1.55* (1.05, 2.05)
-## GHG:      1.17* (1.06, 1.27)
-## Land use: 4.27 (-2.42, 10.95)
-## Ozone:    0.66* (0.34, 0.98)
-## Solar:    1.68 (-1.27, 4.63)
-## Volc:     0.61* (0.33, 0.89)
-## historical: 1.00 (0.83, 1.16)
+## https://data.giss.nasa.gov/modelforce/Marvel_etal_2016/ (updated/corrected)
+## https://media.nature.com/original/nature-assets/nclimate/journal/v6/n4/extref/nclimate2888-s1.pdf (original)
+marvel = 
+	data.table(
+		marvel_forcing = c('Aerosols', 'GHG', 'Land use', 'Ozone', 'Solar', 'Volc'),
+		forcing = c('aerosols', 'co2ch4n2o', 'landuse', 'mhalosum', 'solar', 'volc'),
+		m = c(1.55, 1.17, 4.27, 0.66, 1.68, 0.61),
+		l = c(1.05, 1.06, -2.42, 0.34, -1.27, 0.33),
+		u = c(2.05, 1.27, 10.95, 0.98, 4.63, 0.89)
+		)
 
-## Note: efficacies are relative to CO2 (= 1)
-## "The uncertainty in the efficacies is estimated from individual members of the
-## single-forcing ensembles (Figure S2). Confidence intervals on the sample mean are
-## constructed using a student-t distribution with 4 degrees of freedom (5 in the case
-## of the 6-member historical ensemble)."
+## Note that the variable names in M16 don't match up exactly with the rest of
+## my dataset. So I adjust them to match the equivalent forcing variable in the
+## RCP dataset. For example, they have a forcing called "ozone", which I assume 
+## corresponds to the RCP forcing "mhalosum" (i.e. gases controlled under the 
+## Montreal Protocol). See the RCP metadata and flowchart in the data folder for 
+## more information.
+
+## Additional note: efficacies are relative to CO2 (= 1) and dof = 4.
+## "The uncertainty in the efficacies is estimated from individual members of 
+## the single-forcing ensembles (Figure S2). Confidence intervals on the sample 
+## mean are constructed using a student-t distribution with 4 degrees of freedom
+## (5 in the case of the 6-member historical ensemble)."
 
 
 # 1) Means-only efficacies ------------------------------------------------
@@ -111,7 +120,7 @@ priors_df = fread(here("data/priors.csv"))
 
 modrun = 'eff1'
 
-seed(123)
+set.seed(123)
 n_chains = 4
 chain_length = 1000
 rf2x = rnorm(n_chains * chain_length, mean = 3.71, sd = 0.1855)
@@ -122,12 +131,12 @@ rf2x = rnorm(n_chains * chain_length, mean = 3.71, sd = 0.1855)
 rcps_eff1 = copy(rcps)  
 
 ## Create effective forcing versions of the necessary variables
-rcps_eff1[, ':=' (volc_eff      = 0.61 * volc,
-							 	  solar_eff     = 1.68 * solar, 
-								  co2ch4n2o_eff = 1.17 * co2ch4n2o, 
-								  mhalosum_eff  = 0.66 * mhalosum, 
-								  aerosols_eff  = 1.55 * aerosols,
-								  landuse_eff   = 4.27 * landuse)
+rcps_eff1[, ':=' (volc_eff      = marvel[forcing=='volc', m] * volc,
+							 	  solar_eff     = marvel[forcing=='solar', m] * solar, 
+								  co2ch4n2o_eff = marvel[forcing=='co2ch4n2o', m] * co2ch4n2o, 
+								  mhalosum_eff  = marvel[forcing=='mhalosum', m] * mhalosum, 
+								  aerosols_eff  = marvel[forcing=='aerosols', m] * aerosols,
+								  landuse_eff   = marvel[forcing=='landuse', m] * landuse)
 				 ] %>%
 	.[, other_eff := landuse_eff + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow] %>%
 	## Sum these and (other variables) to get effective TRF
@@ -305,15 +314,18 @@ rf2x = rnorm(n_chains * chain_length, mean = 3.71, sd = 0.1855)
 # 0.50/2.78*sqrt(5) = s
 # s = 0.4021705
 
-## Simplifying, we can write this as a function that takes the mean (m) and lower
-# 95% CI (lc) as inputs, before returning a single, random draw from the 
-# resulting t distribution.
+## Simplifying, we can write this as a function that takes the mean (m) and 95%
+## CIs as inputs, before returning a single, random draw from the resulting t 
+## distribution. Note that I'm using a truncated version of the t-distribution
+## to avoid really unrealistic draws from the tail.
 eff_func = 
-	function(m, lc){
-		rt(1, df=4)*(m - lc)/2.78 + m
+	function(f){
+		m = marvel[forcing==f, m]
+		l = marvel[forcing==f, l]
+		u = marvel[forcing==f, u]
+		tcrit = qt(.025, df = 4, lower.tail = FALSE)
+		truncdist::rtrunc(1, spec='t', a=(l-m), b=(u-m), df=4) * (m - l)/tcrit + m
 	}
-## E.g. For aerosols:
-# eff_func(1.55, 1.05)
 
 ## Bind together in a 1,000 run simulation, taking a new draw from the 
 ## underlying distribution each time.
@@ -324,12 +336,12 @@ rcps_eff2 =
 			d = copy(rcps)[year >= min(climate$year) & year <= max(climate$year)]
 			
 			## Create effective forcing versions of the necessary variables
-			d[, ':=' (volc_eff      = volc * eff_func(0.61, 0.33),
-								solar_eff     = solar * eff_func(1.68, -1.27), 
-								co2ch4n2o_eff = co2ch4n2o * eff_func(1.17, 1.07), 
-								mhalosum_eff  = mhalosum * eff_func(0.66, 0.34), 
-								aerosols_eff  = aerosols * eff_func(1.55, 1.05),
-								landuse_eff   = landuse * eff_func(3.82, -2.16))
+			d[, ':=' (volc_eff      = volc * eff_func('volc'),
+								solar_eff     = solar * eff_func('solar'), 
+								co2ch4n2o_eff = co2ch4n2o * eff_func('co2ch4n2o'), 
+								mhalosum_eff  = mhalosum * eff_func('mhalosum'), 
+								aerosols_eff  = aerosols * eff_func('aerosols'),
+								landuse_eff   = landuse * eff_func('landuse'))
 			] %>%
 				.[, other_eff := landuse_eff + cloud_tot + stratoz + tropoz + ch4oxstrath2o + bcsnow] %>%
 				## Sum these and (other variables) to get effective TRF
@@ -479,6 +491,8 @@ write_fst(res2, here(res_dir, paste0('tcr-', modrun,'.fst')))
 
 
 # Performance -------------------------------------------------------------
+
+modrun = 'eff'
 
 ptime = proc.time() - ptime
 mem_gb = as.numeric(system(
