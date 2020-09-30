@@ -17,9 +17,10 @@ stan: $(standir)mod-pred.stan $(standir)mod.stan $(standir)mod-anthro.stan \
 main: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
 sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-alt-gmst.fst \
- $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst \
  $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/tcr-me-gmst.fst \
- $(resdir)sensitivity/tcr-me-forcings.fst
+ $(resdir)sensitivity/tcr-me-forcings.fst \
+ $(resdir)sensitivity/tcr-eff1-forcings.fst $(resdir)sensitivity/tcr-eff2-forcings.fst \
+ $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst
  
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
@@ -74,6 +75,12 @@ $(results_me_gmst) &: $(rdir)03-sensitivity-me-forcings.R $(standir)mod.stan $(d
  $(datdir)df18.fst
 	Rscript $<
 
+#### d) Adjust forcing efficacies (Marvel et. al, 2016)
+results_eff = $(resdir)sensitivity/tcr-eff1-forcings.fst $(resdir)sensitivity/tcr-eff2-forcings.fst
+$(results_eff) &: $(rdir)03-sensitivity-eff.R $(standir)mod.stan $(datdir)climate.csv \
+ $(rawdir)rcps.csv
+	Rscript $<
+
 #### e) Separate out anthropogenic forcings
 results_anthro = $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst
 $(results_anthro) &: $(rdir)03-sensitivity-anthro.R $(standir)mod-anthro.stan $(datdir)climate.csv
@@ -81,6 +88,6 @@ $(results_anthro) &: $(rdir)03-sensitivity-anthro.R $(standir)mod-anthro.stan $(
 	
 	
 ## Helpers
-.PHONY: all clean data main sensitivity
+.PHONY: all clean dag data stan main sensitivity
 .DELETE_ON_ERROR:
 .SECONDARY:
