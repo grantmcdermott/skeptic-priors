@@ -9,13 +9,14 @@ resdir = results/
 ## https://stackoverflow.com/a/59877127/4115816
 
 ## Headline build
-all: data stan main sensitivity
+all: data stan main recursive sensitivity
 
 data: $(datdir)climate.csv $(datdir)priors.csv $(datdir)df18.fst
 stan: $(standir)mod-pred.stan $(standir)mod.stan $(standir)mod-anthro.stan \
  $(standir)mod-me.stan
 main: $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
+recursive: $(resdir)recursive/tcr-rec.csv
 sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-alt-gmst.fst \
  $(resdir)sensitivity/params-me-gmst.csv $(resdir)sensitivity/tcr-me-gmst.fst \
  $(resdir)sensitivity/tcr-me-forcings.fst \
@@ -55,6 +56,11 @@ $(datdir)df18.fst: $(rdir)01-data-prep.R $(rawdir)df18.idlsave
 results_main = $(resdir)main/tcr.fst $(resdir)main/gmst2100.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/params.csv $(resdir)main/had-dev.csv
 $(results_main) &: $(rdir)02-main.R $(standir)mod-pred.stan $(datdir)climate.csv
+	Rscript $<
+
+### Recursive results
+results_recursive = $(resdir)recursive/tcr-rec.csv
+$(results_recursive) &: $(rdir)03-recursive.R $(standir)mod.stan $(datdir)climate.csv
 	Rscript $<
 
 ### Sensitivity analysis results
