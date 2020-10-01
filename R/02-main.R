@@ -207,6 +207,7 @@ priors_loop = function() {
                 fit$summary(pred_params, "mean", ~quantile(.x, probs = c(0.025, 0.975), na.rm = TRUE))
                 ))[, variable := NULL][]
             setnames(gmst_pred, old = c('2.5%', '97.5%'), new = c('q025', 'q975'))
+            gmst_pred$rcp = i
             gmst_pred$prior = prior_convic
             
             ## 2100 temps (full distributions) 
@@ -250,7 +251,7 @@ res =
 had_dev =
   merge(
     climate[rcp=='rcp60' & !is.na(had_full), .(year, had_full)],
-    res$gmst_pred[, .(year, mean)]
+    res$gmst_pred[rcp=='rcp60', .(year, mean)]
   ) %>%
   .[, .(year, had_dev = mean - had_full)]
 
