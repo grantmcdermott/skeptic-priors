@@ -250,8 +250,8 @@ res =
 ## "evidence" section of the code/paper.
 had_dev =
   merge(
-    climate[rcp=='rcp60' & !is.na(had_full), .(year, had_full)],
-    res$gmst_pred[rcp=='rcp60', .(year, mean)]
+    climate[rcp=='rcp60' & year<=2005, .(year, had_full)],
+    res$gmst_pred[rcp=='rcp60' & prior=='ni', .(year, mean)]
   ) %>%
   .[, .(year, had_dev = mean - had_full)]
 
