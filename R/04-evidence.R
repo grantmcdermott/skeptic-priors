@@ -43,6 +43,13 @@ center_pre2005 = function(d) {
 	ret = cbind(d[, ..colsother], dnums)
 }
 
+center = function(d) {
+	d = as.data.table(d)
+	d1 = d[, .(year)]
+	d2 = as.data.table(scale(d[, -'year'], scale = FALSE))
+	ret = cbind(d1, d2)
+}
+
 
 # Load data ---------------------------------------------------------------
 
@@ -63,20 +70,11 @@ had_dev = fread(here('results/main/had-dev.csv'))
 ## posterior parameters to simulate "true" future values
 pparams = fread(here('results/main/params.csv'))[prior=='ni']
 
-## Recursive TCR estimates for four main sceptic types. Will use the results 
-## from the weakest sceptic (i.e. moderate lukewarmer) to set the starting 
-## point(s) of the while iteration below. 
-# tcr_rec = fread(here('results/recursive/tcr-rec.csv'))[prior=='lukemod']
-# yr_start_1.3C = 2005 - tcr_rec[round(tcr_mean, 1)==1.3, max(year_to)] + 1866
-# yr_start_1.5C = 2005 - tcr_rec[round(tcr_mean, 1)==1.5, max(year_to)] + 1866
-yr_start_1.3C = min(climate$year) + 60
-yr_start_1.5C = min(climate$year) + 90
 
 # * Priors range ----------------------------------------------------------
 
 mu = seq(max(priors_df$mu), min(priors_df$mu), length = 11)
 sigma = round(seq(max(priors_df$sigma), min(priors_df$sigma), length = 11), 3)
-# threshold = c(1.3, 1.5)
 
 priors_range = 
 	expand.grid(mu = mu, sigma = sigma) %>%
@@ -99,8 +97,11 @@ climate[,n := .I
 					(sd_cols) := lapply(.SD, `+`, rnorm(1, mean = 0, sd = .1)),
 					.SDcols = sd_cols,
 					by = n
-				][]
+				]
 climate[, n:=NULL]; rm(sd_cols)
+
+## TESTING normalise
+climate = center_pre2005(climate)
 
 ## Now simulate future climate data based on noninformative parameters
 ## Note that we need a shift parameter to adjust the "intercept".
@@ -121,11 +122,12 @@ climate[year > 2005,
 
 plan(multisession, workers = 2)
 
-# yrs_j = list(thresh_1.3C = start_1.3C, thresh_1.5C = start_1.5C)
-yrs_start = list(yr_start_1.3C, yr_start_1.5C)
-# yrs = list(NULL, NULL)
-yrs = yrs_start
+## Loop counter variables and thresholds
 threshold = c(1.3, 1.5)
+yr_start_1.3C = min(climate$year) + 60
+yr_start_1.5C = min(climate$year) + 90
+yrs_start = list(yr_start_1.3C, yr_start_1.5C)
+yrs = yrs_start
 yr_max = 2100
 
 evid_func = 
@@ -158,11 +160,7 @@ evid_func =
 
 							# ** Counter for while loop ---------------------------------
 
-							# if (max_mu) {
-							# 	yrs[[i]] <<- yrs_start[[i]]  ## Major reset for next sigma round
-							# } else {
-							# 	yrs[[i]] <<- yrs[[i]]       ## Minor reset for next mu round
-							# }
+							## NB: Use "<<-" to assign value to global workspace for next iteration
 							yrs[[i]] <<- ifelse(max_mu, 
 													 			  yrs_start[[i]], ## Major reset for next sigma round
 																	yrs[[i]])      ## Minor reset for next mu round
@@ -180,7 +178,7 @@ evid_func =
 								clim_df =	climate[year <= yrs[[i]]]
 								
 								## Center the vars according to pre 2005 values
-								clim_df = center_pre2005(clim_df)
+								# clim_df = center_pre2005(clim_df)
 								
 
 								# *** Specify data list and params ------------------------
