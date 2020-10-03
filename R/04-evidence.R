@@ -43,28 +43,19 @@ center_pre2005 = function(d) {
 	ret = cbind(d[, ..colsother], dnums)
 }
 
-center = function(d) {
-	d = as.data.table(d)
-	d1 = d[, .(year)]
-	d2 = as.data.table(scale(d[, -'year'], scale = FALSE))
-	ret = cbind(d1, d2)
-}
-
 
 # Load data ---------------------------------------------------------------
 
 ## Load climate data.
 climate = fread(here('data/climate.csv'))[
 	rcp=='rcp60', 
-	.(year, had_sim = had, trf, volc_sim = volc_mean, soi_sim = soi_mean, 
-		amo_sim = amo_mean)]
+	.(year, had, trf, volc_mean, soi_mean, amo_mean)]
 
 ## Load priors data frame
 priors_df = fread(here('data/priors.csv'))[prior_type!='ni']
 
-## Model-derived standard errors (deviations) to needed to simulate "true" 
-## future values.
-had_dev = fread(here('results/main/had-dev.csv'))
+## Simulated GMST from the predicted posterior draws of the main model run.
+gmst_sim = fread(here('results/main/gmst-sim.csv'))
 
 ## Regression results from main run. As above, will use the noninformative 
 ## posterior parameters to simulate "true" future values
@@ -86,35 +77,14 @@ rm(mu, sigma)
 
 # * Simulate future climate data ------------------------------------------
 
-## Add model noise
-climate$noise = sample(had_dev$had_dev, nrow(climate), replace = TRUE)
-
-## Also add noise to future covariate values; otherwise will cause collinearity 
-## problems for future regressions (b/c values stay constant).
-sd_cols = c('volc_sim', 'soi_sim', 'amo_sim')
-climate[,n := .I
-				][year > 2005,
-					(sd_cols) := lapply(.SD, `+`, rnorm(1, mean = 0, sd = .1)),
-					.SDcols = sd_cols,
-					by = n
-				]
-climate[, n:=NULL]; rm(sd_cols)
-
-## TESTING normalise
+## Center the vars according to pre 2005 values
 climate = center_pre2005(climate)
 
-## Now simulate future climate data based on noninformative parameters
-## Note that we need a shift parameter to adjust the "intercept".
-# had05 = climate[year==2005, had_sim]
-climate[year > 2005, 
-				had_sim := 
-					pparams[param=='alpha', mean] + #had05 +
-					pparams[param=='beta', mean] * trf + 
-					pparams[param=='gamma', mean] * volc_sim + 
-					pparams[param=='delta', mean] * soi_sim + 
-					pparams[param=='eta', mean] * amo_sim +
-					noise
-				]
+## Add model noise
+climate = merge(climate, gmst_sim, by = 'year')
+
+## Replace simulated values with historical ones where appropriate
+climate[year<=2005, gmst_sim := had]
 
 # plot(climate$year, climate$had_sim, type = 'l')
 
@@ -130,6 +100,15 @@ yrs_start = list(yr_start_1.3C, yr_start_1.5C)
 yrs = yrs_start
 yr_max = 2100
 
+## DESCRIPTION:
+## The function iterates over a range of priors (characterised by mu and sigma). 
+## Specifically, it moves along a sequence of (decreasing) sigma values for a 
+## given mu. Once it reaches the end of the sigma sequence for that mu, it moves 
+## on to the next, lower mu value and repeats the procedure. It does this for 
+## two TCR threshold levels: 1.3 °C and 1.5°C. (Note that the function will need 
+## to be adjusted  if different thresholds are chosen.) The mean posterior TCR 
+## values must be at least as big as the relevant threshold to qualify as fully 
+## converged with mainstream. 
 evid_func = 
 	function() {
 		
@@ -175,10 +154,7 @@ evid_func =
 								## NB: Use "<<-" to assign value to global workspace for next iteration
 								yrs[[i]] <<- yrs[[i]] + 1 
 								
-								clim_df =	climate[year <= yrs[[i]]]
-								
-								## Center the vars according to pre 2005 values
-								# clim_df = center_pre2005(clim_df)
+								clim_df =	climate[year <= yrs[[i]], !"had"]
 								
 
 								# *** Specify data list and params ------------------------
@@ -188,26 +164,26 @@ evid_func =
 								## Standard deviation for weakly informative priors. Here I follow
 								## the advice of the Stan core team, using 2.5 * sd(y) / sd(x). The
 								## prior means of the centered data are ofc zero.
-								wi_sigma = function(gmst_var = 'had_sim') { ## CHANGED FOR THIS RUN
+								wi_sigma = function(gmst_var = 'gmst_sim') { ## CHANGED FOR THIS RUN
 									sd_cols = setdiff(names(clim_df), c('year', gmst_var))
 									sd_cols = setdiff(sd_cols, names(which(!sapply(clim_df, is.numeric))))
 									clim_df[year<=2005 , 
 													lapply(.SD, function(x) round(2.5*sd(get(gmst_var))/sd(x), 2)), 
 													.SDcols = sd_cols]
 									}
-								prior_sigmas = wi_sigma('had_sim')
+								prior_sigmas = wi_sigma('gmst_sim')
 								
 								data_list = 
 									list(
 										'N' = N, 
-										'gmst' = clim_df$had_sim,                           ## CHANGED
+										'gmst' = clim_df$gmst_sim, ## CHANGED
 										'trf' = clim_df$trf, 
-										'volc' = clim_df$volc_sim, 'soi' = clim_df$soi_sim, ## CHANGED 
-										'amo' = clim_df$amo_sim,                            ## CHANGED
+										'volc' = clim_df$volc_mean, 'soi' = clim_df$soi_mean,
+										'amo' = clim_df$amo_mean,
 										'beta_mu' = beta_mu, 'beta_sigma' = beta_sigma,
-										'gamma_sigma' = prior_sigmas$volc_sim,              ## CHANGED
-										'delta_sigma' = prior_sigmas$soi_sim,               ## CHANGED
-										'eta_sigma' = prior_sigmas$amo_sim                  ## CHANGED
+										'gamma_sigma' = prior_sigmas$volc_mean,
+										'delta_sigma' = prior_sigmas$soi_mean,
+										'eta_sigma' = prior_sigmas$amo_mean
 										)
 								
 

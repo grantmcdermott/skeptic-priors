@@ -154,6 +154,7 @@ priors_loop = function() {
             
             tcr = NULL
             params_tab = NULL
+            gmst_sim = NULL
             
             ## Only needed for a single RCP run, since we're using historic info.
             ## Obviously doesn't make a difference which, but I'll go with the 
@@ -194,12 +195,27 @@ priors_loop = function() {
                        old = c('variable','2.5%', '97.5%'), 
                        new = c('param', 'q025', 'q975'))
               params_tab$prior = prior_convic
-              # num_cols = c('mean', 'q025', 'q975')
-              # params_tab[ , (num_cols) := lapply(.SD, function(x) sprintf('%.3f', x)), .SDcols = num_cols]
-            
+              
+              ## Get full distribution of GMST predictions. Will sample from
+              ## this to simulate "true" future temperatures in the "evidence"
+              ## run/section of the code/paper.
+              if (prior_convic=='ni') {
+                pred_params = paste0("y_pred[", 1:nrow(clim_df), "]")
+                gmst_sim = as_draws_df(fit$draws(pred_params))
+                setDT(gmst_sim)
+                ## Collate and then reduce (i.e. sample from) full distribution
+                ## to get simulated GMST values.
+                gmst_sim = melt(gmst_sim[, !c('.chain', '.iteration', '.draw')],
+                                measure.vars = patterns('^y_pred'), 
+                                variable.name = 'year', value.name = 'gmst_sim')
+                gmst_sim[, year := as.integer(gsub('y_pred\\[|\\]', '', year)) + 
+                           min(clim_df$year) - 1]
+                gmst_sim = gmst_sim[, .(gmst_sim = sample(gmst_sim, 1)), by = year]
+              }
+              
             }
             
-            ## Predicted temps
+            ## Predicted GMST (mean and 95% CI only)
             pred_params = paste0("y_pred[", 1:nrow(clim_df), "]")
             gmst_pred = 
               data.table(cbind(
@@ -216,7 +232,8 @@ priors_loop = function() {
             gmst2100$prior = prior_convic
         
             return(list(tcr = tcr, 
-                        params_tab = params_tab, 
+                        params_tab = params_tab,
+                        gmst_sim = gmst_sim,
                         gmst_pred = gmst_pred,
                         gmst2100 = gmst2100))
             }
@@ -245,15 +262,6 @@ system.time(with_progress({res = priors_loop()}))
 res =
   do.call(function(...) mapply(rbind, ..., SIMPLIFY = FALSE), args = res)
 
-## Get deviations of mean fitted values with actual HadCRUT obs. Will use this
-## series as noise when simulating the future "true" temperatures in the
-## "evidence" section of the code/paper.
-had_dev =
-  merge(
-    climate[rcp=='rcp60' & year<=2005, .(year, had_full)],
-    res$gmst_pred[rcp=='rcp60' & prior=='ni', .(year, mean)]
-  ) %>%
-  .[, .(year, had_dev = mean - had_full)]
 
 # Export results ----------------------------------------------------------
 
@@ -268,9 +276,10 @@ res$gmst_pred$run = modrun
 
 write_fst(res$tcr, here(res_dir, 'tcr.fst'))
 write_fst(res$gmst2100, here(res_dir, 'gmst2100.fst'))
+fwrite(res$gmst_sim, here(res_dir, 'gmst-sim.csv'))
 fwrite(res$gmst_pred, here(res_dir, 'gmst-pred.csv'))
 fwrite(res$params_tab, here(res_dir, 'params.csv'))
-fwrite(had_dev, here(res_dir, 'had-dev.csv'))
+
 
 ## Performance
 ptime = proc.time() - ptime
