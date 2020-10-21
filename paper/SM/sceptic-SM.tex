@@ -1,0 +1,198 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+  \setmainfont[]{texgyrepagella-regular.otf}
+  \setsansfont[]{Fira Sans}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Supplementary Material},
+  pdfauthor={Grant McDermott},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{fontspec}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{threeparttable}
+\usepackage{dcolumn}
+\newcolumntype{A}{D{.}{.}{2.3}}
+\usepackage{sectsty} % Allows your to change titles style
+\allsectionsfont{\sffamily} % Define the style of all titles
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
+
+\title{Supplementary Material}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Sceptic priors and climate consensus}
+\author{Grant McDermott}
+\date{}
+
+\begin{document}
+\maketitle
+
+\newcommand{\beginsupplement}{%
+    \setcounter{table}{0}
+    \renewcommand{\thetable}{SM\arabic{table}}%
+    \setcounter{figure}{0}
+    \renewcommand{\thefigure}{SM\arabic{figure}}%
+}
+%
+    \setcounter{table}{0}
+    \renewcommand{\thetable}{SM\arabic{table}}%
+    \setcounter{figure}{0}
+    \renewcommand{\thefigure}{SM\arabic{figure}}%
+
+\listoftables
+\listoffigures
+\newpage
+
+\hypertarget{tables}{%
+\section{Tables}\label{tables}}
+
+\begin{table}[ht] \centering 
+    \caption{TCR efficacies} 
+    \label{tab:marvel} 
+    \begin{threeparttable} 
+        \begin{tabular}{@{\extracolsep{5pt}} lcc}
+            \toprule
+            Forcing agent & Mean &   95\% C.I.   \\ 
+            \midrule
+            Aerosols      & 1.55 & (1.05, 2.05)  \\
+            GHGs          & 1.17 & (1.07, 1.28)  \\
+            Land use      & 3.82 & (-2.16, 9.80) \\
+            Ozone         & 0.66 & (0.34, 0.98)  \\
+            Solar         & 1.68 & (-1.27, 4.63)  \\
+            Volcanic      & 0.61 & (0.33, 0.89)  \\ 
+            \bottomrule
+        \end{tabular} 
+        \begin{tablenotes}
+            \footnotesize
+            \item Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
+        \end{tablenotes}
+    \end{threeparttable} 
+\end{table}
+
+\begin{table}[h] \centering 
+    \caption{Covariate vectors for prediction in the year 2100} 
+    \begin{threeparttable} %%% added %%% 
+        \begin{tabularx}{.9\textwidth}{@{\extracolsep{1pt}} X A A A A } 
+            %\begin{tabularx}{\textwidth}{X c c c c} 
+            %\hline\hline
+            \toprule
+            &\multicolumn{1}{c}{RCP 2.6}&\multicolumn{1}{c}{RCP 4.5}&\multicolumn{1}{c}{RCP 6.0}&\multicolumn{1}{c}{RCP 8.5}\\
+            %&\multicolumn{1}{c}{\footnotesize420 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize540 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize670 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize940 ppmv CO$_2$}\\
+            %\hline
+            %\\[-1.8ex] 
+            \midrule
+            $RF_{2100}$                                                                             & 2.626     & 4.281     & 5.522     & 8.340     \\ 
+            \hspace{5 pt} \textit{CO$_2$ component} & \multicolumn{1}{c}{\textit{\hspace{1em}85\%}} &   \multicolumn{1}{c}{\textit{\hspace{1em}83\%}}   &   \multicolumn{1}{c}{\textit{\hspace{1em}86\%}}   &   \multicolumn{1}{c}{\textit{\hspace{1em}78\%}}   \\
+            \hspace{5 pt} \textit{Solar component}      & \multicolumn{1}{c}{\textit{\hspace{1em} 7\%}} &   \multicolumn{1}{c}{\textit{\hspace{1em} 4\%}}   &   \multicolumn{1}{c}{\textit{\hspace{1em} 3\%}}   &   \multicolumn{1}{c}{\textit{\hspace{1em} 2\%}}   \\
+            \\[-1.8ex] 
+            $\overline{VOLC}$                                                                   & 0.017     & 0.017     & 0.017     & 0.017     \\
+            \\[-1.8ex] 
+            $\overline{SOI}$                                                                    &\text{-}0.079  &\text{-}0.079  &\text{-}0.079  &\text{-}0.079  \\
+            \\[-1.8ex] 
+            $\overline{AMO}$                                                                    &\text{-}0.002 &\text{-}0.002   &\text{-}0.002  &\text{-}0.002  \\
+            %\hline\hline
+            \bottomrule
+        \end{tabularx}
+        \begin{tablenotes}
+            \footnotesize
+            \item \textit{Notes:} Covariates are used to predict the global mean surface temperature anomaly in the year 2100. The Representative Concentration Pathways (RCPs) are a family of forcing scenarios developed for the IPCC \cite{van2011rcp}. Each RCP has a core component of atmospheric CO$_2$ concentrations, measured in parts per million volume (ppmv). With regard to the covariates in the regression model, total radiative forcing ($RF$) and volcanic aerosols ($VOLC$) are measured in Wm$^{-2}$. The Southern Oscillation Index ($SOI$) and Atlantic Multidecadal Oscilliation ($AMO$) are measured as scaled indices. Future values for $RF$ are taken from the RCP database. For the rest, historical mean values are used.
+        \end{tablenotes}
+    \end{threeparttable} 
+    \label{tab:covariate}
+\end{table}
+
+\newpage
+\pagebreak
+
+\hypertarget{figures}{%
+\section{Figures}\label{figures}}
+
+\begin{figure}[h]
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/scc-fig-1} 
+
+}
+
+\caption{Social cost of carbon (US\$2005 per ton). The results for each agent type are obtained from 10,000 simulation runs of PAGE09 \cite{hope2011page09}. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE09 model defaults. The x-axis is truncated at 100 to aid visual inspection; the uppermost tails of the distributions being well in excess of the range given here.}\label{fig:scc-fig}
+\end{figure}
+
+\newpage
+
+  \bibliography{../sceptic/sceptic.bib}
+
+\end{document}
