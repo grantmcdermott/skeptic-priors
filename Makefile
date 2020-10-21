@@ -4,12 +4,13 @@ datdir = data/
 rdir = R/
 standir = stan/
 resdir = results/
+papdir = paper/
 
 ## See note about new grouped targets method, i.e. replacing ":" with "&:"
 ## https://stackoverflow.com/a/59877127/4115816
 
 ## Headline build
-all: data stan main recursive evidence sensitivity
+all: data stan main recursive evidence sensitivity paper
 
 data: $(datdir)climate.csv $(datdir)priors.csv $(datdir)df18.fst
 stan: $(standir)mod-pred.stan $(standir)mod.stan $(standir)mod-anthro.stan \
@@ -23,6 +24,7 @@ sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-a
  $(resdir)sensitivity/tcr-me-forcings.fst \
  $(resdir)sensitivity/tcr-eff1.fst $(resdir)sensitivity/tcr-eff2.fst \
  $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst
+paper: $(papdir)sceptic/sceptic.pdf $(papdir)SM/sceptic-SM.pdf
  
 clean:
 	rm -f $(results_main) $(datdir)* $(rawdir)*
@@ -134,7 +136,19 @@ $(resdir)sensitivity/tcr-anthro.fst &: $(rdir)05-sensitivity-anthro.R \
  $(standir)mod-anthro.stan $(datdir)climate.csv
 	Rscript $<
 
+
+## Paper
+$(papdir)sceptic/sceptic.pdf &: $(papdir)sceptic/sceptic.Rmd \
+ $(datdir)climate.csv $(datdir)priors.csv \
+ $(resdir)main/params.csv $(resdir)main/tcr.fst \
+ $(resdir)main/gmst-pred.csv $(resdir)main/gmst2100.fst \
+ $(resdir)recursive/tcr-rec.csv $(resdir)evidence/evid.csv \
+ $(resdir)PAGE09/scc.csv
+	Rscript -e 'rmarkdown::render("$<")'
+$(papdir)SM/sceptic-SM.pdf: $(papdir)SM/sceptic-SM.Rmd $(resdir)PAGE09/scc.csv
+	Rscript -e 'rmarkdown::render("$<")'
+
 ## Helpers
-.PHONY: all clean dag data stan main recursive evidence sensitivity
+.PHONY: all clean dag data stan main recursive evidence sensitivity paper
 .DELETE_ON_ERROR:
 .SECONDARY:
