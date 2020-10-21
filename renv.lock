@@ -181,9 +181,14 @@
     "cmdstanr": {
       "Package": "cmdstanr",
       "Version": "0.1.3",
-      "Source": "unknown",
-      "Remotes": "stan-dev/posterior",
-      "Hash": "857d1ce32119fbdb5e7102b0c3b2c742"
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "stan-dev",
+      "RemoteRepo": "cmdstanr",
+      "RemoteRef": "master",
+      "RemoteSha": "bc3c8a7824fcd13184fe447e73dfbbcc295eec83",
+      "Hash": "3a772a90cccf44f983f883464113e442"
     },
     "codetools": {
       "Package": "codetools",
@@ -712,8 +717,14 @@
     "posterior": {
       "Package": "posterior",
       "Version": "0.1.2",
-      "Source": "unknown",
-      "Hash": "454757697f8d4feb2d1090cf436558a3"
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "stan-dev",
+      "RemoteRepo": "posterior",
+      "RemoteRef": "master",
+      "RemoteSha": "6da75bfd5ef7704e0ef3dbdfadd6489dd7609183",
+      "Hash": "9c2632dff675c01ba3b8ae0370073283"
     },
     "praise": {
       "Package": "praise",
