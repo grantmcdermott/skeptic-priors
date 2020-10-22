@@ -4,7 +4,9 @@ datdir = data/
 rdir = R/
 standir = stan/
 resdir = results/
+figsdir = figs/
 papdir = paper/
+perfdir = performance/
 
 ## See note about new grouped targets method, i.e. replacing ":" with "&:"
 ## https://stackoverflow.com/a/59877127/4115816
@@ -27,7 +29,7 @@ sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-a
 paper: $(papdir)sceptic/sceptic.pdf $(papdir)SM/sceptic-SM.pdf
  
 clean:
-	rm -f $(results_main) $(datdir)* $(rawdir)*
+	rm -f $(rawdir)* $(datdir)* $(resdir)* $(figsdir)* $(papdir)sceptic/* $(papdir)SM/* $(perfdir)*
 
 ## Draw the Makefile DAG
 ## Requires: https://github.com/lindenb/makefile2graph
