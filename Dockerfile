@@ -27,10 +27,10 @@ RUN R -e "renv::restore(confirm = FALSE)"
 RUN R -e "cmdstanr::install_cmdstan(cores = 2)"
 
 # Extra: makefile2graph for Make DAG
-RUN cd ..
+RUN cd /tmp
 RUN git clone https://github.com/lindenb/makefile2graph.git
 RUN cd makefile2graph
-RUN make
-RUN cd ../sceptic-priors
+RUN make && make install
+RUN cd /sceptic-priors
 
 CMD ["bash"]
