@@ -30,7 +30,8 @@ RUN R -e "cmdstanr::install_cmdstan(cores = 2)"
 RUN cd /tmp
 RUN git clone https://github.com/lindenb/makefile2graph.git
 RUN cd makefile2graph
-RUN make && make install
+RUN make
+#RUN make install ## Not sure why but this is generating build errors
 RUN cd /sceptic-priors
 
 CMD ["bash"]
