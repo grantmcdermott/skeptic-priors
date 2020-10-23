@@ -1,8 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Sceptic priors and climate consensus
-====================================
+# Sceptic priors and climate consensus
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -33,8 +32,7 @@ your local computer. Alternately, click on the “fork” button at the very
 top right of the page to create an independent copy of the repo within
 your own GitHub account.
 
-Reproducibility
----------------
+## Reproducibility
 
 I use [**Make**](https://www.gnu.org/software/make/) to automate the
 entire project. Assuming that you have installed Make and have met all
@@ -56,8 +54,7 @@ Make a relevant meta target, e.g.
 See the [Makefile](Makefile) to get a sense of the options. The
 associated DAG is [here](makefile-dag.png) (warning: it’s complicated).
 
-Dependencies
-------------
+## Dependencies
 
 While the entire project can be reproduced via a single call to `make`,
 users must first satisfy various software dependencies. There are two
@@ -123,38 +120,48 @@ have completed Step 1 above, run the following line from your R console:
 ### Docker
 
 For those of you who don’t feel like configuring a manual setup, I also
-provide a [Docker
-image](https://hub.docker.com/repository/docker/grantmcd/sceptic) that
-bundles all of the necessary elements. You’ll also want to mount this
-repo on the running container so that you can access the actual scripts.
-For example, say that you’ve cloned this repo to
-`/home/yourname/sceptic-priors` on your computer. Then you would run
+provide a Dockerfile that will automatically bundle all of the
+dependencies and copy across the project files. To build the Docker
+image locally:
 
-    docker run -it --rm -v /home/yourname/sceptic-priors:/mnt/sceptic-priors grantmcd/sceptic /bin/bash
+    ## Run these commands in the shell
+    cd sceptic-priors
+    docker build --tag sceptic:R4.0.2 .
 
-(This will take a few minutes to download the container image from
-DockerHub the first time you run it. But the container will be ready and
-waiting for immediate deployment on your system thereafter.)
+This will take a couple of minutes to pull in all of the necessary
+packages, compile CmdStan etc. But, thereafter, the now-built container
+will be ready and waiting for immediate deployment whenever you want.
+Run it with:
 
-Once the container is up and running, you should see something like:
+    docker run -it --rm sceptic:R4.0.2
 
-    root@53f880d5ea69:/payload# 
+You should see something like:
 
-You can then navigate to the mounted volume and start running the
-scripts, e.g.
+    root@7400ee9f415f:/sceptic-priors# 
 
-    root@53f880d5ea69:/payload# cd /mnt/sceptic-priors/ 
-    root@53f880d5ea69:/mnt/sceptic-priors# Rscript --vanilla R/sceptic.R
+You should now be able to run all of the regular Make commands on the
+project (`make`, `make paper`, etc.), run the individual R scripts (in
+the `R/` subdir), or generally explore as you wish.
 
-Of course, you can also open up the interactive R shell (type `R`)
-instead of running the scripts. Exit and stop the Docker container by
-typing `exit`.
+To stop the container, just type `exit`.
 
-If you are unfamiliar with Docker, then I recommend starting
-[here](https://ropenscilabs.github.io/r-docker-tutorial/).
+**Aside 1:** Running `make` in the Docker container will generate a
+bunch of warning messages to the effect of “warning: overriding recipe
+for target ‘&’”. This is because the Ubuntu OS on the container is
+running an older version of Make (version 4.2 vs 4.3). It’s a bit
+annoying, but should be harmless.
 
-Performance
------------
+**Aside 2:** If you don’t want to work with (ephemeral) project files
+that were copied over to the container during the build process, but
+would rather mount the local version of the project (i.e. the files on
+your computer that you cloned from GitHub) as an external volume, you
+are obviously free to do so.
+
+If you are totally unfamiliar with Docker and want to know more, I have
+a brief tutorial with additional resources
+[here](https://raw.githack.com/uo-ec510-2020-spring/lectures/master/12-docker/12-docker.html).
+
+## Performance
 
 The code has been refactored to run all the Bayesian computation through
 **CmdStan**. This has yielded *considerable* speed gains, to the point
@@ -177,14 +184,12 @@ these only takes a few seconds.
 | Measurement error in forcings (sensitivity) | `R/05-sensitivity-me-forcings.R` |     442.32 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 | Measurement error in GMST (sensitivity)     | `R/05-sensitivity-me-gmst.R`     |       7.41 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 
-Problems
---------
+## Problems
 
 If you have any trouble running the code, or find any errors, please
 file an issue on this repo and I’ll look into it.
 
-License
--------
+## License
 
 The software code contained within this repository is made available
 under the [MIT license](http://opensource.org/licenses/mit-license.php).

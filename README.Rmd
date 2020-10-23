@@ -77,30 +77,34 @@ cmdstanr::install_cmdstan(cores = 2)
 
 ### Docker
 
-For those of you who don't feel like configuring a manual setup, I also provide a [Docker image](https://hub.docker.com/repository/docker/grantmcd/sceptic) that bundles all of the necessary elements. You'll also want to mount this repo on the running container so that you can access the actual scripts. For example, say that you've cloned this repo to `/home/yourname/sceptic-priors` on your computer. Then you would run
+For those of you who don't feel like configuring a manual setup, I also provide a Dockerfile that will automatically bundle all of the dependencies and copy across the project files. To build the Docker image locally:
 
 ```sh
-docker run -it --rm -v /home/yourname/sceptic-priors:/mnt/sceptic-priors grantmcd/sceptic /bin/bash
+## Run these commands in the shell
+cd sceptic-priors
+docker build --tag sceptic:R4.0.2 .
 ```
-
-(This will take a few minutes to download the container image from DockerHub the first time you run it. But the container will be ready and waiting for immediate deployment on your system thereafter.)
-
-Once the container is up and running, you should see something like:
+This will take a couple of minutes to pull in all of the necessary packages, compile CmdStan etc. But, thereafter, the now-built container will be ready and waiting for immediate deployment whenever you want. Run it with:
 
 ```sh
-root@53f880d5ea69:/payload# 
+docker run -it --rm sceptic:R4.0.2
 ```
 
-You can then navigate to the mounted volume and start running the scripts, e.g.
+You should see something like:
 
+```sh
+root@7400ee9f415f:/sceptic-priors# 
 ```
-root@53f880d5ea69:/payload# cd /mnt/sceptic-priors/ 
-root@53f880d5ea69:/mnt/sceptic-priors# Rscript --vanilla R/sceptic.R
-```
 
-Of course, you can also open up the interactive R shell (type `R`) instead of running the scripts. Exit and stop the Docker container by typing `exit`.
+You should now be able to run all of the regular Make commands on the project (`make`, `make paper`, etc.), run the individual R scripts (in the `R/` subdir), or generally explore as you wish. 
 
-If you are unfamiliar with Docker, then I recommend starting [here](https://ropenscilabs.github.io/r-docker-tutorial/).
+To stop the container, just type `exit`.
+
+**Aside 1:** Running `make` in the Docker container will generate a bunch of warning messages to the effect of "warning: overriding recipe for target '&'". This is because the Ubuntu OS on the container is running an older version of Make (version 4.2 vs 4.3). It's a bit annoying, but should be harmless.
+
+**Aside 2:** If you don't want to work with (ephemeral) project files that were copied over to the container during the build process, but would rather mount the local version of the project (i.e. the files on your computer that you cloned from GitHub) as an external volume, you are obviously free to do so. 
+
+If you are totally unfamiliar with Docker and want to know more, I have a brief tutorial with additional resources [here](https://raw.githack.com/uo-ec510-2020-spring/lectures/master/12-docker/12-docker.html).
 
 
 ## Performance
