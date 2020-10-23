@@ -1,16 +1,37 @@
-FROM rocker/r-ver:3.5.1
+FROM rocker/r-ver:4.0.2
+
 LABEL maintainer="Grant McDermott <grantmcd@uoregon.edu>"
+
+## Add git, Make, graphviz, Pandoc, etc. and Python (and install scipy)
 RUN export DEBIAN_FRONTEND=noninteractive; apt-get -y update \
   && apt-get install -y git-core \
-	jags \
-	libcairo2-dev \
-	libxml2-dev \
-	libcurl4-openssl-dev \
-	libssl-dev \
-	make \
+  python3.8 \
+  python3-pip \
+	graphviz \
 	pandoc \
-	pandoc-citeproc
-RUN ["install2.r", "abind", "assertthat", "backports", "bindr", "bindrcpp", "boot", "broom", "cellranger", "cli", "coda", "colorspace", "crayon", "dclone", "digest", "dplyr", "evaluate", "extrafont", "extrafontdb", "fansi", "forcats", "gdtools", "generics", "ggplot2", "ggridges", "glue", "gridExtra", "gtable", "haven", "here", "hms", "hrbrthemes", "htmltools", "httr", "jsonlite", "knitr", "labeling", "lattice", "lazyeval", "LearnBayes", "lubridate", "magrittr", "Matrix", "modelr", "munsell", "nlme", "pbapply", "pillar", "pkgconfig", "plyr", "purrr", "R.cache", "R.methodsS3", "R.oo", "R.utils", "R2jags", "R2WinBUGS", "R6", "RColorBrewer", "Rcpp", "readr", "readxl", "remotes", "RhpcBLASctl", "rjags", "rlang", "rmarkdown", "rprojroot", "rstudioapi", "Rttf2pt1", "rvest", "scales", "stargazer", "stringi", "stringr", "tibble", "tictoc", "tidyr", "tidyselect", "tidyverse", "utf8", "viridisLite", "withr", "xfun", "xml2", "xtable"]
-RUN ["installGithub.r", "johnbaums/jagstools@ca5ee61e4a534b46b810b20aceb3ef7dc4448e2b"]
-WORKDIR /payload/
-CMD ["R"]
+	pandoc-citeproc \
+	libxml2-dev \
+	libicu-dev
+RUN pip3 install scipy==1.5.1
+
+WORKDIR sceptic-priors
+COPY . .
+
+# Install renv and R packages
+ENV RENV_VERSION 0.12.0
+RUN echo "options(renv.consent = TRUE)" >> .Rprofile
+RUN echo "options(RETICULATE_MINICONDA_ENABLED = FALSE)" >> .Rprofile
+RUN R -e "install.packages('remotes', repos = c(RSPM = 'https://packagemanager.rstudio.com/all/latest'))"
+RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
+RUN R -e "renv::restore(confirm = FALSE)"
+RUN R -e "cmdstanr::install_cmdstan(cores = 2)"
+
+# Extra: makefile2graph for Make DAG
+RUN cd /tmp
+RUN git clone https://github.com/lindenb/makefile2graph.git
+RUN cd makefile2graph
+RUN make
+#RUN make install ## Not sure why but this is generating build errors
+RUN cd /sceptic-priors
+
+CMD ["bash"]
