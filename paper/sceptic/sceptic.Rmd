@@ -308,6 +308,8 @@ The various data sources for this paper are summarised in Table \ref{tab:sources
 
 # Results {#sec:results}
 
+The analysis for this project was primarily conducted in *R* 4.0.2 (\cite{rcore}), with the Bayesian computation being passed on to the Stan programming language (\cite{cmdstanr}). All of the code and data needed to reproduce the results can be found at the companion GitHub repository.^[https://github.com/grantmcdermott/sceptic-priors.] 
+
 ## Regression results and updated TCR beliefs {#sec:regression}
 
 ```{r params, include = FALSE}
@@ -317,7 +319,7 @@ params = params[param!='tcr']
 beta_ni = sprintf('%.3f', params[param=='beta' & prior=='ni', mean])
 ```
 
-The posterior regression results for the various prior types are presented in Table \ref{tab:reg}.^[The analysis for this project was primarily conducted in *R* (\cite{rcore}), with the Bayesian computation being passed on to the Stan programming language (\cite{cmdstanr}). All of the code and data needed to reproduce the results can be found at the companion GitHub repository: https://github.com/grantmcdermott/sceptic-priors.] Beginning with the noninformative case in the first column, all of the regression coefficients are credibly different from zero and of the anticipated sign. For example, GMST is negatively correlated with SOI. This is to be expected since the El Niño phenomenon is defined by SOI moving into its negative phase. The posterior coefficient density on our main parameter of interest, total radiative forcing ($RF$), shows that global temperature will rise by an average of `r beta_ni` °C for every  Wm$^{-2}$ increase. Of greater interest, however, is the fact that the posterior estimates yielded by the group of sceptic priors are very similar to this noninformative case. With the exception of the Strong Denier, there is a clear tendency to congregate towards the noninformative parameter values.
+The posterior regression results for the various prior types are presented in Table \ref{tab:reg}. Each column contains the results from running the Bayesian regression eq. (\ref{eq:regression}) over the full historical data set (1866--2005), using a particular set of priors. Beginning with the noninformative case in the first column, all of the regression coefficients are credibly different from zero and of the anticipated sign. For example, GMST is negatively correlated with SOI. This is to be expected since the El Niño phenomenon is defined by SOI moving into its negative phase. The posterior coefficient density on our main parameter of interest, total radiative forcing ($RF$), shows that global temperature will rise by an average of `r beta_ni` °C for every  Wm$^{-2}$ increase. Of greater interest, however, is the fact that the posterior estimates yielded by the group of sceptic priors are very similar to this noninformative case. With the exception of the Strong Denier, there is a clear tendency to congregate towards the noninformative parameter values.
 
 ```{r regtab, dependson=params}
 regtab = function(d, param_ord = NULL, digits = 3) {
