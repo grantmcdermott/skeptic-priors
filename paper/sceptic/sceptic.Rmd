@@ -517,7 +517,7 @@ evid_plot =
 evid_plot(evid)
 ```
 
-An implication of this thought experiment is the following. If a someone is unconvinced of the human influence on climate today --- despite all of the available evidence --- then there is a high probability that they will remain unconvinced for many years hence. Such extreme cases are perhaps in the minority of the population. However, it is striking to think that these individuals are already out of reach from the perspective of supporting comprehensive climate policy. Even the accumulation of evidence over the next several decades may not be enough to convince them.
+An implication of this thought experiment is the following. If someone is unpersuaded of the human influence on climate today --- despite all of the available evidence --- then there is a high probability that they will remain unconvinced for many years hence. Such extreme cases are perhaps in the minority of real-world populations. However, it is striking to think that these individuals are already out of reach from a comprehensive climate policy perspective. Even the accumulation of evidence over the next several decades may not be enough to convince them. Communication efforts should be tailored appropriately, specifically targeting moderates for persuasion (e.g. lukewarmers) rather than engaging sceptics *en masse*.
 
 
 ## Sensitivity analysis {#sec:sensitivity}
@@ -667,7 +667,7 @@ pred_plot(gmst_pred)
 
 What of the predictions yielded by our group of climate sceptics? While it is straightforward to redraw Fig. \ref{fig:gmst-pred} for each prior type, a more intuitive comparison can be made by looking at the total warming that each person expects by the end of the century. Fig. \ref{fig:gmst2100} plots the predictive temperature density in the year 2100 for all prior types by RCP scenario. Again, the data have a clear tendency to overwhelm even reasonably staunch forms of climate scepticism. Nearly all of the stylised sceptics would expect to breach the 2 °C threshold by 2100 under RCP 6.0, while a temperature rise of more than 3 °C is likely under under RCP 8.5. An exception can only be found in the form of the Strong Denier, whose extreme prior dominates the posterior in a way that obviates nearly all concern about large temperature increases.
 
-```{r gmst2100, fig.cap = 'Predicted temperature anomaly by 2100: all priors.'}
+```{r gmst2100, fig.cap = 'Predicted temperature anomaly by 2100: all priors types. Points denote means and error bars denote 95\\% credible intervals.'}
 gmst2100_plot =
   function(gmst2100) {
     g = gmst2100[, .
@@ -692,7 +692,7 @@ gmst2100_plot(gmst2100)
 ```
 
 
-## Welfare implications and the social cost of carbon {sec:welfare}
+## Welfare implications and the social cost of carbon {#sec:welfare}
 
 Provided they consider enough data, we have seen that most climate sceptics should be able to agree that a 2 °C target requires limiting CO$_2$ concentrations to around 540 ppmv. However, whether someone actually subscribes to policy measures aimed at achieving the 2 °C goal is dependent on many things; their choice of discount rate, beliefs about the efficacy of policy, damage expectations, etc. Such issues are largely beyond the scope of this paper. Nonetheless, we may still gain a deeper insight into the welfare implications of our posterior TCR values by analysing their effect on the social cost of carbon (SCC). The SCC represents the economic costs associated with a marginal unit of CO$_2$ emissions. It can therefore be thought of as society's willingness to pay for the prevention of future damages associated with human-induced climate change.
 
