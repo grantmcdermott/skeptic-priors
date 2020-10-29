@@ -151,21 +151,21 @@ gmst2100 = read_fst(here('results/main/gmst2100.fst')); setDT(gmst2100)
 tcr_rec = fread(here('results/recursive/tcr-rec.csv'))
 evid = fread(here('results/evidence/evid.csv'))
 scc = fread(here('results/PAGE09/scc.csv'))
-sens_ni = rbindlist(lapply(
+sens_tab = rbindlist(lapply(
 	grep('tcr', list.files(here('results/sensitivity'), full.names = TRUE), value = TRUE),
 	function(x) {
 		d = read_fst(x)
 		setDT(d)
-		if ('series' %in% names(d)) d$run = d$series ## Only really for 'anthro' runs
+		if (!('series' %in% names(d))) d$series = d$run
 		d[prior=='ni', 
 			.(tcr = paste0(sprintf('%.1f', mean(tcr)), 
 										 ' (',
-										 q025 = sprintf('%.1f',  quantile(tcr, .025)), 
-										 ',',
-										 q975 = sprintf('%.1f',  quantile(tcr, .975)),
+										 sprintf('%.1f',  quantile(tcr, .025)), 
+										 ', ',
+										 sprintf('%.1f',  quantile(tcr, .975)),
 										 ')'
 										 )),
-			by = run]
+			by = .(run, series)]
 		}
 	))
 ```
@@ -543,42 +543,60 @@ An implication of this thought experiment is the following. If someone is unpers
 
 I consider a number of alternative specifications to test the sensitivity of my results. These are summarized in Table \ref{tab:sensitivity}. For example, the HadCRUT4 dataset is known to suffer from potential coverage biases due to incomplete placement of \textit{in situ} thermometers. I therefore rerun the analysis with two alternate reconstructions of GMST. \cite{cowtan2014coverage}, hereafter CW2014, correct for the gaps in the HadCRUT4 dataset by using an interpolation algorithm based on the "kriging" method. Similarly, the NASA Goddard Institute for Space Studies uses an extrapolation algorithm to overcome coverage bias in GISTEMP, its own GMST reconstruction. Running the Bayesian regression model on these alternative series yields moderately higher TCR values compared to HadCRUT4. Under a noninformative prior, the posterior TCR means (and 95\% Bayesian credible intervals) are 1.6 °C (1.4--1.8 °C) for CW2014 and 1.7 °C (1.5--1.9 °C) for GISTEMP. While I omit them for brevity, the posterior results for the group of climate sceptics are similarly nudged higher towards the new noninformative distributions. Given that the explicit goal of this paper is to evaluate policy options from the perspective of climate sceptics, I continue using the results from the HadCRUT4 series as a default. Yet, it should be noted that this is a conservative choice that may, at least marginally, understate the true level of warming.
 
-```{r}
-sens_cols = c('mean', 'q025', 'q975')
-sens_ni[, (sens_cols) := lapply(.SD, sprintf)]
+```{r sens_tab}
+sens_ord = c('alt-gmst', 'me-gmst', 'me-forcings', 'eff1', 'eff2', 'anthro')
+sens_labs = c('CW2014' = 'cw', 'giss' = 'GISTEMP', 'ME GMST' = 'me-gmst', 'ME forcings'= 'me-forcings', 'Eff1' = 'eff1', 'Eff2' = 'eff2', 'Anthro' = 'anthro', 'CO2' = 'co2')
+sens_tab[, series := factor(series, levels = sens_ord)]
+setorder(sens_tab, series)
+sens_tab[, Comment := fcase(run=='alt-gmst', 'Alternative GMST series.',
+														series=='me-gmst', 'Specifies measurement error in HadCRUT4',
+														series=='me-forcings', 'Introduces measurement error in forcings data.',
+														series=='eff1', 'Adjusted forcing efficacies (means).',
+														series=='eff2', 'Adjusted forcing efficacies (distributions).',
+														series=='anthro', 'Separates anthropogenic from natural forcings.',
+														series=='co2', 'Separates CO\\$_2\\$ from natural forcings.'
+														)]
+sens_tab[, run := NULL]
+setnames(sens_tab, c('series', 'tcr'), c('Key', 'TCR'))
+
+kbl(sens_tab, align = 'lll', booktabs = TRUE, format = 'latex',
+		caption = 'TCR: Sensitivity analysis and alternative specifications. \\label{tab:sensitivity}') %>%
+	footnote('TCR means are given in °C, with 95\\\\% credible intervals in parentheses. The estimates above are computed using noninformative priors only. Full distributions for all prior types across all sensitivity runs are provided in the Supplementary Material. See main text for additional details.', 
+					 general_title = 'Notes:', footnote_as_chunk = TRUE,
+					 escape = FALSE, threeparttable = TRUE)
 ```
 
 
-\begin{table}[t] \centering 
-	\caption{TCR: Alternative specifications and robustness checks} 
-	\label{tab:sensitivity} 
-	\begin{threeparttable} %%% added %%% 
-	\begin{tabular}{@{\extracolsep{5pt}} lccl} 
-%		\\[-1.8ex]\hline 
-%		\hline \\[-1.8ex] 
-		\toprule %%% added %%%
-		Key 				& Mean ($^\circ$C) 	& 95\% C.I.  & Comment \\ 
-%		\hline \\[-1.8ex] 
-		\midrule %%% added %%%
-		HadCRUT4 			& 1.6 				& [1.4, 1.7] & Primary GMST series. For comparison only. \\ 
-		CW2014 				& 1.6				& [1.4, 1.8] & Alternative GMST series. \\ 
-		GISTEMP 			& 1.7 				& [1.5, 1.9] & Alternative GMST series. \\ 
-		Meas. error 		& 1.5 				& [1.4, 1.7] & Specifying measurement error in HadCRUT4. \\ 
-		Marvel I			& 2.1 				& [1.9, 2.4] & Adjusted forcing efficacies (means). \\ 
-		Marvel II 			& 1.9 				& [0.4, 3.4] & Adjusted forcing efficacies (distributions). \\ 
-		Anthro$^\dagger$	& 1.5 				& [1.4, 1.8] & Separate anthropogenic from natural forcings. \\ 
-		CO$_2$$^\dagger$	& 1.7 				& [1.4, 2.0] & Separate CO$_2$ from all other forcings. \\ 
-%		\hline \\[-1.8ex]
-		\bottomrule 
-%		\multicolumn{4}{l}{\footnotesize All estimates are computed using noninformative priors.} \\ 
-	\end{tabular} 
-	\begin{tablenotes}
-		\footnotesize
-		\item All estimates are computed using noninformative priors. See main text for additional details.
-		\item $^\dagger$ See Supplementary Material for a summary of the posterior TCR values across the different sceptic prior types.
-	\end{tablenotes}
-\end{threeparttable} 
-\end{table}
+<!-- \begin{table}[t] \centering  -->
+<!-- 	\caption{TCR: Alternative specifications and robustness checks}  -->
+<!-- 	\label{tab:sensitivity}  -->
+<!-- 	\begin{threeparttable} %%% added %%%  -->
+<!-- 	\begin{tabular}{@{\extracolsep{5pt}} lccl}  -->
+<!-- %		\\[-1.8ex]\hline  -->
+<!-- %		\hline \\[-1.8ex]  -->
+<!-- 		\toprule %%% added %%% -->
+<!-- 		Key 				& Mean ($^\circ$C) 	& 95\% C.I.  & Comment \\  -->
+<!-- %		\hline \\[-1.8ex]  -->
+<!-- 		\midrule %%% added %%% -->
+<!-- 		HadCRUT4 			& 1.6 				& [1.4, 1.7] & Primary GMST series. For comparison only. \\  -->
+<!-- 		CW2014 				& 1.6				& [1.4, 1.8] & Alternative GMST series. \\  -->
+<!-- 		GISTEMP 			& 1.7 				& [1.5, 1.9] & Alternative GMST series. \\  -->
+<!-- 		Meas. error 		& 1.5 				& [1.4, 1.7] & Specifying measurement error in HadCRUT4. \\  -->
+<!-- 		Marvel I			& 2.1 				& [1.9, 2.4] & Adjusted forcing efficacies (means). \\  -->
+<!-- 		Marvel II 			& 1.9 				& [0.4, 3.4] & Adjusted forcing efficacies (distributions). \\  -->
+<!-- 		Anthro$^\dagger$	& 1.5 				& [1.4, 1.8] & Separate anthropogenic from natural forcings. \\  -->
+<!-- 		CO$_2$$^\dagger$	& 1.7 				& [1.4, 2.0] & Separate CO$_2$ from all other forcings. \\  -->
+<!-- %		\hline \\[-1.8ex] -->
+<!-- 		\bottomrule  -->
+<!-- %		\multicolumn{4}{l}{\footnotesize All estimates are computed using noninformative priors.} \\  -->
+<!-- 	\end{tabular}  -->
+<!-- 	\begin{tablenotes} -->
+<!-- 		\footnotesize -->
+<!-- 		\item All estimates are computed using noninformative priors. See main text for additional details. -->
+<!-- 		\item $^\dagger$ See Supplementary Material for a summary of the posterior TCR values across the different sceptic prior types. -->
+<!-- 	\end{tablenotes} -->
+<!-- \end{threeparttable}  -->
+<!-- \end{table} -->
 
 All three GMST reconstructions also provide estimates of measurement error. The Bayesian framework is ideally suited to incorporate such knowledge, since the nested model structure allows us to fully specify measurement error on the dependent variable within the regression model itself. Doing so in the present setup yields coefficient estimates that are effectively identical to those presented in Table \ref{tab:regtab}. This is unsurprising once we recall that measurement error on the dependent variable is absorbed by the disturbance term of the regression model.^[For example, see p. 326 of \cite{greene2007econometric}. To illustrate with a simple univariate case: The regression model can be written as $y_t \sim \mathcal{N}(\beta X_t, \sigma^2 + \omega_t^2)$, where $\sigma^2 = \Var(\epsilon)$ is the variance of the error term and $\omega_t^2 = \Var(\nu_t)$ is the variance of the measurement error on $y_t$. Together, $\epsilon$ and $\nu_t$ make up the overall disturbance of the regression.]
 Since the Bayesian regression framework is primarily concerned with total model uncertainty, specifying the relative contribution of such measurement error to the overall disturbance doesn't meaningfully alter the analysis --- though it may be useful for incorporating known sources of heteroscedasticity.^[See \cite{lewis2005edv} for a related discussion in a frequentist setting.] The primary regression results already have the measurement error "baked in" to the estimation, regardless of whether we define it explicitly or not.
