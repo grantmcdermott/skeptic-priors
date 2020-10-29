@@ -151,6 +151,23 @@ gmst2100 = read_fst(here('results/main/gmst2100.fst')); setDT(gmst2100)
 tcr_rec = fread(here('results/recursive/tcr-rec.csv'))
 evid = fread(here('results/evidence/evid.csv'))
 scc = fread(here('results/PAGE09/scc.csv'))
+sens_ni = rbindlist(lapply(
+	grep('tcr', list.files(here('results/sensitivity'), full.names = TRUE), value = TRUE),
+	function(x) {
+		d = read_fst(x)
+		setDT(d)
+		if ('series' %in% names(d)) d$run = d$series ## Only really for 'anthro' runs
+		d[prior=='ni', 
+			.(tcr = paste0(sprintf('%.1f', mean(tcr)), 
+										 ' (',
+										 q025 = sprintf('%.1f',  quantile(tcr, .025)), 
+										 ',',
+										 q975 = sprintf('%.1f',  quantile(tcr, .975)),
+										 ')'
+										 )),
+			by = run]
+		}
+	))
 ```
 
 
@@ -525,6 +542,12 @@ An implication of this thought experiment is the following. If someone is unpers
 ## Sensitivity analysis {#sec:sensitivity}
 
 I consider a number of alternative specifications to test the sensitivity of my results. These are summarized in Table \ref{tab:sensitivity}. For example, the HadCRUT4 dataset is known to suffer from potential coverage biases due to incomplete placement of \textit{in situ} thermometers. I therefore rerun the analysis with two alternate reconstructions of GMST. \cite{cowtan2014coverage}, hereafter CW2014, correct for the gaps in the HadCRUT4 dataset by using an interpolation algorithm based on the "kriging" method. Similarly, the NASA Goddard Institute for Space Studies uses an extrapolation algorithm to overcome coverage bias in GISTEMP, its own GMST reconstruction. Running the Bayesian regression model on these alternative series yields moderately higher TCR values compared to HadCRUT4. Under a noninformative prior, the posterior TCR means (and 95\% Bayesian credible intervals) are 1.6 °C (1.4--1.8 °C) for CW2014 and 1.7 °C (1.5--1.9 °C) for GISTEMP. While I omit them for brevity, the posterior results for the group of climate sceptics are similarly nudged higher towards the new noninformative distributions. Given that the explicit goal of this paper is to evaluate policy options from the perspective of climate sceptics, I continue using the results from the HadCRUT4 series as a default. Yet, it should be noted that this is a conservative choice that may, at least marginally, understate the true level of warming.
+
+```{r}
+sens_cols = c('mean', 'q025', 'q975')
+sens_ni[, (sens_cols) := lapply(.SD, sprintf)]
+```
+
 
 \begin{table}[t] \centering 
 	\caption{TCR: Alternative specifications and robustness checks} 
