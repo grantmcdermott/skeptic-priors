@@ -149,6 +149,7 @@ priors_loop = function() {
 						## TCR
 						beta_draws = as.matrix(fit$draws("beta"))[, 1]
 						tcr = data.table(tcr = rf2x * beta_draws, prior = prior_convic)
+						tcr$series = i
 						
 						## Summary table
 						params_tab = 
