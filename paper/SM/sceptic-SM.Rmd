@@ -6,6 +6,7 @@ author: "Grant McDermott"
 bibliography: ../sceptic/sceptic.bib
 output: 
   pdf_document:
+    keep_tex: true
     latex_engine: xelatex
     # toc: true
     citation_package: natbib
@@ -116,7 +117,7 @@ theme_set(
 
 ```{r data}
 # climate = fread(here('data/climate.csv'))
-# priors_dt = fread(here('data/priors.csv'))
+priors_dt = fread(here('data/priors.csv'))
 # params = fread(here('results/main/params.csv'))
 # tcr = read_fst(here('results/main/tcr.fst')); setDT(tcr)
 # gmst_pred = fread(here('results/main/gmst-pred.csv'))
@@ -129,11 +130,13 @@ scc = fread(here('results/PAGE09/scc.csv'))
 
 # Tables
 
+## Sensitivity analysis
+
 \begin{table}[ht] \centering 
-	\caption{TCR efficacies} 
+	\caption{TCR efficacies used in ``MEA'' I and II sensitivity runs} 
 	\label{tab:marvel} 
 	\begin{threeparttable} 
-		\begin{tabular}{@{\extracolsep{5pt}} lcc}
+		\begin{tabularx}{.75\textwidth}{@{\extracolsep{5pt}} Xcc}
 			\toprule
 			Forcing agent & Mean &   95\% C.I.   \\ 
 			\midrule
@@ -144,57 +147,20 @@ scc = fread(here('results/PAGE09/scc.csv'))
 			Solar         & 1.68 & (-1.27, 4.63)  \\
 			Volcanic      & 0.61 & (0.33, 0.89)  \\ 
 			\bottomrule
-		\end{tabular} 
+		\end{tabularx} 
 		\begin{tablenotes}
 			\footnotesize
-			\item Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
+			\item Notes: Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
 		\end{tablenotes}
 	\end{threeparttable} 
 \end{table} 
 
-<!-- \vspace{1cm} -->
-
-<!-- \begin{table}[h] \centering -->
-<!-- 	%\begin{adjustwidth}{-.1in}{-.1in}%{-.55in}{-.55in}   -->
-<!-- 	\caption{Posterior TCRs when separating anthropogenic sources from other forcings (robustness check)}  -->
-<!-- 	\label{tab:anthro}  -->
-<!-- %	\begin{adjustwidth}{-1cm}{-1cm} -->
-<!-- 		%  \scriptsize  -->
-<!-- 		\footnotesize %%% added %%% -->
-<!-- 		\begin{threeparttable} %%% added %%% -->
-<!-- 			%\begin{tabular}{@{\extracolsep{1pt}} D{.}{.}{-3} D{.}{.}{-3} D{.}{.}{-3} D{.}{.}{-3} D{.}{.}{-3} D{.}{.}{-3} }  -->
-<!-- 			\begin{tabularx}{.9\linewidth}{ l X X X X X} -->
-<!-- 				%\\[-1.8ex]\hline  -->
-<!-- 				%\hline \\[-1.8ex]  -->
-<!-- %				\multicolumn{6}{c}{\normalsize \footnotesize Dependent variable: Global Mean Surface Temperature anomaly ($^\circ$C)} \\ \\[-1.8ex]\hline  -->
-<!-- 				\toprule %%% changed %%%%  -->
-<!-- 				\multicolumn{1}{c}{} &  & \multicolumn{2}{c}{Lukewarmer} & \multicolumn{2}{c}{Denier} \\  %\\[-1.8ex]  -->
-<!-- 				\cmidrule(lr){3-4}\cmidrule(lr){5-6} -->
-<!-- 				\multicolumn{1}{c}{} & \multicolumn{1}{c}{Noninformative} & \multicolumn{1}{c}{Moderate} & \multicolumn{1}{c}{Strong} & \multicolumn{1}{c}{Moderate} & \multicolumn{1}{c}{Strong} \\   -->
-<!-- 				\midrule -->
-<!-- 				\multicolumn{1}{l}{TCR (anthropogenic)} & \multicolumn{1}{c}{1.5} & \multicolumn{1}{c}{1.5} & \multicolumn{1}{c}{1.2} & \multicolumn{1}{c}{1.4} & \multicolumn{1}{c}{0.3} \\  -->
-<!-- 				\multicolumn{1}{c}{} & \multicolumn{1}{c}{[1.4, 1.8]} & \multicolumn{1}{c}{[1.3, 1.7]} & \multicolumn{1}{c}{[1.1, 1.4]} & \multicolumn{1}{c}{[1.2, 1.6]} & \multicolumn{1}{c}{[0.2, 0.5]} \\  -->
-<!-- 				\midrule				 -->
-<!-- 				\multicolumn{1}{l}{TCR (CO$_2$)} & \multicolumn{1}{c}{1.7} & \multicolumn{1}{c}{1.5} & \multicolumn{1}{c}{1.1} & \multicolumn{1}{c}{1.3} & \multicolumn{1}{c}{0.2} \\  -->
-<!-- 				\multicolumn{1}{c}{} & \multicolumn{1}{c}{[1.4, 2]} & \multicolumn{1}{c}{[1.2, 1.8]} & \multicolumn{1}{c}{[1, 1.3]} & \multicolumn{1}{c}{[1, 1.5]} & \multicolumn{1}{c}{[0.1, 0.3]} \\  -->
-
-<!-- 				\\[-1.8ex] -->
-<!-- 				%\hline \\[-1.8ex]  -->
-<!-- 				\bottomrule -->
-<!-- 			\end{tabularx}  -->
-<!-- 			\begin{tablenotes} -->
-<!-- 				\footnotesize %\scriptsize -->
-<!-- 				\item Implied TCR values are derived from an alternative implementation of regression equation~\ref{eq:regression}. In the first case, anthropogenic forcings are entered separately from natural forcings. In the second, CO$_2$ forcings are entered separately from all other sources. See main text for details. While the underlying regression coefficients are omitted for brevity, the notes from Table~\ref{tab:reg-coefs} all apply.  -->
-<!-- 			\end{tablenotes} -->
-<!-- 		\end{threeparttable} -->
-<!-- %	\end{adjustwidth} -->
-<!-- \end{table}  -->
-
+## Future temperatures
 
 \begin{table}[h] \centering 
-	\caption{Covariate vectors for prediction in the year 2100} 
+	\caption{Covariate vectors for 2100 predictions} 
 	\begin{threeparttable} %%% added %%% 
-		\begin{tabularx}{.9\textwidth}{@{\extracolsep{1pt}} X A A A A } 
+		\begin{tabularx}{.75\textwidth}{@{\extracolsep{1pt}} X A A A A } 
 			%\begin{tabularx}{\textwidth}{X c c c c} 
 			%\hline\hline
 			\toprule
@@ -228,6 +194,119 @@ scc = fread(here('results/PAGE09/scc.csv'))
 \pagebreak
 
 # Figures
+
+## Sensitivity analysis
+
+Figs. \ref{fig:sens_cw14} -- \ref{fig:sens_co2} provide additional context and information related to the various sensitivity analyses undertaken in Section 5.2 of the main text. In each case, the figure caption references against the key listed in first column of Table 4. The figures themselves are directly comparable with Fig. 1 and the same general notes apply (dashed lines denote TCR priors, solid lines denote TCR posteriors, etc.) Note that in some cases the x-axis has been truncated to preserve this direct comparability, even though the posterior distributions may extend beyond the -1 °C to 3 °C range.
+
+```{r tcr_plot}
+tcr_plot =
+  function(tcr_dt, p_dt = priors_dt, priors_only = FALSE) {
+    
+    ## Can't use stat_function() that maps to facets, ridges or other aesthetic 
+    ## elements. So we have to create the data manually instead. See:
+    ## https://github.com/tidyverse/ggplot2/issues/2357
+    
+  	## Priors
+  	p_dt[, prior := factor(match_priors(paste0(prior_type, convic_type)), 
+  												 levels=prior_names)]
+    p_dt[prior_type=='ni', ':=' (mu = mu*3.71, sigma = sigma*3.71)]
+    prior_dens = 
+    	rbindlist(lapply(
+    		prior_names, 
+    		function(x){
+    			dt = p_dt[prior==x]
+    			tcr_grid = seq(from = qnorm(0.0001, dt$mu, dt$sigma), 
+    										 to = qnorm(0.9999, dt$mu, dt$sigma), 
+    										 length=100)
+    			data.table(
+    				tcr = tcr_grid,
+    				height = dnorm(tcr_grid, mean = dt$mu, sd = dt$sigma),
+    				prior = x
+    				)
+    			}))
+    
+    ## Posteriors
+    tcr_dens = tcr_dt[, .(data = list(.SD)), by = prior]
+    tcr_dens[, dens := lapply(data, function(d) density(d$tcr))]
+    tcr_dens[, tcr := lapply(dens, function(d) d$x)]
+    tcr_dens[, height := lapply(dens, function(d) d$y)]
+    ## Unnest
+    tcr_dens = tcr_dens[, .(tcr = tcr[[1]], height = height[[1]]), by=prior]
+    tcr_dens[, prior := factor(match_priors(prior), levels=prior_names[c(1,3,2,4,5)])]
+    
+    ggplot(
+    	tcr_dens,
+    	aes(x=tcr, y = prior, height=height, group=prior, 
+    			col=prior, fill=prior)
+    	) +
+      ## Dummy data (need to plot first otherwise annotate geom doesn't work)
+      geom_density_ridges(stat = 'identity', scale = 2, alpha = 0, col = NA) +
+      ## IPCC "likely" region (1.0–2.5 °C)
+      annotate('rect', xmin = 1, xmax = 2.5, ymin = 0, ymax = Inf, alpha = .2) +
+      ## Priors
+      geom_density_ridges(
+        stat = 'identity', scale = 1.75, 
+        data = prior_dens,
+        lty = 2, fill = NA
+        ) +
+      ## Posteriors
+      {if (!priors_only) {
+      	geom_density_ridges(stat = 'identity', scale = 1.75, alpha = 0.5, lwd = 0.5)
+      	}} +
+      ## Stylistic elements
+      labs(x = expression('TCR'~'('*degree*C*')'), y = 'Density') +
+      xlim(-1, 3) +
+      scale_colour_manual(values = prior_cols, aesthetics = c('colour', 'fill')) +
+      theme(
+        axis.text.y = element_text(vjust = 0),
+        axis.title.y = element_blank(),
+        legend.position = 'none'
+      ) 
+    }
+```
+
+```{r sens_cw14, dependson = 'tcr_plot', fig.cap = 'TCR densities: "CW14" sensitivity run.'}
+alt_gmst = read_fst(here('results/sensitivity/tcr-alt-gmst.fst')); setDT(alt_gmst)
+tcr_plot(alt_gmst[series=='cw'])
+```
+
+```{r sens_gistemp, dependson = 'tcr_plot', fig.cap = 'TCR densities: "GISTEMP" sensitivity run.'}
+tcr_plot(alt_gmst[series=='giss'])
+```
+
+```{r sens_hadcrut_me, dependson = 'tcr_plot', fig.cap = 'TCR densities: "HadCRUT ME" sensitivity run.'}
+hadcrut_me = read_fst(here('results/sensitivity/tcr-me-gmst.fst')); setDT(hadcrut_me)
+tcr_plot(hadcrut_me)
+```
+
+```{r sens_df18, dependson = 'tcr_plot', fig.cap = 'TCR densities: "DF18" sensitivity run.'}
+df18 = read_fst(here('results/sensitivity/tcr-me-forcings.fst')); setDT(df18)
+tcr_plot(df18)
+```
+
+```{r sens_mea_i, dependson = 'tcr_plot', fig.cap = 'TCR densities: "MEA I" sensitivity run.'}
+mea_i = read_fst(here('results/sensitivity/tcr-eff1.fst')); setDT(mea_i)
+tcr_plot(mea_i)
+```
+
+```{r sens_mea_ii, dependson = 'tcr_plot', fig.cap = 'TCR densities: "MEA II" sensitivity run.'}
+mea_ii = read_fst(here('results/sensitivity/tcr-eff2.fst')); setDT(mea_ii)
+tcr_plot(mea_ii)
+```
+
+```{r sens_anthro, dependson = 'tcr_plot', fig.cap = 'TCR densities: "Anthro" sensitivity run.'}
+anthro = read_fst(here('results/sensitivity/tcr-anthro.fst')); setDT(anthro)
+tcr_plot(anthro[series=='anthro'])
+```
+
+```{r sens_co2, dependson = 'tcr_plot', fig.cap = 'TCR densities: "CO2" sensitivity run.'}
+tcr_plot(anthro[series=='co2'])
+```
+
+\pagebreak
+
+## Welfare implications and the social cost of carbon
 
 ```{r scc-fig, fig.cap = 'Social cost of carbon (US\\$2005 per ton). The results for each agent type are obtained from 10,000 simulation runs of PAGE09 \\cite{hope2011page09}. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE09 model defaults. The x-axis is truncated at 100 to aid visual inspection; the uppermost tails of the distributions being well in excess of the range given here.', fig.pos = 'h'}
 scc = melt(scc, measure.vars = names(scc), 
