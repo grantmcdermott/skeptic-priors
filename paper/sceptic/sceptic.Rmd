@@ -101,10 +101,10 @@ match_priors = function(x) {
 
 ## Match short RCP names to long RCP names
 match_rcps = function(x) {
-  x <- gsub('rcp26', rcp_names[1], x)
-  x <- gsub('rcp45', rcp_names[2], x)
-  x <- gsub('rcp60', rcp_names[3], x)
-  x <- gsub('rcp85', rcp_names[4], x)
+  x = gsub('rcp26', rcp_names[1], x)
+  x = gsub('rcp45', rcp_names[2], x)
+  x = gsub('rcp60', rcp_names[3], x)
+  x = gsub('rcp85', rcp_names[4], x)
   return(x)
 }
 
@@ -599,9 +599,9 @@ Climate policy is largely predicated upon the risks to future generations. As su
 
 While the trajectory of future radiative forcings is subject to much uncertainty, some guidance is available in the form of the IPCC's Representative Concentration Pathways \cite{van2011rcp}. These so-called "RCPs" describe a family of emissions scenarios, where total anthropogenic forcings evolves according to various economic, demographic and technological assumptions. Each RCP includes a core component of atmospheric CO$_2$ concentrations, while they all share a common prediction for radiative forcing due to solar activity. I take these series as the basis for constructing covariate vectors to predict temperatures until the year 2100. For the remaining explanatory variables --- stratospheric aerosols, SOI and AMO --- I take the mean historical values from my dataset. A summary of covariate vectors in 2100 for each RCP scenario is provided in the Supplementary Material.
 
-Fig. \ref{fig:gmst-pred} shows the temperature evolution for each RCP under the noninformative case, which I again take as the benchmark. The principal message is that CO$_2$ concentrations must be constrained to RCP 4.5 or lower, if we are to avoid a 2 °C rise in global temperature. Given the prominence of this particular threshold in international climate treaties and the popular narrative, the result is a reinforcement of commonly cited emissions targets such as 450 and 540 ppmv. On the other hand, we can expect to breech even 3 °C by the year 2100 if we continue along a truly unconstrained emissions path à la RCP 8.5.
+Fig. \ref{fig:gmst-pred} shows the temperature evolution for each RCP under the noninformative case, which I again take as the benchmark. As discussed in Section \ref{sec:likelihood}, it would be inappropriate to extrapolate my regression model to scenarios that are characterised by significant changes in the rate of radiative forcing, because of oceanic thermal inertia. I therefore focus on RCPs 6.0 and 8.5 since these two scenarios maintain steady rates of increase in forcing.^[Temperature predictions for RCPs 2.6 and 4.5 --- depicting respective CO$_2$ stabilisation scenarios --- are included in Fig. \ref{fig:gmst-pred} for reference purposes only.] The principal message is that CO$_2$ concentrations must be constrained to well below RCP 6.0, if we are to avoid a 2 °C rise in global temperatures. Given the prominence of this particular threshold in international climate treaties and the popular narrative, the result is a reinforcement of commonly cited emissions targets such as 450 and 540 ppmv. On the other hand, we can expect to breech even 3 °C by the year 2100 if we continue along a truly unconstrained emissions path à la RCP 8.5.
 
-```{r gmst-pred, fig.cap = 'Model fit and prediction: noninformative priors. Temperature anomaly relative to the 1871--1900 average. Shaded regions denote 95\\% credible intervals.'}
+```{r gmst-pred, fig.cap = 'Model fit and prediction: noninformative priors. Temperature anomaly relative to the 1871--1900 average. Shaded regions denote 95\\% credible intervals. Note that predictions for RCPs 2.6 and 4.5 are potentially ill-conditioned and are included for reference purposes only. See text for details.'}
 
 pred_plot =
   function(pred) {
@@ -630,7 +630,7 @@ pred_plot =
   							(sd_cols) := lapply(.SD, `+`, had_pre2006),
   							.SDcols = sd_cols]
   	
-  	series_labs = trimws(gsub('.*\\)', '', rcp_names))
+  	series_labs = gsub('.*\\)', '', rcp_names)
     ggplot(
       data = predictions, 
       aes(x = year, col = series, fill = series, linetype = series)
@@ -643,10 +643,16 @@ pred_plot =
       geom_line(
         data = predictions[series %in% c('fitted','rcp26','rcp45','rcp60','rcp85')],
         aes(y = mean), lwd = 0.5
-        ) + 
-      geom_ribbon(
-        aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.3
-        ) + 
+        ) +  
+    	geom_ribbon(
+    		data = predictions[series %in% c('rcp26','rcp45')],
+    		aes(ymin = q025, ymax = q975, col = series, fill = NA), 
+    		lwd = 0.1, lty = 1, show.legend = FALSE
+    		) + 
+    	geom_ribbon(
+    		data = predictions[series %in% c('fitted','rcp60','rcp85')],
+    		aes(ymin = q025, ymax = q975), lty = 0, alpha = 0.3
+    		) + 
       ## Historic vs Forecast period
       geom_vline(xintercept = 2005, colour = 'gray35', linetype = 6) +
       annotate(
@@ -679,7 +685,7 @@ pred_plot =
       scale_y_continuous(
         sec.axis = dup_axis(
           breaks = predictions[year==2100 & grepl('rcp', series), mean],
-          labels = gsub(' \\(forecast\\)', '', series_labs),
+          labels = series_labs,
           name = NULL)
         ) +
       theme(
@@ -695,30 +701,49 @@ pred_plot =
 pred_plot(gmst_pred)
 ```
 
-What of the predictions yielded by our group of climate sceptics? While it is straightforward to redraw Fig. \ref{fig:gmst-pred} for each prior type, a more intuitive comparison can be made by looking at the total warming that each person expects by the end of the century. Fig. \ref{fig:gmst2100} plots the predictive temperature density in the year 2100 for all prior types by RCP scenario. Again, the data have a clear tendency to overwhelm even reasonably staunch forms of climate scepticism. Nearly all of the stylised sceptics would expect to breach the 2 °C threshold by 2100 under RCP 6.0, while a temperature rise of more than 3 °C is likely under under RCP 8.5. An exception can only be found in the form of the Strong Denier, whose extreme prior dominates the posterior in a way that obviates nearly all concern about large temperature increases.
+What of the predictions yielded by our group of climate sceptics? While it is straightforward to redraw Fig. \ref{fig:gmst-pred} for each prior type, a more intuitive comparison can be made by looking at the full distribution of warming that each person expects by the end of the century. Fig. \ref{fig:gmst2100} plots the predictive temperature density in the year 2100 for all prior types by RCP scenarios 6.0 and 8.5. Again, the data have a clear tendency to overwhelm even reasonably staunch forms of climate scepticism. Nearly all of the stylised sceptics would expect to breach the 2 °C threshold by 2100 under RCP 6.0, while a temperature rise of more than 3 °C is likely under under RCP 8.5. An exception can only be found in the form of the Strong Denier, whose extreme prior dominates the posterior in a way that obviates nearly all concern about large temperature increases.
 
-```{r gmst2100, fig.cap = 'Predicted temperature anomaly by 2100: all priors types. Points denote means and error bars denote 95\\% credible intervals.'}
+```{r gmst2100, fig.asp = 0.5, fig.cap = 'Predicted temperature anomaly by 2100: all priors types. Points denote means and error bars denote 95\\% credible intervals.'}
 gmst2100_plot =
-  function(gmst2100) {
-    g = gmst2100[, .
-    						 (gmst_mean = mean(gmst),
-    						 	gmst_q025 = quantile(gmst, p=0.025),
-    						 	gmst_q975 = quantile(gmst, p=0.975)), 
-    						 by = .(rcp, prior)]
-    g[, prior := factor(match_priors(prior))][, rcp := match_rcps(rcp)]
-    ggplot(g, aes(x = fct_reorder(prior, gmst_mean), 
-    							y = gmst_mean, ymin=gmst_q025, ymax=gmst_q975, col=prior)) +
-      geom_pointrange() + 
-      coord_flip() +
-      scale_colour_manual(values = prior_cols) +
-      facet_wrap(~ rcp) +
-      labs(x = 'Prior', y = 'Temperature anomaly by 2100 (°C)') +
+  function(gmst2100_dt = gmst2100) {
+    
+    gmst_dens = gmst2100_dt[rcp %in% c('rcp60', 'rcp85'), 
+    										 .(data = list(.SD)), by = .(rcp, prior)]
+    gmst_dens[, dens := lapply(data, function(d) density(d$gmst))]
+    gmst_dens[, gmst := lapply(dens, function(d) d$x)]
+    gmst_dens[, height := lapply(dens, function(d) d$y)]
+    ## Unnest
+    gmst_dens = gmst_dens[, 
+    											.(gmst = gmst[[1]], height = height[[1]]), 
+    											by = .(rcp, prior)]
+    gmst_dens[, prior := factor(match_priors(prior), levels=prior_names)]
+    gmst_dens[, rcp := match_rcps(rcp)
+    					][, rcp := gsub('\\(c\\)', '\\(a\\)', rcp)
+    						][, rcp := gsub('\\(d\\)', '\\(b\\)', rcp)]
+    
+    ggplot(
+    	gmst_dens,
+    	aes(x=gmst, y = fct_reorder(prior, gmst), height=height, group=prior, 
+    			col=prior, fill=prior)
+    	) +
+      # ## Dummy data (need to plot first otherwise annotate geom doesn't work)
+      # geom_density_ridges(stat = 'identity', scale = 2, alpha = 0, col = NA) +
+      ## Posteriors
+      geom_density_ridges(stat = 'identity', scale = 1.75, alpha = 0.5, lwd = 0.5) +
+    	facet_wrap(~ rcp) +
+      labs(x = 'Temperature anomaly by 2100 (°C)') +
+      ## Stylistic elements
+      # labs(x = expression('TCR'~'('*degree*C*')'), y = 'Density') +
+      # xlim(-1, 3) +
+      scale_colour_manual(values = prior_cols, aesthetics = c('colour', 'fill')) +
       theme(
-        legend.position = 'none',
-        axis.title.y = element_blank()
-        ) 
-  }
-gmst2100_plot(gmst2100)
+        axis.text.y = element_text(vjust = 0),
+        axis.title.y = element_blank(),
+        legend.position = 'none'
+      ) 
+    }
+
+gmst2100_plot()
 ```
 
 
