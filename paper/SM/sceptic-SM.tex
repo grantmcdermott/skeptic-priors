@@ -82,6 +82,7 @@
 \usepackage{threeparttablex}
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
+\usepackage{xcolor}
 \ifluatex
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -121,11 +122,14 @@
 \hypertarget{tables}{%
 \section{Tables}\label{tables}}
 
+\hypertarget{sensitivity-analysis}{%
+\subsection{Sensitivity analysis}\label{sensitivity-analysis}}
+
 \begin{table}[ht] \centering 
-    \caption{TCR efficacies} 
+    \caption{TCR efficacies used in ``MEA'' I and II sensitivity runs} 
     \label{tab:marvel} 
     \begin{threeparttable} 
-        \begin{tabular}{@{\extracolsep{5pt}} lcc}
+        \begin{tabularx}{.75\textwidth}{@{\extracolsep{5pt}} Xcc}
             \toprule
             Forcing agent & Mean &   95\% C.I.   \\ 
             \midrule
@@ -136,18 +140,21 @@
             Solar         & 1.68 & (-1.27, 4.63)  \\
             Volcanic      & 0.61 & (0.33, 0.89)  \\ 
             \bottomrule
-        \end{tabular} 
+        \end{tabularx} 
         \begin{tablenotes}
             \footnotesize
-            \item Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
+            \item Notes: Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
         \end{tablenotes}
     \end{threeparttable} 
 \end{table}
 
+\hypertarget{future-temperatures}{%
+\subsection{Future temperatures}\label{future-temperatures}}
+
 \begin{table}[h] \centering 
-    \caption{Covariate vectors for prediction in the year 2100} 
+    \caption{Covariate vectors for 2100 predictions} 
     \begin{threeparttable} %%% added %%% 
-        \begin{tabularx}{.9\textwidth}{@{\extracolsep{1pt}} X A A A A } 
+        \begin{tabularx}{.75\textwidth}{@{\extracolsep{1pt}} X A A A A } 
             %\begin{tabularx}{\textwidth}{X c c c c} 
             %\hline\hline
             \toprule
@@ -182,13 +189,104 @@
 \hypertarget{figures}{%
 \section{Figures}\label{figures}}
 
+\hypertarget{sensitivity-analysis-1}{%
+\subsection{Sensitivity analysis}\label{sensitivity-analysis-1}}
+
+Figs. \ref{fig:sens_cw14} -- \ref{fig:sens_co2} provide additional
+context and information related to the various sensitivity analyses
+undertaken in Section 5.2 of the main text. In each case, the figure
+caption references against the key listed in first column of Table 4.
+The figures themselves are directly comparable with Fig. 1 and the same
+general notes apply (dashed lines denote TCR priors, solid lines denote
+TCR posteriors, etc.) Note that in some cases the x-axis has been
+truncated to preserve this direct comparability, even though the
+posterior distributions may extend beyond the -1 °C to 3 °C range.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_cw14-1} 
+
+}
+
+\caption{TCR densities: "CW14" sensitivity run.}\label{fig:sens_cw14}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_gistemp-1} 
+
+}
+
+\caption{TCR densities: "GISTEMP" sensitivity run.}\label{fig:sens_gistemp}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_hadcrut_me-1} 
+
+}
+
+\caption{TCR densities: "HadCRUT ME" sensitivity run.}\label{fig:sens_hadcrut_me}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_df18-1} 
+
+}
+
+\caption{TCR densities: "DF18" sensitivity run.}\label{fig:sens_df18}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_mea_i-1} 
+
+}
+
+\caption{TCR densities: "MEA I" sensitivity run.}\label{fig:sens_mea_i}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_mea_ii-1} 
+
+}
+
+\caption{TCR densities: "MEA II" sensitivity run.}\label{fig:sens_mea_ii}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_anthro-1} 
+
+}
+
+\caption{TCR densities: "Anthro" sensitivity run.}\label{fig:sens_anthro}
+\end{figure}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_co2-1} 
+
+}
+
+\caption{TCR densities: "CO2" sensitivity run.}\label{fig:sens_co2}
+\end{figure}
+
+\pagebreak
+
+\hypertarget{welfare-implications-and-the-social-cost-of-carbon}{%
+\subsection{Welfare implications and the social cost of
+carbon}\label{welfare-implications-and-the-social-cost-of-carbon}}
+
 \begin{figure}[h]
 
 {\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/scc-fig-1} 
 
 }
 
-\caption{Social cost of carbon (US\$2005 per ton). The results for each agent type are obtained from 10,000 simulation runs of PAGE09 \cite{hope2011page09}. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE09 model defaults. The x-axis is truncated at 100 to aid visual inspection; the uppermost tails of the distributions being well in excess of the range given here.}\label{fig:scc-fig}
+\caption{Social cost of carbon (US\$2005 per ton). The results for each agent type are obtained from 10,000 simulation runs of PAGE \cite{hope2011page09}. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE model defaults. The x-axis is truncated at 100 to aid visual inspection; the uppermost tails of the distributions being well in excess of the range given here.}\label{fig:scc-fig}
 \end{figure}
 
 \newpage

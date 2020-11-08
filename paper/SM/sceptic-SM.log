@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.8.31)  21 OCT 2020 15:28
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  7 NOV 2020 16:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -717,30 +717,30 @@ Package: natbib 2010/09/13 8.31b (PWD, AO)
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count311
 ) (./sceptic-SM.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/lmtt/m/n --> TU/lmtt/m/n on input line 102.
+(Font)                  OT1/lmtt/m/n --> TU/lmtt/m/n on input line 103.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/lmtt/m/n --> TU/lmtt/b/n on input line 102.
+(Font)                  OT1/lmtt/m/n --> TU/lmtt/b/n on input line 103.
 
 Package fontspec Info: latinmodern-math scale = 1.088164383755634.
 
@@ -769,7 +769,7 @@ t=math;language=dflt;"
 (fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(0)/m/n' will be
-(Font)              scaled to size 10.88165pt on input line 102.
+(Font)              scaled to size 10.88165pt on input line 103.
 
 Package fontspec Info: latinmodern-math scale = 1.088164383755634.
 
@@ -808,18 +808,18 @@ t=math;language=dflt;"
 (fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 10.88165pt on input line 102.
+(Font)              scaled to size 10.88165pt on input line 103.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 102.
+(Font)              `operators' in the math version `normal' on input line 103.
 
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
 (Font)                  OT1/lmr/m/n --> TU/latinmodern-math.otf(1)/m/n on input
- line 102.
+ line 103.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 102.
+(Font)              `operators' in the math version `bold' on input line 103.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
 (Font)                  OT1/lmr/bx/n --> TU/latinmodern-math.otf(1)/b/n on inpu
-t line 102.
+t line 103.
 
 Package fontspec Info: latinmodern-math scale = 1.088164383755634.
 
@@ -906,15 +906,15 @@ f]/OT:script=math;language=dflt;+ssty=1;"
 (fontspec)             =0pt\relax \fontdimen 21\font =0pt\relax 
 
 LaTeX Font Info:    Encoding `OMS' has changed to `TU' for symbol font
-(Font)              `symbols' in the math version `normal' on input line 102.
+(Font)              `symbols' in the math version `normal' on input line 103.
 LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
 (Font)                  OMS/lmsy/m/n --> TU/latinmodern-math.otf(2)/m/n on inpu
-t line 102.
+t line 103.
 LaTeX Font Info:    Encoding `OMS' has changed to `TU' for symbol font
-(Font)              `symbols' in the math version `bold' on input line 102.
+(Font)              `symbols' in the math version `bold' on input line 103.
 LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
 (Font)                  OMS/lmsy/b/n --> TU/latinmodern-math.otf(2)/b/n on inpu
-t line 102.
+t line 103.
 
 Package fontspec Info: latinmodern-math scale = 1.088164383755634.
 
@@ -984,17 +984,17 @@ t=math;language=dflt;"
 
 LaTeX Font Info:    Encoding `OMX' has changed to `TU' for symbol font
 (Font)              `largesymbols' in the math version `normal' on input line 1
-02.
+03.
 LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
 (Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/m/n on inpu
-t line 102.
+t line 103.
 LaTeX Font Info:    Encoding `OMX' has changed to `TU' for symbol font
-(Font)              `largesymbols' in the math version `bold' on input line 102
+(Font)              `largesymbols' in the math version `bold' on input line 103
 .
 LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
 (Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/b/n on inpu
-t line 102.
-LaTeX Info: Redefining \microtypecontext on input line 102.
+t line 103.
+LaTeX Info: Redefining \microtypecontext on input line 103.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
 Package microtype Info: No adjustment of tracking.
@@ -1005,7 +1005,7 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 \AtBeginShipoutBox=\box67
-Package hyperref Info: Link coloring OFF on input line 102.
+Package hyperref Info: Link coloring OFF on input line 103.
 (/usr/share/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 (/usr/share/texmf-dist/tex/latex/refcount/refcount.sty
@@ -1015,9 +1015,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count312
 )
-LaTeX Info: Redefining \ref on input line 102.
-LaTeX Info: Redefining \pageref on input line 102.
-LaTeX Info: Redefining \nameref on input line 102.
+LaTeX Info: Redefining \ref on input line 103.
+LaTeX Info: Redefining \pageref on input line 103.
+LaTeX Info: Redefining \nameref on input line 103.
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
 *geometry* verbose mode - [ preamble ] result:
@@ -1053,40 +1053,40 @@ LaTeX Info: Redefining \nameref on input line 102.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/m/n' will be
-(Font)              scaled to size 17.28pt on input line 104.
+(Font)              scaled to size 17.28pt on input line 105.
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/m/n' will be
-(Font)              scaled to size 12.0pt on input line 104.
+(Font)              scaled to size 12.0pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 13.05798pt on input line 104.
+(Font)              scaled to size 13.05798pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 8.70532pt on input line 104.
+(Font)              scaled to size 8.70532pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 6.52899pt on input line 104.
+(Font)              scaled to size 6.52899pt on input line 105.
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
-04.
+05.
 (/usr/share/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 13.05927pt on input line 104.
+(Font)              scaled to size 13.05927pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 8.70618pt on input line 104.
+(Font)              scaled to size 8.70618pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 6.52963pt on input line 104.
+(Font)              scaled to size 6.52963pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 13.0567pt on input line 104.
+(Font)              scaled to size 13.0567pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 8.70447pt on input line 104.
+(Font)              scaled to size 8.70447pt on input line 105.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 6.52835pt on input line 104.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 104
+(Font)              scaled to size 6.52835pt on input line 105.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 105
 .
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/usr/share/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 104
+LaTeX Font Info:    Trying to load font information for U+msb on input line 105
 .
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -1094,15 +1094,15 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/m/n' will be
-(Font)              scaled to size 14.4pt on input line 117.
+(Font)              scaled to size 14.4pt on input line 118.
 
 LaTeX Font Warning: Font shape `TU/texgyrepagella-regular.otf(0)/b/n' undefined
 
 (Font)              using `TU/texgyrepagella-regular.otf(0)/m/n' instead on inp
-ut line 117.
+ut line 118.
 
 LaTeX Font Info:    Font shape `TU/FiraSans(0)/b/n' will be
-(Font)              scaled to size 12.71864pt on input line 117.
+(Font)              scaled to size 12.71864pt on input line 118.
 (./sceptic-SM.lot
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
 (Font)              scaled to size 7.61716pt on input line 1.
@@ -1123,46 +1123,83 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 )
 \tf@lot=\write3
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/b/n' will be
-(Font)              scaled to size 14.4pt on input line 118.
+(Font)              scaled to size 14.4pt on input line 119.
 (./sceptic-SM.lof)
 \tf@lof=\write4
 [1
 
 ]
+LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/b/n' will be
+(Font)              scaled to size 12.0pt on input line 126.
+LaTeX Font Info:    Font shape `TU/FiraSans(0)/b/n' will be
+(Font)              scaled to size 10.59888pt on input line 126.
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/m/n' will be
-(Font)              scaled to size 8.0pt on input line 141.
+(Font)              scaled to size 8.0pt on input line 145.
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/m/n' will be
-(Font)              scaled to size 6.0pt on input line 142.
+(Font)              scaled to size 6.0pt on input line 146.
 
 LaTeX Font Warning: Font shape `TU/texgyrepagella-regular.otf(0)/m/it' undefine
 d
 (Font)              using `TU/texgyrepagella-regular.otf(0)/m/n' instead on inp
-ut line 142.
+ut line 146.
 
 LaTeX Font Info:    Font shape `TU/texgyrepagella-regular.otf(0)/m/it' will be
-(Font)              scaled to size 8.0pt on input line 173.
+(Font)              scaled to size 8.0pt on input line 180.
 [2]
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_cw14-1.pdf 
+Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_cw14-1.pdf>
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_gistemp-1.p
+df Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_gistemp-1.pd
+f>
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_hadcrut_me-
+1.pdf Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_hadcrut_me-1
+.pdf>
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_df18-1.pdf 
+Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_df18-1.pdf>
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_mea_i-1.pdf
+ Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_mea_i-1.pdf>
+
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_mea_ii-1.pd
+f Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_mea_ii-1.pdf
+>
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_anthro-1.pd
+f Graphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_anthro-1.pdf
+>
+File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_co2-1.pdf G
+raphic file (type pdf)
+<use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/sens_co2-1.pdf>
+[3] [4] [5] [6]
 File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/scc-fig-1.pdf Gr
 aphic file (type pdf)
 <use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/scc-fig-1.pdf>
-[3] (./sceptic-SM.bbl)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 198.
-[4]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 198.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[7] (./sceptic-SM.bbl)
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 296.
+[8]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 296.
 (./sceptic-SM.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 198.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 198.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 296.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 296.
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 20442 strings out of 479284
- 355276 string characters out of 5886220
- 812318 words of memory out of 5000000
- 37753 multiletter control sequences out of 15000+600000
- 538983 words of font info for 89 fonts, out of 8000000 for 9000
+ 20519 strings out of 479284
+ 359606 string characters out of 5886219
+ 814047 words of memory out of 5000000
+ 37821 multiletter control sequences out of 15000+600000
+ 538991 words of font info for 90 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  63i,16n,121p,809b,499s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on sceptic-SM.pdf (4 pages).
+Output written on sceptic-SM.pdf (8 pages).
