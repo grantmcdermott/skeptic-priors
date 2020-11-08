@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  7 NOV 2020 19:32
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  7 NOV 2020 20:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -545,7 +545,13 @@ Underfull \vbox (badness 1354) has occurred while \output is active []
 [19] [20]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[21] [22] (./sceptic.bbl [23]
+[21] [22]
+Overfull \hbox (25.9pt too wide) in paragraph at lines 1310--1313
+\TU/lmr/m/n/10 code and data for the study are available at []$[][][][][] [] []
+ [] [][][][][][] [] [][][] [] [][][][][][][][][][][][][][] []
+ []
+
+(./sceptic.bbl [23]
 Underfull \hbox (badness 10000) in paragraph at lines 59--66
 \TU/lmr/m/n/8 2019. Available: []$[][][][][] [] [] [] [][][][] [] [][][][][][] 
 [] [][][] [] [][][][] [] [][][][][][] [] [][][][][][][][][] [][] [][][][][][][]
@@ -559,14 +565,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 293--296
 [] [][][][][][][] [][]
  []
 
-
+[26]
 Underfull \hbox (badness 10000) in paragraph at lines 353--357
 [][][][][][] [][] [][][][][][][][][][][] [] [][] [] [][][][] [] [][] [] [][] []
  [][][] [][] [][][][] [][] [][][][][] [][] [][][][][][] [][] [][][][] [][] [][]
 [][][][][][][][] [][]
  []
 
-[26]
+
 Underfull \hbox (badness 2285) in paragraph at lines 394--401
 \TU/lmr/m/n/8 URL []$[][][][] [] [] [] [][][] [] [][][] [] [][][] [] [][] [] []
 [] [] [][][][][][][][][] [] [][][][] [] [][][][][][] [] [][][][][][][][] [] [][
@@ -588,22 +594,22 @@ Underfull \hbox (badness 1931) in paragraph at lines 427--432
  []
 
 [27])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1309.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1317.
 [28]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1309.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1317.
 (./sceptic.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1309.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1309.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1317.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1317.
 
 Package rerunfilecheck Info: File `sceptic.out' has not changed.
-(rerunfilecheck)             Checksum: 05A49AB93901628DD0F11D498054B48A;328.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1309.
+(rerunfilecheck)             Checksum: 18E7E27D04443A84AD5DB2348D88785D;376.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1317.
  ) 
 Here is how much of TeX's memory you used:
- 11482 strings out of 479284
- 162215 string characters out of 5886219
- 458774 words of memory out of 5000000
- 28916 multiletter control sequences out of 15000+600000
+ 11483 strings out of 479284
+ 162229 string characters out of 5886219
+ 459811 words of memory out of 5000000
+ 28917 multiletter control sequences out of 15000+600000
  540241 words of font info for 64 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  34i,19n,47p,1171b,472s stack positions out of 5000i,500n,10000p,200000b,80000s
