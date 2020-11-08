@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  7 NOV 2020 16:29
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  7 NOV 2020 19:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -553,35 +553,35 @@ Underfull \hbox (badness 10000) in paragraph at lines 59--66
  []
 
 [24] [25]
-Underfull \hbox (badness 10000) in paragraph at lines 278--281
+Underfull \hbox (badness 10000) in paragraph at lines 293--296
 []$[][][][][] [] [] [] [][][] [] [][][][][][][][] [] [][] [] [][] [] [][][][][]
 [][] [] [][][][] [][] [][][][][][] [][] [][] [][] [][][][] [][] [][] [][] [] []
 [] [][][][][][][] [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 338--342
+Underfull \hbox (badness 10000) in paragraph at lines 353--357
 [][][][][][] [][] [][][][][][][][][][][] [] [][] [] [][][][] [] [][] [] [][] []
  [][][] [][] [][][][] [][] [][][][][] [][] [][][][][][] [][] [][][][] [][] [][]
 [][][][][][][][] [][]
  []
 
 [26]
-Underfull \hbox (badness 2285) in paragraph at lines 379--386
+Underfull \hbox (badness 2285) in paragraph at lines 394--401
 \TU/lmr/m/n/8 URL []$[][][][] [] [] [] [][][] [] [][][] [] [][][] [] [][] [] []
 [] [] [][][][][][][][][] [] [][][][] [] [][][][][][] [] [][][][][][][][] [] [][
 ][][][][][][][][][][][] []
  []
 
 
-Underfull \hbox (badness 3179) in paragraph at lines 379--386
+Underfull \hbox (badness 3179) in paragraph at lines 394--401
 \TU/lmr/m/n/8 able: []$[][][][] [] [] [] [][][] [] [][][] [] [][][] [] [][] [] 
 [][] [] [][][][][][][][][] [] [][][][] [] [][][][][][] [] [][][][][][][][] [] [
 ][][][][][][][][][][][][] []
  []
 
 
-Underfull \hbox (badness 1931) in paragraph at lines 412--417
+Underfull \hbox (badness 1931) in paragraph at lines 427--432
 \TU/lmr/m/n/8 ness, Cognitive Psychology \TU/lmr/bx/n/8 3\TU/lmr/m/n/8 (3), 430
  (1972).  DOI $[][][][] [] [] [] [][] [] [][][] [] [][][] [] [][] [] [][][][] [
 ]
@@ -600,10 +600,10 @@ Package rerunfilecheck Info: File `sceptic.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1309.
  ) 
 Here is how much of TeX's memory you used:
- 11480 strings out of 479284
- 162170 string characters out of 5886219
- 459687 words of memory out of 5000000
- 28914 multiletter control sequences out of 15000+600000
+ 11482 strings out of 479284
+ 162215 string characters out of 5886219
+ 458774 words of memory out of 5000000
+ 28916 multiletter control sequences out of 15000+600000
  540241 words of font info for 64 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  34i,19n,47p,1171b,472s stack positions out of 5000i,500n,10000p,200000b,80000s
