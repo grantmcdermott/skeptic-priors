@@ -8,7 +8,7 @@
 
 This repository contains code and data for my working paper, [“Sceptic
 priors and climate
-consensus”](https://grantmcdermott.com/papers/scepticpriors.pdf).
+consensus”](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/sceptic/sceptic.pdf)).
 
 > **Abstract:** How much evidence would it take to convince sceptics
 > that they are wrong about climate change? I explore this question
@@ -178,8 +178,8 @@ these only takes a few seconds.
 | Main                                        | `R/02-main.R`                    |      29.69 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 | Recursive                                   | `R/03-recursive.R`               |     163.82 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 | Evidence                                    | `R/04-evidence.R`                |     497.80 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
-| Alternative GMST series (sensitivity)       | `R/05-sensitivity-alt-gmst.R`    |       5.65 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
-| Anthrogenic forcings separate (sensitivity) | `R/05-sensitivity-anthro.R`      |       8.92 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
+| Alternative GMST series (sensitivity)       | `R/05-sensitivity-alt-gmst.R`    |       6.62 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
+| Anthrogenic forcings separate (sensitivity) | `R/05-sensitivity-anthro.R`      |       8.11 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 | Adjusted forcings efficacies (sensitivity)  | `R/05-sensitivity-eff.R`         |     461.60 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 | Measurement error in forcings (sensitivity) | `R/05-sensitivity-me-forcings.R` |     442.32 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
 | Measurement error in GMST (sensitivity)     | `R/05-sensitivity-me-gmst.R`     |       7.41 |         12 |  31 | Arch Linux | x86\_64-pc-linux-gnu (64-bit) |
