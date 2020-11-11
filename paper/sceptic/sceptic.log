@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  7 NOV 2020 20:38
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2020.10.24)  10 NOV 2020 22:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -308,43 +308,61 @@ Package: dcolumn 2014/10/28 v1.06 decimal alignment package (DPC)
 Package: changepage 2009/10/20 v1.0c check page and change page layout
 \c@cp@cntr=\count284
 \cp@tempcnt=\count285
+) (/usr/share/texmf-dist/tex/latex/lineno/lineno.sty
+Package: lineno 2005/11/02 line numbers on paragraphs v4.41
+Invalid UTF-8 byte or sequence at line 296 replaced by U+FFFD.
+\linenopenalty=\count286
+\output=\toks27
+\linenoprevgraf=\count287
+\linenumbersep=\dimen181
+\linenumberwidth=\dimen182
+\c@linenumber=\count288
+\c@pagewiselinenumber=\count289
+\c@LN@truepage=\count290
+\c@internallinenumber=\count291
+\c@internallinenumbers=\count292
+\quotelinenumbersep=\dimen183
+\bframerule=\dimen184
+\bframesep=\dimen185
+\bframebox=\box54
+LaTeX Info: Redefining \\ on input line 3056.
 ) (/usr/share/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
 \LTleft=\skip55
 \LTright=\skip56
 \LTpre=\skip57
 \LTpost=\skip58
-\LTchunksize=\count286
-\LTcapwidth=\dimen181
-\LT@head=\box54
-\LT@firsthead=\box55
-\LT@foot=\box56
-\LT@lastfoot=\box57
-\LT@cols=\count287
-\LT@rows=\count288
-\c@LT@tables=\count289
-\c@LT@chunks=\count290
-\LT@p@ftn=\toks27
+\LTchunksize=\count293
+\LTcapwidth=\dimen186
+\LT@head=\box55
+\LT@firsthead=\box56
+\LT@foot=\box57
+\LT@lastfoot=\box58
+\LT@cols=\count294
+\LT@rows=\count295
+\c@LT@tables=\count296
+\c@LT@chunks=\count297
+\LT@p@ftn=\toks28
 ) (/usr/share/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2019/05/31 v2.5 Span multiple rows of a table
 \multirow@colwidth=\skip59
-\multirow@cntb=\count291
+\multirow@cntb=\count298
 \multirow@dima=\skip60
-\bigstrutjot=\dimen182
+\bigstrutjot=\dimen187
 ) (/usr/share/texmf-dist/tex/latex/wrapfig/wrapfig.sty
-\wrapoverhang=\dimen183
-\WF@size=\dimen184
-\c@WF@wrappedlines=\count292
-\WF@box=\box58
-\WF@everypar=\toks28
+\wrapoverhang=\dimen188
+\WF@size=\dimen189
+\c@WF@wrappedlines=\count299
+\WF@box=\box59
+\WF@everypar=\toks29
 Package: wrapfig 2003/01/31  v 3.6
 ) (/usr/share/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count293
-\float@exts=\toks29
-\float@box=\box59
-\@float@everytoks=\toks30
-\@floatcapt=\box60
+\c@float@type=\count300
+\float@exts=\toks30
+\float@box=\box60
+\@float@everytoks=\toks31
+\@floatcapt=\box61
 ) (/usr/share/texmf-dist/tex/latex/colortbl/colortbl.sty
 Package: colortbl 2020/01/04 v1.0e Color table columns (DPC)
 (/usr/share/texmf-dist/tex/latex/graphics/color.sty
@@ -354,7 +372,7 @@ File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package color Info: Driver file: xetex.def on input line 147.
 )
-\everycr=\toks31
+\everycr=\toks32
 \minrowclearance=\skip61
 ) (/usr/share/texmf-dist/tex/latex/pdflscape/pdflscape.sty
 Package: pdflscape 2019/12/05 v0.12 Display of landscape pages in PDF (HO)
@@ -367,32 +385,32 @@ Package pdflscape Info: Auto-detected driver: dvipdfm (xetex) on input line 98.
 Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
 (/usr/share/texmf-dist/tex/latex/varwidth/varwidth.sty
 Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
-\@vwid@box=\box61
-\sift@deathcycles=\count294
-\@vwid@loff=\dimen185
-\@vwid@roff=\dimen186
+\@vwid@box=\box62
+\sift@deathcycles=\count301
+\@vwid@loff=\dimen190
+\@vwid@roff=\dimen191
 )
-\c@taburow=\count295
-\tabu@nbcols=\count296
-\tabu@cnt=\count297
-\tabu@Xcol=\count298
-\tabu@alloc=\count299
-\tabu@nested=\count300
-\tabu@target=\dimen187
-\tabu@spreadtarget=\dimen188
-\tabu@naturalX=\dimen189
-\tabucolX=\dimen190
-\tabu@Xsum=\dimen191
-\extrarowdepth=\dimen192
-\abovetabulinesep=\dimen193
-\belowtabulinesep=\dimen194
-\tabustrutrule=\dimen195
-\tabu@thebody=\toks32
-\tabu@footnotes=\toks33
-\tabu@box=\box62
-\tabu@arstrutbox=\box63
-\tabu@hleads=\box64
-\tabu@vleads=\box65
+\c@taburow=\count302
+\tabu@nbcols=\count303
+\tabu@cnt=\count304
+\tabu@Xcol=\count305
+\tabu@alloc=\count306
+\tabu@nested=\count307
+\tabu@target=\dimen192
+\tabu@spreadtarget=\dimen193
+\tabu@naturalX=\dimen194
+\tabucolX=\dimen195
+\tabu@Xsum=\dimen196
+\extrarowdepth=\dimen197
+\abovetabulinesep=\dimen198
+\belowtabulinesep=\dimen199
+\tabustrutrule=\dimen256
+\tabu@thebody=\toks33
+\tabu@footnotes=\toks34
+\tabu@box=\box63
+\tabu@arstrutbox=\box64
+\tabu@hleads=\box65
+\tabu@vleads=\box66
 \tabu@cellskip=\skip62
 ) (/usr/share/texmf-dist/tex/latex/threeparttablex/threeparttablex.sty
 Package: threeparttablex 2013/07/23 v0.3 by daleif
@@ -403,21 +421,21 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
 \TPTL@width=\skip63
 ) (/usr/share/texmf-dist/tex/generic/ulem/ulem.sty
-\UL@box=\box66
-\UL@hyphenbox=\box67
+\UL@box=\box67
+\UL@hyphenbox=\box68
 \UL@skip=\skip64
-\UL@hook=\toks34
-\UL@height=\dimen196
-\UL@pe=\count301
-\UL@pixel=\dimen197
-\ULC@box=\box68
+\UL@hook=\toks35
+\UL@height=\dimen257
+\UL@pe=\count308
+\UL@pixel=\dimen258
+\ULC@box=\box69
 Package: ulem 2019/11/18
-\ULdepth=\dimen198
+\ULdepth=\dimen259
 ) (/usr/share/texmf-dist/tex/latex/makecell/makecell.sty
 Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
-\rotheadsize=\dimen199
-\c@nlinenum=\count302
-\TeXr@lab=\toks35
+\rotheadsize=\dimen260
+\c@nlinenum=\count309
+\TeXr@lab=\toks36
 ) (/usr/share/texmf-dist/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
 (/usr/share/texmf-dist/tex/latex/graphics-cfg/color.cfg
@@ -435,40 +453,40 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
 ) (/usr/share/texmf-dist/tex/latex/l3backend/l3backend-xdvipdfmx.def
 File: l3backend-xdvipdfmx.def 2020-06-03 L3 backend support: xdvipdfmx
-\g__graphics_track_int=\count303
-\l__pdf_internal_box=\box69
-\g__pdf_backend_object_int=\count304
-\g__pdf_backend_annotation_int=\count305
+\g__graphics_track_int=\count310
+\l__pdf_internal_box=\box70
+\g__pdf_backend_object_int=\count311
+\g__pdf_backend_annotation_int=\count312
 ) (./sceptic.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 57.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 59.
 LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 5
-7.
+9.
 (/usr/share/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 59.
+LaTeX Font Info:    ... okay on input line 59.
 Unknown journal: specify \journalname{<name of your journal>} in preambel
 
-\AtBeginShipoutBox=\box70
-Package hyperref Info: Link coloring OFF on input line 57.
+\AtBeginShipoutBox=\box71
+Package hyperref Info: Link coloring OFF on input line 59.
 (/usr/share/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 (/usr/share/texmf-dist/tex/latex/refcount/refcount.sty
@@ -476,16 +494,16 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ) (/usr/share/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count306
+\c@section@level=\count313
 )
-LaTeX Info: Redefining \ref on input line 57.
-LaTeX Info: Redefining \pageref on input line 57.
-LaTeX Info: Redefining \nameref on input line 57.
+LaTeX Info: Redefining \ref on input line 59.
+LaTeX Info: Redefining \pageref on input line 59.
+LaTeX Info: Redefining \nameref on input line 59.
 (./sceptic.out) (./sceptic.out)
 \@outlinefile=\write3
 SVJour3 warning: Missing \journalname
 
-Underfull \hbox (badness 10000) in paragraph at lines 84--104
+Underfull \hbox (badness 10000) in paragraph at lines 86--106
 
  []
 
@@ -493,24 +511,24 @@ Underfull \hbox (badness 10000) in paragraph at lines 84--104
 File: se-ascii-print.def 2019/11/29 v1.12 stringenc: Printable ASCII characters
 
 ) [1] [2] [3] [4] [5] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 479--480
+Underfull \hbox (badness 10000) in paragraph at lines 481--482
 
  []
 
 [7] [8]
-Underfull \hbox (badness 10000) in paragraph at lines 579--579
+Underfull \hbox (badness 10000) in paragraph at lines 581--581
 \TU/lmr/m/n/8 and natural factors (excluding volcanic
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 588--589
+Underfull \hbox (badness 10000) in paragraph at lines 590--591
 []$[]$ []$[][][][][] [] [] [] [][][] [] [][][] [] [][] [] [][][][] [] [][][][][
 ][] [] [][][][][][][]$[]\TU/lmr/m/n/8 , (original) []$[][][][][] [] [] [] [][][
 ][][][] [] [][][] []
  []
 
 [9]
-Overfull \hbox (40.44806pt too wide) in paragraph at lines 658--687
+Overfull \hbox (40.44806pt too wide) in paragraph at lines 660--689
  [] 
  []
 
@@ -545,13 +563,7 @@ Underfull \vbox (badness 1354) has occurred while \output is active []
 [19] [20]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[21] [22]
-Overfull \hbox (25.9pt too wide) in paragraph at lines 1310--1313
-\TU/lmr/m/n/10 code and data for the study are available at []$[][][][][] [] []
- [] [][][][][][] [] [][][] [] [][][][][][][][][][][][][][] []
- []
-
-(./sceptic.bbl [23]
+[21] [22] [23] (./sceptic.bbl
 Underfull \hbox (badness 10000) in paragraph at lines 59--66
 \TU/lmr/m/n/8 2019. Available: []$[][][][][] [] [] [] [][][][] [] [][][][][][] 
 [] [][][] [] [][][][] [] [][][][][][] [] [][][][][][][][][] [][] [][][][][][][]
@@ -594,24 +606,24 @@ Underfull \hbox (badness 1931) in paragraph at lines 427--432
  []
 
 [27])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1317.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1337.
 [28]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1317.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1337.
 (./sceptic.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1317.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1317.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 1337.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1337.
 
 Package rerunfilecheck Info: File `sceptic.out' has not changed.
 (rerunfilecheck)             Checksum: 18E7E27D04443A84AD5DB2348D88785D;376.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1317.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1337.
  ) 
 Here is how much of TeX's memory you used:
- 11483 strings out of 479284
- 162229 string characters out of 5886219
- 459811 words of memory out of 5000000
- 28917 multiletter control sequences out of 15000+600000
- 540241 words of font info for 64 fonts, out of 8000000 for 9000
+ 11691 strings out of 479284
+ 165355 string characters out of 5886219
+ 465131 words of memory out of 5000000
+ 29119 multiletter control sequences out of 15000+600000
+ 540249 words of font info for 65 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 34i,19n,47p,1171b,472s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 34i,19n,47p,1171b,481s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 Output written on sceptic.pdf (28 pages).

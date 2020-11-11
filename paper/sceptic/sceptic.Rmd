@@ -4,6 +4,7 @@ title: Sceptic priors and climate consensus
 # titlerunning: Short form of title (if too long for head)
 # authorrunning: Short form of author list if too long for running head
 thanks: | 
+    Estimate word count: 9,275.
     The data and source code for reproducing all of the results in this paper 
     can be found at the companion GitHub repository: 
     https://github.com/grantmcdermott/sceptic-priors
@@ -58,6 +59,8 @@ header-includes:
   - \DeclareMathOperator{\Var}{Var}
   - \usepackage{dcolumn}
   - \usepackage{changepage}
+  - \usepackage{lineno}
+  - \linenumbers
   # - \usepackage{xr} ## Needs .aux file which knitr automatically removes
   # - \externaldocument[SM-]{../SM/sceptic-SM}
   
@@ -817,4 +820,16 @@ Unsurprisingly, given their congruence with mainstream estimates, I show that th
 
 # Declarations {-}
 
-The author has no relevant financial or non-financial interests to disclose. All code and data for the study are available at https://github.com/grantmcdermott/sceptic-priors.
+- *Ethical Approval.* Not applicable.
+
+- *Consent to Participate.* Not applicable.
+
+- *Consent to Publish.* Not applicable.
+
+- *Authors Contributions.* G.R. McDermott is the sole author for this article.
+
+- *Funding.* The author has no relevant financial or non-financial interests to disclose. 
+
+- *Competing Interests.* The author has no conflicts of interest to declare that are relevant to the content of this article.
+
+- *Availability of data and materials.* All code and data for this article are available at https://github.com/grantmcdermott/sceptic-priors.
