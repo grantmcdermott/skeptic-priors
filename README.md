@@ -8,7 +8,7 @@
 
 This repository contains code and data for my working paper, [“Sceptic
 priors and climate
-consensus”](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/sceptic/sceptic.pdf)).
+consensus”](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/sceptic/sceptic.pdf).
 
 > **Abstract:** How much evidence would it take to convince sceptics
 > that they are wrong about climate change? I explore this question
@@ -39,10 +39,12 @@ entire project. Assuming that you have installed Make and have met all
 of the other dependencies — see [below](#dependencies) — the **TL;DR**
 version for reproducing everything is:
 
-    ## Run these commands in the shell
-    git clone git@github.com:grantmcdermott/sceptic-priors.git
-    cd sceptic-priors
-    make
+``` sh
+## Run these commands in the shell
+git clone git@github.com:grantmcdermott/sceptic-priors.git
+cd sceptic-priors
+make
+```
 
 You can also limit the build to subsections of the project by passing
 Make a relevant meta target, e.g.
@@ -75,9 +77,11 @@ number of external R libraries. I have used
 environment. To install all of the necessary R libraries, you need
 simply run the following command from your R console:
 
-    ## Run these commands in R
-    # renv::init()    ## Only necessary if you didn't clone/open the repo as an RStudio project
-    renv::restore()  ## Enter "y" when prompted
+``` r
+## Run these commands in R
+# renv::init()    ## Only necessary if you didn't clone/open the repo as an RStudio project
+renv::restore()  ## Enter "y" when prompted
+```
 
 #### Step 2. Install CmdStan
 
@@ -88,8 +92,10 @@ it would otherwise. While R and CmdStan are two separate programs, the
 easiest way to install the latter is from the former. Assuming that you
 have completed Step 1 above, run the following line from your R console:
 
-    ## Run this command in R
-    cmdstanr::install_cmdstan(cores = 2)
+``` r
+## Run this command in R
+cmdstanr::install_cmdstan(cores = 2)
+```
 
 #### Step 3. Optional(ish)
 
@@ -124,20 +130,26 @@ provide a Dockerfile that will automatically bundle all of the
 dependencies and copy across the project files. To build the Docker
 image locally:
 
-    ## Run these commands in the shell
-    cd sceptic-priors
-    docker build --tag sceptic:R4.0.2 .
+``` sh
+## Run these commands in the shell
+cd sceptic-priors
+docker build --tag sceptic:R4.0.2 .
+```
 
 This will take a couple of minutes to pull in all of the necessary
 packages, compile CmdStan etc. But, thereafter, the now-built container
 will be ready and waiting for immediate deployment whenever you want.
 Run it with:
 
-    docker run -it --rm sceptic:R4.0.2
+``` sh
+docker run -it --rm sceptic:R4.0.2
+```
 
 You should see something like:
 
-    root@7400ee9f415f:/sceptic-priors# 
+``` sh
+root@7400ee9f415f:/sceptic-priors# 
+```
 
 You should now be able to run all of the regular Make commands on the
 project (`make`, `make paper`, etc.), run the individual R scripts (in
