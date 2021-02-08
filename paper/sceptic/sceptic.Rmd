@@ -31,16 +31,16 @@ abstract: |
   How much evidence would it take to convince sceptics that they are wrong about 
   climate change? I explore this question within a Bayesian framework. I 
   consider a group of stylised sceptics and examine how these individuals update 
-  their beliefs in the face of current and continuing climate change. I find 
+  their beliefs rationally in the face of ongoing climate change. I find 
   that available evidence in the form of instrumental climate data tends to 
   overwhelm all but the most extreme priors. Most sceptics form updated beliefs 
   about climate sensitivity that correspond closely to estimates from the 
   scientific literature. However, belief convergence is a non-linear function of 
   prior strength. It thus becomes increasingly difficult to convince the 
-  remaining pool of sceptics. I discuss necessary conditions for consensus
-  formation under Bayesian learning and show how apparent deviations from the
-  Bayesian ideal still be accommodated within the same conceptual framework. I 
-  argue that a generalized Bayesian model thus provides a bridge between 
+  remaining pool of sceptics. I discuss the necessary conditions for consensus
+  formation under Bayesian learning and show that apparent deviations from the
+  Bayesian ideal can still be accommodated within the same conceptual framework. 
+  I argue that a generalized Bayesian model provides a bridge between 
   competing theories of climate scepticism as a social phenomenon.
 
 bibliography: sceptic.bib
@@ -582,7 +582,7 @@ kbl(sens_tab, align = 'lll', booktabs = TRUE,
 
 I consider a number of alternative specifications to test the sensitivity of my findings. Table \ref{tab:sensitivity} summarises the resulting posterior TCR distributions that obtain under noninformative priors --- see the Supplementary Material for full posterior distributions across all prior types. The general effect of these alternate specifications, regardless of prior, is to nudge the posterior TCR mean higher. We also see a widening of the posterior distributions, as some specifications explicitly introduce additional uncertainty into the estimation.
 
-A first sensitivity check is motivated by the fact that HadCRUT4 is known to suffer from potential coverage biases due to incomplete placement of \textit{in situ} thermometers. I therefore rerun the analysis with two alternate reconstructions of GMST. \cite{cowtan2014coverage}, hereafter CW14, correct for the gaps in the HadCRUT4 dataset by using an interpolation algorithm based on the "kriging" method. Similarly, the NASA Goddard Institute for Space Studies uses an extrapolation algorithm to overcome coverage bias in GISTEMP, its own GMST reconstruction. Running the Bayesian regression model on these alternative series yields moderately higher TCR values compared to HadCRUT4. Under a noninformative prior, the posterior TCR means (and 95\% Bayesian credible intervals) are `r sens_tab2[series=='cw', tcr]` for CW14 and `r sens_tab2[series=='giss', tcr]` for GISTEMP. 
+A first sensitivity check is motivated by the fact that HadCRUT4 is known to suffer from potential coverage biases due to incomplete placement of \textit{in situ} thermometers. I therefore rerun the analysis with two alternate reconstructions of GMST. \cite{cowtan2014coverage}, hereafter CW14, correct for the gaps in the HadCRUT4 dataset by using an interpolation algorithm based on the "kriging" method.^[The UK Met office released HadCRUT5, which adopts a similar kriging strategy to CW14, during the late revision stages of this manuscript. \cite{morice2020hadcrut5}] Similarly, the NASA Goddard Institute for Space Studies uses an extrapolation algorithm to overcome coverage bias in GISTEMP, its own GMST reconstruction. Running the Bayesian regression model on these alternative series yields moderately higher TCR values compared to HadCRUT4. Under a noninformative prior, the posterior TCR means (and 95\% Bayesian credible intervals) are `r sens_tab2[series=='cw', tcr]` for CW14 and `r sens_tab2[series=='giss', tcr]` for GISTEMP. 
 <!-- While I omit them for brevity, the posterior results for the group of climate sceptics are similarly nudged higher towards the new noninformative distributions. -->
 Given that the explicit goal of this paper is to evaluate policy options from the perspective of climate sceptics, I continue using the results from the HadCRUT4 series as a default. Yet, it should be noted that this is a conservative choice that may, at least marginally, understate the true level of warming.
 
