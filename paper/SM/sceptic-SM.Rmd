@@ -8,15 +8,17 @@ output:
   pdf_document:
     keep_tex: true
     latex_engine: xelatex
-    # toc: true
+    toc: true
     citation_package: natbib
     dev: cairo_pdf
 header-includes: 
   - \usepackage{fontspec}
+  - \usepackage{float}
   - \usepackage{booktabs}
   - \usepackage{tabularx}
   - \usepackage{threeparttable}
   - \usepackage{dcolumn}
+  - \DeclareMathOperator{\Var}{Var}
   - \newcolumntype{A}{D{.}{.}{2.3}}
   - \usepackage{sectsty} % Allows your to change titles style
   - \allsectionsfont{\sffamily} % Define the style of all titles
@@ -32,12 +34,10 @@ sansfont: Fira Sans
 }
 \beginsupplement
 
-\listoftables
-\listoffigures
-\newpage
+<!-- \listoftables -->
+<!-- \listoffigures -->
 
-
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, cache = FALSE}
 knitr::opts_chunk$set(
 	cache = TRUE, 
 	echo = FALSE, 
@@ -45,6 +45,7 @@ knitr::opts_chunk$set(
 	message = FALSE,
 	fig.path = here::here('figs/'),
 	fig.align = 'center',
+	fig.pos = 'H', ## Place the float at precisely the location in the LaTeX code. 
 	out.width = '100%',
 	dpi=300
 	)
@@ -127,77 +128,54 @@ priors_dt = fread(here('data/priors.csv'))
 scc = fread(here('results/PAGE09/scc.csv'))
 ```
 
-
-# Tables
-
-## Sensitivity analysis
-
-\begin{table}[ht] \centering 
-	\caption{TCR efficacies used in ``MEA'' I and II sensitivity runs} 
-	\label{tab:marvel} 
-	\begin{threeparttable} 
-		\begin{tabularx}{.75\textwidth}{@{\extracolsep{5pt}} Xcc}
-			\toprule
-			Forcing agent & Mean &   95\% C.I.   \\ 
-			\midrule
-			Aerosols      & 1.55 & (1.05, 2.05)  \\
-			GHGs          & 1.17 & (1.07, 1.28)  \\
-			Land use      & 3.82 & (-2.16, 9.80) \\
-			Ozone         & 0.66 & (0.34, 0.98)  \\
-			Solar         & 1.68 & (-1.27, 4.63)  \\
-			Volcanic      & 0.61 & (0.33, 0.89)  \\ 
-			\bottomrule
-		\end{tabularx} 
-		\begin{tablenotes}
-			\footnotesize
-			\item Notes: Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
-		\end{tablenotes}
-	\end{threeparttable} 
-\end{table} 
-
-## Future temperatures
-
-\begin{table}[h] \centering 
-	\caption{Covariate vectors for 2100 predictions} 
-	\begin{threeparttable} %%% added %%% 
-		\begin{tabularx}{.75\textwidth}{@{\extracolsep{1pt}} X A A A A } 
-			%\begin{tabularx}{\textwidth}{X c c c c} 
-			%\hline\hline
-			\toprule
-			&\multicolumn{1}{c}{RCP 2.6}&\multicolumn{1}{c}{RCP 4.5}&\multicolumn{1}{c}{RCP 6.0}&\multicolumn{1}{c}{RCP 8.5}\\
-			%&\multicolumn{1}{c}{\footnotesize420 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize540 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize670 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize940 ppmv CO$_2$}\\
-			%\hline
-			%\\[-1.8ex] 
-			\midrule
-			$RF_{2100}$  																			& 2.626		& 4.281		& 5.522		& 8.340		\\ 
-			\hspace{5 pt} \textit{CO$_2$ component}	& \multicolumn{1}{c}{\textit{\hspace{1em}85\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em}83\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em}86\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em}78\%}}	\\
-			\hspace{5 pt} \textit{Solar component}		& \multicolumn{1}{c}{\textit{\hspace{1em} 7\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em} 4\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em} 3\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em} 2\%}}	\\
-			\\[-1.8ex] 
-			$\overline{VOLC}$																	& 0.017		& 0.017		& 0.017		& 0.017		\\
-			\\[-1.8ex] 
-			$\overline{SOI}$																	&\text{-}0.079	&\text{-}0.079	&\text{-}0.079	&\text{-}0.079	\\
-			\\[-1.8ex] 
-			$\overline{AMO}$ 																	&\text{-}0.002 &\text{-}0.002	&\text{-}0.002	&\text{-}0.002	\\
-			%\hline\hline
-			\bottomrule
-		\end{tabularx}
-		\begin{tablenotes}
-			\footnotesize
-			\item \textit{Notes:} Covariates are used to predict the global mean surface temperature anomaly in the year 2100. The Representative Concentration Pathways (RCPs) are a family of forcing scenarios developed for the IPCC \cite{van2011rcp}. Each RCP has a core component of atmospheric CO$_2$ concentrations, measured in parts per million volume (ppmv). With regard to the covariates in the regression model, total radiative forcing ($RF$) and volcanic aerosols ($VOLC$) are measured in Wm$^{-2}$. The Southern Oscillation Index ($SOI$) and Atlantic Multidecadal Oscilliation ($AMO$) are measured as scaled indices. Future values for $RF$ are taken from the RCP database. For the rest, historical mean values are used.
-		\end{tablenotes}
-	\end{threeparttable} 
-	\label{tab:covariate}
-\end{table}
-
-
 \newpage
-\pagebreak
 
-# Figures
+# Sensitivity analysis
 
-## Sensitivity analysis
+```{r sens_tab}
+sens_tab = rbindlist(lapply(
+	grep('tcr', list.files(here('results/sensitivity'), full.names = TRUE), value = TRUE),
+	function(x) {
+		d = read_fst(x)
+		setDT(d)
+		if (!('series' %in% names(d))) d$series = d$run
+		d[prior=='ni',
+			.(tcr = paste0(sprintf('%.1f', mean(tcr)),
+										 ' (',
+										 sprintf('%.1f',  quantile(tcr, .025)),
+										 ', ',
+										 sprintf('%.1f',  quantile(tcr, .975)),
+										 ')'
+										 )),
+			by = .(run, series)]
+		}
+	))
+# sens_tab
+sens_labs = c('CW14' = 'cw', 'GISTEMP' = 'giss', 'HadCRUT ME' = 'me-gmst', 'DF18'= 'me-forcings', 'MEA16 I' = 'eff1', 'MEA16 II' = 'eff2', 'Anthro' = 'anthro', 'CO$_2$' = 'co2')
+sens_tab[, series := factor(series, levels = sens_labs)]
+setorder(sens_tab, series)
+## quick segue; copy table for ease of use in text
+sens_tab2 = copy(sens_tab)
+sens_tab2[, tcr := gsub('\\(', '°C \\(', tcr)][, tcr := gsub('\\)', ' °C\\)', tcr)][, tcr := gsub(', ', '--', tcr)]
+## end segue
+# sens_tab[, Comment := fcase(run=='alt-gmst', 'Alternative GMST series.',
+# 														series=='me-gmst', 'Measurement error in GMST data.',
+# 														series=='me-forcings', 'Measurement error in forcings data.',
+# 														series=='eff1', 'Adjusted forcing efficacies (means).',
+# 														series=='eff2', 'Adjusted forcing efficacies (distributions).',
+# 														series=='anthro', 'Separate anthropogenic from natural forcings.',
+# 														series=='co2', 'Separate CO$_2$ from other forcings.'
+# 														)]
+# sens_tab[, ':=' (series = names(sens_labs[series]), run = NULL)]
+# setnames(sens_tab, c('series', 'tcr'), c('Key', 'TCR'))
+# kbl(sens_tab, align = 'lll', booktabs = TRUE, 
+# 		format = 'latex', escape = FALSE,
+# 		caption = 'TCR: Sensitivity analysis and alternative specifications. \\label{tab:sensitivity}') %>%
+# 	footnote('TCR means are given in °C, with 95\\\\% credible intervals in parentheses. The estimates above are computed using noninformative priors only. Full distributions for all prior types across all sensitivity runs are provided in the Supplementary Material. See main text for additional details.',
+# 					 general_title = 'Notes:', footnote_as_chunk = TRUE,
+# 					 escape = FALSE, threeparttable = TRUE)
+```
 
-Figs. \ref{fig:sens_cw14} -- \ref{fig:sens_co2} provide additional context and information related to the various sensitivity analyses undertaken in Section 5.2 of the main text. In each case, the figure caption references against the key listed in first column of Table 4. The figures themselves are directly comparable with Fig. 1 and the same general notes apply (dashed lines denote TCR priors, solid lines denote TCR posteriors, etc.) Note that in some cases the x-axis has been truncated to preserve this direct comparability, even though the posterior distributions may extend beyond the -1 °C to 3 °C range.
 
 ```{r tcr_plot}
 tcr_plot =
@@ -266,6 +244,22 @@ tcr_plot =
     }
 ```
 
+As noted in the main text, I consider a number of alternative specifications to test the sensitivity of my findings. The following section provides additional context and technical information for these different sensitivity runs.
+<!-- Table \ref{tab:sensitivity} summarises the resulting posterior TCR distributions that obtain under noninformative priors --- see the Supplementary Material for full posterior distributions across all prior types. The general effect of these alternate specifications, regardless of prior, is to nudge the posterior TCR mean higher. We also see a widening of the posterior distributions, as some specifications explicitly introduce additional uncertainty into the estimation. -->
+
+**Note:** Figs. \ref{fig:sens_cw14} -- \ref{fig:sens_co2} are directly comparable to Fig. 1 in the main text and the same general notes apply (dashed lines denote TCR priors, solid lines denote TCR posteriors, etc.) In some cases, the x-axis has been truncated to preserve this direct comparability, though the posterior distributions extend beyond the -1 °C to 3 °C range. The caption of each figure references against the key listed in Table 4 of the main text.
+
+<!-- Figs. \ref{fig:sens_cw14} -- \ref{fig:sens_co2} provide additional context and information related to the various sensitivity analyses undertaken in Section 5.2 of the main text. In each case, the figure caption references against the key listed in first column of Table 4. The figures themselves are directly comparable with Fig. 1 and the same general notes apply (dashed lines denote TCR priors, solid lines denote TCR posteriors, etc.) Note that in some cases the x-axis has been truncated to preserve this direct comparability, even though the posterior distributions may extend beyond the -1 °C to 3 °C range. -->
+
+<!-- \newpage -->
+<!-- \pagebreak -->
+
+## Alternative GMST series
+
+A first sensitivity check is motivated by the fact that HadCRUT4 is known to suffer from potential coverage biases due to incomplete placement of \textit{in situ} thermometers. I therefore rerun the analysis with two alternate reconstructions of GMST. \cite{cowtan2014coverage}, hereafter CW14, correct for the gaps in the HadCRUT4 dataset by using an interpolation algorithm based on the "kriging" method.^[HadCRUT5 \citep{morice2020hadcrut5} adopts a similar kriging strategy to CW14. This updated version of the the HadCRUT temperature record was released during the late revision stages of this manuscript by the UK Met office, and we would expect near identical results to CW14 given the similarities in approach.] Similarly, the NASA Goddard Institute for Space Studies uses an extrapolation algorithm to overcome coverage bias in GISTEMP, its own GMST reconstruction. Running the Bayesian regression model on these alternative series yields moderately higher TCR values compared to HadCRUT4. Under a noninformative prior, the posterior TCR means (and 95\% Bayesian credible intervals) are `r sens_tab2[series=='cw', tcr]` for CW14 and `r sens_tab2[series=='giss', tcr]` for GISTEMP. 
+<!-- While I omit them for brevity, the posterior results for the group of climate sceptics are similarly nudged higher towards the new noninformative distributions. -->
+Given that the explicit goal of this paper is to evaluate policy options from the perspective of climate sceptics, I continue using the results from the HadCRUT4 series as a default. Yet, it should be noted that this is a conservative choice that may, at least marginally, understate the true level of warming.
+
 ```{r sens_cw14, dependson = 'tcr_plot', fig.cap = 'TCR densities: "CW14" sensitivity run.'}
 alt_gmst = read_fst(here('results/sensitivity/tcr-alt-gmst.fst')); setDT(alt_gmst)
 tcr_plot(alt_gmst[series=='cw'])
@@ -275,15 +269,62 @@ tcr_plot(alt_gmst[series=='cw'])
 tcr_plot(alt_gmst[series=='giss'])
 ```
 
+\newpage
+\pagebreak
+
+## Measurement error in GMST data
+
+All three GMST reconstructions used in this study provide estimates of measurement error. The Bayesian framework is ideally suited to incorporate such knowledge, since the nested model structure allows us to fully specify measurement error on the dependent variable within the regression model itself. Doing so under the noninformative prior yields TCR estimates of `r sens_tab2[series=='me-gmst', tcr]`, which are effectively identical to the comparable result in the main text. This is unsurprising once we recall that measurement error on the dependent variable is absorbed by the disturbance term of the regression model.^[For example, see \cite[p. 326]{greene2007econometric}. To illustrate with a simple univariate case: The regression model can be written as $y_t \sim \mathcal{N}(\beta X_t, \sigma^2 + \omega_t^2)$, where $\sigma^2 = \Var(\epsilon)$ is the variance of the error term and $\omega_t^2 = \Var(\nu_t)$ is the variance of the measurement error on $y_t$. Together, $\epsilon$ and $\nu_t$ make up the overall disturbance of the regression.]
+Since the Bayesian regression framework is primarily concerned with total model uncertainty, specifying the relative contribution of such measurement error to the overall disturbance doesn't meaningfully alter the analysis --- though it may be useful for incorporating known sources of heteroscedasticity.^[See \cite{lewis2005edv} for a related discussion in a frequentist setting.] The primary regression results already have GMST measurement error "baked in" to the estimation, regardless of whether we define it explicitly or not.
+
 ```{r sens_hadcrut_me, dependson = 'tcr_plot', fig.cap = 'TCR densities: "HadCRUT ME" sensitivity run.'}
 hadcrut_me = read_fst(here('results/sensitivity/tcr-me-gmst.fst')); setDT(hadcrut_me)
 tcr_plot(hadcrut_me)
 ```
 
+\newpage
+\pagebreak
+
+## Measurement error in forcings data
+
+While measurement error in the dependent variable is already (i.e. implicitly) encapsulated by my Bayesian regression model, the same cannot be said of any explanatory variables. In particular, uncertainty about the radiative forcing data would need to be accounted for explicitly in the modeling procedure. Fortunately, the Bayesian framework offers a natural way to incorporate this type of uncertainty. I conduct a Monte Carlo simulation using the 1,000-member ensemble of forcing estimates from \cite{dessler2018ecs}; hereafter DF18. Specifically, I run my Bayesian regression model on each member of the DF18 ensemble separately --- 1,000 different regressions with each taking their corresponding forcings as the true state of the world --- before aggregating the posterior results into a single meta-distribution at the end.^[This probabilistic approach is the standard Bayesian solution to dealing with measurement error in explanatory variables. In contrast, deriving consistent regression estimators when there is measurement error in explanatory variables can be a much more complicated affair in frequentist settings \citep{greene2007econometric}.] The resulting posterior distributions are wider, as expected due to the additional uncertainty. But the noninformative TCR mean and 95% credible interval of `r sens_tab2[series=='me-forcings', tcr]` are still well situated within the IPCC "likely" range.
+
 ```{r sens_df18, dependson = 'tcr_plot', fig.cap = 'TCR densities: "DF18" sensitivity run.'}
 df18 = read_fst(here('results/sensitivity/tcr-me-forcings.fst')); setDT(df18)
 tcr_plot(df18)
 ```
+
+\newpage
+\pagebreak
+
+## Adjusted forcing efficacies
+
+The regression models in the main text implicitly assume that the different physical drivers making up total radiative forcing have the same per-unit effect on GMST. Forcing agents that yield a similar radiative imbalance in Wm$^{-2}$ are expected to result in similar feedbacks and responses in GMST. However, recent research has suggested that the warming efficacy of different forcing agents can, in fact, vary with factors like geography. Aerosol emissions, for example, are primarily concentrated in the mid-to-high latitudes of the Northern Hemisphere. The disproportionately large land mass in this region causes aerosol forcing to exhibit stronger feedback effects and an accelerated temperature response than if it were uniformly distributed across the globe \cite{shindell2014tcr}. 
+
+The implications of such forcing inhomogeneity on climate sensitivity estimates are more fully explored by \cite{marvel2016implications}, hereafter MEA16. I adapt their results to construct an adjusted series of total radiative forcing, where each forcing agent is pre-multiplied by an appropriate efficacy coefficient (see Supplementary Material). Specifically, I  consider two approaches. The first takes MEA16's mean efficacy estimates as given and ignores all modeling uncertainty in their results. The second explicitly accounts for modeling uncertainty in much the same way that was used to account for explanatory variable measurement error above; i.e. I conduct a Monte Carlo exercise that repeatedly samples from the *t* distributions underlying each forcing efficacy estimate and then combines the posterior results from many regressions into a single meta-distribution at the end. Consistent with MEA16, both approaches lead to a pronounced increase in the posterior TCR mean, with the Monte Carlo sampling approach further yielding a much wider credible interval. However, MEA16 note that data artefacts --- e.g. small changes experienced by some forcing agents over their study period --- automatically induce large uncertainties in the associated efficacy estimates. Combined with the fact that MEA16 obtain their results from a single climate model rather than a multi-model ensemble, this means that the unusually wide credible intervals of the latter Monte Carlo approach should be regarded with caution.
+
+\begin{table}[ht] \centering 
+	\caption{TCR efficacies used in ``MEA'' I and II sensitivity runs} 
+	\label{tab:marvel} 
+	\begin{threeparttable} 
+		\begin{tabularx}{.75\textwidth}{@{\extracolsep{5pt}} Xcc}
+			\toprule
+			Forcing agent & Mean &   95\% C.I.   \\ 
+			\midrule
+			Aerosols      & 1.55 & (1.05, 2.05)  \\
+			GHGs          & 1.17 & (1.07, 1.28)  \\
+			Land use      & 3.82 & (-2.16, 9.80) \\
+			Ozone         & 0.66 & (0.34, 0.98)  \\
+			Solar         & 1.68 & (-1.27, 4.63)  \\
+			Volcanic      & 0.61 & (0.33, 0.89)  \\ 
+			\bottomrule
+		\end{tabularx} 
+		\begin{tablenotes}
+			\footnotesize
+			\item Notes: Adapted from Table S1 of \cite{marvel2016implications}. Confidence intervals on the sample means are constructed from a \textit{t} distribution with 4 degrees of freedom.
+		\end{tablenotes}
+	\end{threeparttable} 
+\end{table} 
 
 ```{r sens_mea_i, dependson = 'tcr_plot', fig.cap = 'TCR densities: "MEA I" sensitivity run.'}
 mea_i = read_fst(here('results/sensitivity/tcr-eff1.fst')); setDT(mea_i)
@@ -295,6 +336,13 @@ mea_ii = read_fst(here('results/sensitivity/tcr-eff2.fst')); setDT(mea_ii)
 tcr_plot(mea_ii)
 ```
 
+\newpage
+\pagebreak
+
+## Separate anthropogenic forcings (CO$_2$) from other forcings
+
+As final sensitivity test, I relax the constraint that all sources of radiative forcing have to be included in the regression model under the same composite $RF$ term. As described in the main text, this decision was motivated by the fact that the forcing agents in my dataset are all defined in Wm$^{-2}$. Separating out individual forcings and then placing different priors on them will likely cause the model to become physically inconsistent.^[For the anthropogenic forcings, the use of a composite term also avoids introducing severe multicollinearity into the econometric estimation.]  Such admonishments notwithstanding, I implement two version of this unphysical model. The first separates out anthropogenic forcings (e.g. GHGs) from natural forcings (e.g. solar radiation). The second separates out CO$_2$ forcing from all other sources. In each case, the subjective sceptic priors are placed only on the isolated anthropogenic component. All other variables take noninformative priors. Both sets of regressions yield very similar results to the main, physically-correct specification. If anything, isolating CO$_2$ on its own yields a higher posterior TCR for certain prior types. However, this latter implementation should be treated with caution for reasons previously described.
+
 ```{r sens_anthro, dependson = 'tcr_plot', fig.cap = 'TCR densities: "Anthro" sensitivity run.'}
 anthro = read_fst(here('results/sensitivity/tcr-anthro.fst')); setDT(anthro)
 tcr_plot(anthro[series=='anthro'])
@@ -304,11 +352,50 @@ tcr_plot(anthro[series=='anthro'])
 tcr_plot(anthro[series=='co2'])
 ```
 
+\newpage
 \pagebreak
 
-## Welfare implications and the social cost of carbon
+# Future temperatures
 
-```{r scc-fig, fig.cap = 'Social cost of carbon (US\\$2005 per ton). The results for each agent type are obtained from 10,000 simulation runs of PAGE \\cite{hope2011page09}. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE model defaults. The x-axis is truncated at 100 to aid visual inspection; the uppermost tails of the distributions being well in excess of the range given here.', fig.pos = 'h'}
+\begin{table}[h] \centering 
+	\caption{Covariate vectors for 2100 predictions} 
+	\begin{threeparttable} %%% added %%% 
+		\begin{tabularx}{.75\textwidth}{@{\extracolsep{1pt}} X A A A A } 
+			%\begin{tabularx}{\textwidth}{X c c c c} 
+			%\hline\hline
+			\toprule
+			&\multicolumn{1}{c}{RCP 2.6}&\multicolumn{1}{c}{RCP 4.5}&\multicolumn{1}{c}{RCP 6.0}&\multicolumn{1}{c}{RCP 8.5}\\
+			%&\multicolumn{1}{c}{\footnotesize420 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize540 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize670 ppmv CO$_2$}&\multicolumn{1}{c}{\footnotesize940 ppmv CO$_2$}\\
+			%\hline
+			%\\[-1.8ex] 
+			\midrule
+			$RF_{2100}$  																			& 2.626		& 4.281		& 5.522		& 8.340		\\ 
+			\hspace{5 pt} \textit{CO$_2$ component}	& \multicolumn{1}{c}{\textit{\hspace{1em}85\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em}83\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em}86\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em}78\%}}	\\
+			\hspace{5 pt} \textit{Solar component}		& \multicolumn{1}{c}{\textit{\hspace{1em} 7\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em} 4\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em} 3\%}}	&	\multicolumn{1}{c}{\textit{\hspace{1em} 2\%}}	\\
+			\\[-1.8ex] 
+			$\overline{VOLC}$																	& 0.017		& 0.017		& 0.017		& 0.017		\\
+			\\[-1.8ex] 
+			$\overline{SOI}$																	&\text{-}0.079	&\text{-}0.079	&\text{-}0.079	&\text{-}0.079	\\
+			\\[-1.8ex] 
+			$\overline{AMO}$ 																	&\text{-}0.002 &\text{-}0.002	&\text{-}0.002	&\text{-}0.002	\\
+			%\hline\hline
+			\bottomrule
+		\end{tabularx}
+		\begin{tablenotes}
+			\footnotesize
+			\item \textit{Notes:} Covariates are used to predict the global mean surface temperature anomaly in the year 2100. The Representative Concentration Pathways (RCPs) are a family of forcing scenarios developed for the IPCC \cite{van2011rcp}. Each RCP has a core component of atmospheric CO$_2$ concentrations, measured in parts per million volume (ppmv). With regard to the covariates in the regression model, total radiative forcing ($RF$) and volcanic aerosols ($VOLC$) are measured in Wm$^{-2}$. The Southern Oscillation Index ($SOI$) and Atlantic Multidecadal Oscilliation ($AMO$) are measured as scaled indices. Future values for $RF$ are taken from the RCP database. For the rest, historical mean values are used.
+		\end{tablenotes}
+	\end{threeparttable} 
+	\label{tab:covariate}
+\end{table}
+
+
+\newpage
+\pagebreak
+
+# Welfare implications and the social cost of carbon
+
+```{r scc-fig, fig.cap = 'Social cost of carbon (US\\$2005 per ton). The results for each agent type are obtained from 10,000 simulation runs of PAGE09 \\citep{hope2011page09}. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE09 model defaults. The x-axis is truncated at 100 to aid visual inspection; the uppermost tails of the distributions being well in excess of the range given here.', fig.pos = 'h'}
 scc = melt(scc, measure.vars = names(scc), 
 					 variable.name = 'prior', value.name = 'scc')
 scc[, prior := factor(match_priors(prior), levels=prior_names)]
