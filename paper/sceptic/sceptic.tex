@@ -83,21 +83,21 @@ this paper can be found at the companion GitHub repository:
 \maketitle
 
 \begin{abstract}
-How much evidence would it take to convince sceptics that they are wrong
-about climate change? I explore this question within a Bayesian
+How much evidence would it take to convince climate sceptics that they
+are wrong? I explore this question within an empirical Bayesian
 framework. I consider a group of stylised sceptics and examine how these
-individuals update their beliefs in the face of current and continuing
+individuals rationally update their beliefs in the face of ongoing
 climate change. I find that available evidence in the form of
 instrumental climate data tends to overwhelm all but the most extreme
 priors. Most sceptics form updated beliefs about climate sensitivity
 that correspond closely to estimates from the scientific literature.
-However, belief convergence is a non-linear function of prior strength.
-It thus becomes increasingly difficult to convince the remaining pool of
-sceptics. I discuss necessary conditions for consensus formation under
-Bayesian learning and show how apparent deviations from the Bayesian
-ideal still be accommodated within the same conceptual framework. I
-argue that a generalized Bayesian model thus provides a bridge between
-competing theories of climate scepticism as a social phenomenon.
+However, belief convergence is a non-linear function of prior strength
+and it becomes increasingly difficult to convince the remaining pool of
+dissenters. I discuss the necessary conditions for consensus formation
+under Bayesian learning and show that apparent deviations from the
+Bayesian ideal can still be accommodated within the same conceptual
+framework. I argue that a generalized Bayesian model provides a bridge
+between competing theories of climate scepticism as a social phenomenon.
 \\
 \keywords{
         climate sceptics \and
@@ -118,52 +118,86 @@ competing theories of climate scepticism as a social phenomenon.
 
 Climate change has come to represent a defining policy issue of our age.
 Yet support for comprehensive climate policy at the global scale remains
-elusive. Many policy makers and citizens are openly sceptical about the
-human role in our changing climate, despite decades of accumulated
-research and an overwhelming scientific consensus
-(\cite{oreskes2004beyond}, \cite{anderegg2010expert},
-\cite{doran2011examining}, \cite{cook2013quantifying},
-\cite{verheggen2014scientists}, \cite{tol2014quantifying},
-\cite{cook2016consensus}, \cite{saad2019americans}). What are we to make
-of this scepticism? And just how much evidence would it take to convince
-climate sceptics that they are wrong? In the present paper, I seek to
-answer these questions within a Bayesian framework that combines a range
-of sceptic beliefs (i.e.~priors) with available climate data. My goal is
-to pin down plausible rates of convergence with the scientific
-consensus, by examining how different sceptics update their beliefs in
-the face of current and continuing climate change. In so doing, I hope
-to shed light on our current policy impasse and offer some remarks about
-the possibility for finding common ground in the future.
+elusive. Decades of accumulated research and an overwhelming scientific
+consensus have not been enough to convince everyone. Many policy makers
+and ordinary citizens remain openly sceptical about the human role in
+our changing climate (\cite{oreskes2004beyond},
+\cite{anderegg2010expert}, \cite{doran2011examining},
+\cite{cook2013quantifying}, \cite{verheggen2014scientists},
+\cite{tol2014quantifying}, \cite{cook2016consensus},
+\cite{saad2019americans}). What are we to make of this scepticism? And
+just how much evidence would it take to convince climate sceptics that
+they are wrong? I seek to answer these questions within an empirical
+Bayesian framework. My goal is to understand how sceptics would respond
+to increasing evidence for human-induced climate change, provided that
+they update their beliefs rationally. In so doing, I hope to shed light
+on our current policy impasse and the possibility for finding common
+ground in the near future.
 
-Many studies have explored the cultural and psychological factors
+Beliefs about climate change are powerful. They dictate our choices as
+individuals and policies as societies. Our beliefs also shape how we
+interpret new information about the world. We are more predisposed to
+accept data that accords with our priors, and vice versa. For a climate
+sceptic, as for anyone else, beliefs provide a lens through which
+information is subjectively interrogated and made intelligible.
+Naturally, this is not to say that beliefs are immutable. A central
+theme of Bayesianism --- the intellectual framework for this paper ---
+is the process by which beliefs are updated through exposure to new
+information. But our responsiveness to this new information may be
+greatly diminished, depending on how strongly we hold our existing
+beliefs. Exactly \emph{how} great of a diminishing effect is the focus
+of this paper. To preview my method and findings, I consider a range of
+sceptic beliefs and examine how these ``priors'' modulate a person's
+responsiveness to climate data. I find that available evidence in the
+form of instrumental climate data tends to overwhelm all but the most
+extreme cases. However, I also document the non-linear effect that
+beliefs have on convergence with the scientific consensus. Even as most
+sceptic priors are overwhelmed by the evidence for climate change, it
+becomes increasingly difficult to convince the remaining dissenters that
+they are wrong.
+
+Numerous studies have explored the cultural and psychological factors
 underlying climate scepticism. These include \cite{kahan2011cultural},
 \cite{kahan2012polarizing}, \cite{mccright2011cool},
 \cite{mccright2011politicization}, \cite{corner2012uncertainty},
 \cite{ranney2012changing}, \cite{clark2013knowledge},
 \cite{lewandowsky2019influence} --- see \cite{hornsey2016meta} for a
-recent literature review. My present concern is less with the origins of
-scepticism than what it represents. Namely, a set of \emph{beliefs}
-about the likely causes of global warming, which will in turn affect how
-new information about those causes is interpreted. A convenient way to
-model such beliefs is by defining scepticism in terms of climate
-sensitivity, i.e.~the temperature response to a doubling of CO\(_2\).
-Specifically, we can map sceptic beliefs directly on to subjective
-estimates of climate sensitivity, because they both describe the likely
-causes and probability distribution of future warming. The particular
-measure of climate sensitivity that I focus on here is the transient
-climate response (TCR). Formally, TCR describes the warming at the time
-of CO\(_2\) doubling --- i.e.~after 70 years --- in a 1\% per year
-increasing CO\(_2\) experiment \cite{ipcc2013i}. For the purposes of
-this paper, however, it will simply be thought of as the contemporaneous
-change in global temperature that results from a steady doubling of
-atmospheric CO\(_2\).
+recent review. Broadly speaking, these studies divide into two camps.
+One strand of the literature emphasises the so-called ``deficit model,''
+which posits that climate scepticism originates from a lack of relevant
+background knowledge. This includes an understanding of the underlying
+evidence and physical mechanisms, as well as the true extent of the
+scientific consensus. However, another camp has come to advocate for a
+theory of ``cultural cognition,'' which interprets climate scepticism as
+a social phenomenon resulting from shared value systems and group
+identity dynamics. In this latter view, a person's scientific
+sophistication is relevant only insofar as it allows them to better
+marshal arguments in support of pre-determined positions
+(i.e.~reinforcing cultural and tribal affiliations). I shall return to
+these two competing frameworks later in the paper. For the moment, my
+concern is less with the origins of climate scepticism than what it
+represents: namely, a set of beliefs about the rates and causes of
+global climate change.
 
-According to the the Intergovernmental Panel on Climate Change
-\cite{ipcc2013i}, TCR is ``likely'' to be somewhere in the range of
-1.0--2.5 °C. This corresponds roughly to a 66--100\% probability
-interval in IPCC terminology. The IPCC further emphasizes the inherently
-Bayesian nature of climate sensitivity estimates, going so far as to
-state:
+A convenient way to model beliefs about climate change is by defining
+scepticism in terms of climate sensitivity, i.e.~the temperature
+response to a doubling of CO\(_2\). Specifically, we can map sceptic
+beliefs directly on to subjective estimates of climate sensitivity,
+because they both describe the probable causes and distribution of
+future warming. The particular measure of climate sensitivity that I
+focus on here is the transient climate response (TCR). Formally, TCR
+describes the warming at the time of CO\(_2\) doubling --- i.e.~after 70
+years --- in a 1\% per year increasing CO\(_2\) experiment
+\cite{ipcc2013i}. For the purposes of this paper, however, it will
+simply be thought of as the contemporaneous change in global temperature
+that results from a steady doubling of atmospheric CO\(_2\).
+
+According to the the Intergovernmental Panel on Climate Change (IPCC),
+TCR is ``likely'' to be somewhere in the range of 1.0--2.5 °C
+(\cite{ipcc2013i}). This corresponds to an approximate 66--100\%
+probability interval in IPCC terminology. The IPCC further emphasizes
+the inherently Bayesian nature of climate sensitivity estimates, going
+so far as to state:
 
 \begin{quote}
 \emph{{[}T{]}he probabilistic estimates available in the literature for
@@ -180,7 +214,7 @@ recall that frequentism interprets probability as the limiting frequency
 in a large number of repeated draws. Such a narrow definition holds
 little relevance to the question of climate sensitivity, for which there
 exists but one unique value. There is no population of ``sensitivities''
-to draw samples from. I also adopt a Bayesian framework to determine
+to draw samples from. I too adopt a Bayesian framework for determining
 climate sensitivity and its concomitant policy implications. However, my
 approach differs from the previous literature along several dimensions.
 
@@ -198,21 +232,21 @@ climate change that are logically consistent with the initial beliefs of
 these sceptics.
 
 Contrarian climate beliefs have also been largely ignored in the
-economic policy literature to date. The handful of studies that do
+economic and policy literature to date. The handful of studies that do
 consider policy options from the sceptic perspective have tended to
 emphasise edge scenarios like climate catastrophe and irreversibility.
-For example, \cite{kiseleva2016heterogeneous} introduces an IAM of
-heterogeneous agents that incorporates various degrees of climate
-scepticism. She shows that a world comprised only of sceptical policy
-makers will make sufficient investments in mitigation measures to avoid
-catastrophic outcomes. The key mechanism is a dominant subset of
-``weak'' sceptics who are sufficiently concerned by anthropogenic
-climate change that they reduce their emissions accordingly.
-\cite{kiseleva2016heterogeneous} does not allow for learning in her
-simulations.\footnote{It should be said that there \emph{is} an
-  important literature on Bayesian learning in IAMs that originates with
-  \cite{kelly1999learning}. But I am not aware of any study that
-  attempts to integrate learning by climate sceptics into an IAM.}
+For example, \cite{kiseleva2016heterogeneous} introduces an Integrated
+Assessment Model (IAM) of heterogeneous agents that incorporates various
+degrees of climate scepticism. She shows that a world comprised only of
+sceptical policy makers will make sufficient investments in mitigation
+measures to avoid catastrophic outcomes. The key mechanism is a dominant
+subset of ``weak'' sceptics who are sufficiently concerned by
+anthropogenic climate change that they reduce their emissions
+accordingly. \cite{kiseleva2016heterogeneous} does not allow for
+learning in her simulations.\footnote{It should be said that there
+  \emph{is} an important literature on Bayesian learning in IAMs that
+  originates with \cite{kelly1999learning}. But I am unaware of any IAM
+  studies that explicitly try to model learning by climate sceptics.}
 However, theoretical work by \cite{wijnbergen2015skeptics} show that
 climate sceptics actually have an incentive to reduce emissions, since
 it will facilitate learning about the true causes of climate change.
@@ -230,13 +264,12 @@ an empirical framework.\footnote{In terms of tangentially related
   on local weather shocks. This builds off of earlier work by
   \cite{deryugina2013update}, who finds that longer spells of abnormal
   local weather patterns are consistent with Bayesian updating about
-  climate beliefs.}
-
-Unlike the existing numerical and game-theoretic approaches, described
-above, I am not attempting to prescribe an optimal emissions strategy or
-learning paths for climate sceptics under future uncertainty. Rather, my
-goal is to establish some ground rules for thinking about climate policy
-today, given the information that is already available to us.
+  climate beliefs.} Unlike the existing numerical and game-theoretic
+approaches, I am not attempting to prescribe an optimal emissions
+strategy or learning paths for climate sceptics under future
+uncertainty. Rather, my goal is to establish some ground rules for
+thinking about climate policy today, given the information that is
+already available to us.
 
 Another distinguishing feature of this paper is that the results are
 derived via conceptually straightforward time-series regression
@@ -266,9 +299,9 @@ analysis. A noteworthy and early exception is that of
 \cite{tol1998bayes}, who are motivated to adopt a Bayesian approach
 because of multicollinearity in their anthropogenic emissions data. Such
 multicollinearity does not plague newer datasets, since these are
-defined in common units as will be discussed in Section \ref{sec:data}.
-Further, \cite{tol1998bayes} do not consider the influence of overtly
-contrarian priors as a basis for affecting policy.
+defined in terms of common units (e.g.~Wm\(^{-2}\)). Further,
+\cite{tol1998bayes} do not consider the influence of overtly contrarian
+priors as a basis for affecting policy.
 
 \hypertarget{sec:econometric}{%
 \section{Econometric approach}\label{sec:econometric}}
@@ -317,19 +350,19 @@ needed. For this reason, eq.(\ref{eq:bayes}) is typically re-written as
 Equation (\ref{eq:bayesprop}) embodies the mantra of Bayesian
 statistics: ``The posterior is proportional to the likelihood times the
 prior.'' Solving for the posterior typically involves the combination of
-various integrals, which cannot be calculated analytically.\footnote{A
-  famous exception is that of conjugate priors, which belong to the same
-  distribution family as the resulting posterior. However, this places
-  strong restrictions on the questions that can asked of the data.}
-Fortunately, we can simulate the posterior density computationally using
-Markov Chain Monte Carlo (MCMC) routines. This can be done for virtually
-any combination of prior and likelihood function. Obtaining a valid
-posterior is then simply a matter of: (i) choosing a prior distribution
-for our regression parameters, i.e.~regression coefficients and
-variances; and (ii) specifying a likelihood function to fit the data.
-For ease of exposition --- how we map parameter values to beliefs about
-TCR will be determined by the specification of the regression model ---
-I begin with the likelihood function.
+various integrals, which cannot be calculated analytically.\footnote{So-called
+  \textit{conjugate} priors are a prominent exception and belong to the
+  same distribution family as the resulting posterior. However,
+  conjugacy places strong restrictions on the questions that can asked
+  of the data.} Fortunately, we can simulate the posterior density
+computationally using Markov Chain Monte Carlo (MCMC) routines. This can
+be done for virtually any combination of prior and likelihood function.
+Obtaining a valid posterior is then simply a matter of: (i) choosing a
+prior distribution for our regression parameters, i.e.~regression
+coefficients and variances; and (ii) specifying a likelihood function to
+fit the data. For ease of exposition --- how we map parameter values to
+beliefs about TCR will be determined by the specification of the
+regression model --- I begin with the likelihood function.
 
 \hypertarget{sec:likelihood}{%
 \subsection{Likelihood function}\label{sec:likelihood}}
@@ -382,14 +415,12 @@ to ensure that the model remains physically consistent.\footnote{Volcanic
   aerosols are an exception because they impart only a transitory level
   of forcing. This explains why \(VOLC\) may be included as a separate
   component in the regression equation \cite{estrada2013statistically}.}
-Nonetheless, I show in an alternate specification later in the paper
-that relaxing this constraint leads to near identical conclusions as the
-physically correct specification. I also show that the core results do
-not hinge on the imposition of a common efficacy among different forcing
-agents.
+I shall demonstrate that relaxing these constraints later in the paper
+nonetheless yields virtually identical conclusions as the physically
+correct specification.
 
 Returning to my primary regression model, eq. (\ref{eq:regression})
-implies a likelihood function that is multivariate normal
+implies a likelihood function that is multivariate normal,
 
 \begin{equation}
    p(GMST | \boldsymbol{\beta}, \sigma^2) =  \frac{1}{\left(2 \pi \sigma^2\right)^{T/2}} \text{exp}\left[ - \frac{(GMST - \mathbf{X}\boldsymbol{\beta})'(GMST - \mathbf{X}\boldsymbol{\beta})}{2 \sigma^2} \right], \label{eq:likelihood}
@@ -487,30 +518,30 @@ Climate scepticism is a matter of degree. I account for this fact by
 defining a simple typology of sceptics as per Table
 \ref{tab:sceppriors}. Summarizing, I distinguish between two basic
 sceptic archetypes based on their best guess for TCR.
-\textit{Lukewarmers} believe that TCR lies around 1 \(^\circ\)C ---
-i.e.~the lower bound of the IPCC likely range (c.f.
-\cite{ridley2015lukewarmer}) --- while \textit{deniers} believe that TCR
-is likely zero. I further distinguish these individuals based on how
-certain they are about their best guess. A person with \textit{moderate}
-convictions believes that the true value of TCR lies within a 1
-\(^\circ\)C uncertainty interval of their prior mean (95\% probability),
-while that interval falls to just 0.25 \(^\circ\)C for someone with
-\textit{strong} convictions. Altogether this yields a spectrum of
-sceptic priors that ranges from moderate lukewarmers to strong deniers.
-Importantly, each sceptic can all be represented mathematically by a
-prior distribution on TCR. I assume normal distributions for simplicity,
-where the mean represents an individual's best guess and the variance
-their uncertainty.\footnote{The choice of normally-distributed priors
-  should have little bearing on the generality of the results. An
-  exception might occur if I assumed a bounded prior, like a triangular
-  or uniform distribution. Because these bounded distributions assign
-  zero weight to outcomes beyond a specific interval, no amount of data
-  can shift the posterior beyond that interval. This idea, that a
-  Bayesian posterior can converge on a particular outcome only if the
-  prior allocates some (infinitesimal) weight to it, is known
-  colloquially as \emph{Cromwell's rule} (\cite{jackman2009bayesian}).}
-Following eq. (\ref{eq:impliedtcr}), obtaining priors over \(\beta_1\)
-is a simple matter of dividing the respective TCR distributions by
+\textit{Lukewarmers} (c.f. \cite{ridley2015lukewarmer}) believe that TCR
+lies around 1 \(^\circ\)C --- i.e.~the lower bound of the IPCC
+``likely'' range --- while \textit{deniers} believe that TCR is likely
+zero. I further distinguish these individuals based on how certain they
+are about their best guess. A person with \textit{moderate} convictions
+believes that the true value of TCR lies within a 1 \(^\circ\)C
+uncertainty interval of their prior mean (95\% probability), while that
+interval falls to just 0.25 \(^\circ\)C for someone with \textit{strong}
+convictions. Altogether, this yields a spectrum of sceptic priors that
+ranges from moderate lukewarmers to strong deniers. Importantly, each
+sceptic can all be represented mathematically by a prior distribution on
+TCR. I assume normal distributions for simplicity, where the mean
+represents an individual's best guess and the variance their
+uncertainty.\footnote{The choice of normally-distributed priors should
+  have little bearing on the generality of the results. An exception
+  might occur if I assumed a bounded prior, like a triangular or uniform
+  distribution. Because these bounded distributions assign zero weight
+  to outcomes beyond a specific interval, no amount of data can shift
+  the posterior beyond that interval. This idea, that a Bayesian
+  posterior can converge on a particular outcome only if the prior
+  allocates some (infinitesimal) weight to it, is known colloquially as
+  \emph{Cromwell's rule} (\cite{jackman2009bayesian}).} Following eq.
+(\ref{eq:impliedtcr}), obtaining priors over \(\beta_1\) is a simple
+matter of dividing the respective TCR distributions by
 \(F_{2\times}=3.71\text{ Wm}^{-2}\). These are the parameters that
 actually enter the Bayesian regression model and are also shown in Table
 \ref{tab:sceppriors}.
@@ -534,7 +565,7 @@ and independent variable \(x\), I define a noninformative prior for the
 associated regression coefficient
 \(\beta_x \sim \mathcal{N}(0, \ 2.5 \frac{s_y}{s_x})\), where
 \(s_x = \text{sd}(x)\).\footnote{This is the default prior suggested by
-  \cite{rstanarm}, which they refer to as ``weakly informative''.} In
+  \cite{rstanarm}, which they refer to as ``weakly informative.''} In
 other words, my noninformative priors take the form of normal
 distributions with wide variances. For my default regression
 specification this equates to a prior on the key radiative forcing
@@ -599,61 +630,38 @@ The various data sources for this paper are summarised in Table
 taken from the HadCRUT4 dataset, jointly compiled by the UK Met Office
 and the Climatic Research Unit at the University of East Anglia. Two
 alternate global temperature reconstructions --- one provided by
-\cite{cowtan2014coverage} and the other by the NASA Goddard Institute
-for Space Studies (GISTEMP) --- are used as a check against coverage
-issues and other uncertainties. Radiative forcing data, covering both
-historic estimates (1765--2005) and future scenarios (2006-2300), are
-taken from the Representative Concentration Pathway (RCP) database,
-hosted by the Potsdam Institute for Climate Impact Research. These data
-include anthropogenic sources of radiative forcing like industrial
-greenhouse gas emissions, as well as natural sources like solar
-irradiance and volcanic eruptions. As a part of the sensitivity
-analyses, I use an ensemble of 1,000 forcing estimates to capture
-measurement uncertainty about radiative forcing data. This ensemble
-originates with \cite{dessler2018ecs}, although I use a recapitulated
-version provided by \cite{hausfather2020evaluating} for ease of access.
-Data for two major oceanic-atmospheric phenomena, the Atlantic
-Multidecadal Oscillation (AMO, 1856--2017) and the Southern Oscillation
-Index (SOI, 1866--2017), are taken from the U.S. National Oceanic and
-Atmospheric Administration (NOAA) and National Center for Atmospheric
-Research (NCAR). Summarising the common historic dataset for which data
-are available across all series, we have 140 annual observations running
-over 1866--2005. RCP scenarios until 2100 will also be considered for
-making future predictions later in the paper.
+\cite{cowtan2014coverage} (hereafter, CW14) and the other by the NASA
+Goddard Institute for Space Studies (GISTEMP) --- are used as a check
+against spatial coverage issues and other uncertainties.\footnote{HadCRUT5
+  (\cite{morice2020hadcrut5}) was released during the late revision
+  stages of the manuscript. Among other things, this updated version of
+  the HadCRUT temperature record adopts a similar approach to
+  interpolating coverage gaps as in CW14.} Radiative forcing data,
+covering both historic estimates (1765--2005) and future scenarios
+(2006-2300), are taken from the Representative Concentration Pathway
+(RCP) database, hosted by the Potsdam Institute for Climate Impact
+Research. These data include anthropogenic sources of radiative forcing
+like industrial greenhouse gas emissions, as well as natural sources
+like solar irradiance and volcanic eruptions. As a part of the
+sensitivity analyses, I use an ensemble of 1,000 forcing estimates to
+capture measurement uncertainty about radiative forcing data. This
+ensemble originates with \cite{dessler2018ecs}, although I use a
+recapitulated version provided by \cite{hausfather2020evaluating} for
+ease of access. Data for two major oceanic-atmospheric phenomena, the
+Atlantic Multidecadal Oscillation (AMO, 1856--2017) and the Southern
+Oscillation Index (SOI, 1866--2017), are taken from the U.S. National
+Oceanic and Atmospheric Administration (NOAA) and National Center for
+Atmospheric Research (NCAR). Summarising the common historic dataset for
+which data are available across all series, we have 140 annual
+observations running over 1866--2005. RCP scenarios until 2100 will also
+be considered for making future predictions later in the paper.
 
 \hypertarget{sec:results}{%
 \section{Results}\label{sec:results}}
 
-The analysis for this project was primarily conducted in \texttt{R}
-(\cite{rcore}, version 4.0.2), with the Bayesian computation being
-passed on to the \texttt{Stan} programming language (\cite{cmdstanr}).
-All of the code and data needed to reproduce the results can be found at
-the companion GitHub repository.\footnote{\url{https://github.com/grantmcdermott/sceptic-priors}.}
-
-\hypertarget{sec:regression}{%
-\subsection{Regression results and updated TCR
-beliefs}\label{sec:regression}}
-
-The posterior regression results for the various prior types are
-presented in Table \ref{tab:reg}. Each column contains the results from
-running the Bayesian regression eq. (\ref{eq:regression}) over the full
-historical data set (1866--2005), using a particular set of priors.
-Beginning with the noninformative case in the first column, all of the
-regression coefficients are credibly different from zero and of the
-anticipated sign. For example, GMST is negatively correlated with SOI.
-This is to be expected since the El Niño phenomenon is defined by SOI
-moving into its negative phase. The posterior coefficient density on our
-main parameter of interest, total radiative forcing (\(RF\)), shows that
-global temperature will rise by an average of 0.426 °C for every
-Wm\(^{-2}\) increase. Of greater interest, however, is the fact that the
-posterior estimates yielded by the group of sceptic priors are very
-similar to this noninformative case. With the exception of the Strong
-Denier, there is a clear tendency to congregate towards the
-noninformative parameter values.
-
 \begin{table}
 
-\caption{\label{tab:regtab}Regression results and implied TCR \label{tab:reg}}
+\caption{\label{tab:regtab}Posterior regression results and implied TCR \label{tab:reg}}
 \centering
 \fontsize{8}{10}\selectfont
 \begin{threeparttable}
@@ -688,6 +696,42 @@ TCR & 1.6 & 1.5 & 1.3 & 1.5 & 0.3\\
 \end{threeparttable}
 \end{table}
 
+The analysis for this project was primarily conducted in \texttt{R}
+(\cite{rcore}, version 4.0.2), with the Bayesian computation being
+passed on to the \texttt{Stan} programming language (\cite{cmdstanr}).
+All of the code and data needed to reproduce the results can be found at
+the companion GitHub repository.\footnote{\url{https://github.com/grantmcdermott/sceptic-priors}.}
+
+\hypertarget{sec:regression}{%
+\subsection{Regression results and updated TCR
+beliefs}\label{sec:regression}}
+
+The posterior regression results for the various prior types are
+presented in Table \ref{tab:reg}. Each column contains the results from
+running the Bayesian regression eq. (\ref{eq:regression}) over the full
+historical data set (1866--2005), using a particular set of priors.
+Beginning with the noninformative case in the first column, all of the
+regression coefficients are credibly different from zero and of the
+anticipated sign. For example, GMST is negatively correlated with SOI.
+This is to be expected since the El Niño phenomenon is defined by SOI
+moving into its negative phase. The posterior coefficient density on our
+main parameter of interest, total radiative forcing (\(RF\)), shows that
+global temperature will rise by an average of 0.426 °C for every
+Wm\(^{-2}\) increase. Of greater interest, however, is the fact that the
+posterior estimates yielded by the group of sceptic priors are very
+similar to this noninformative case. With the exception of the Strong
+Denier, there is a clear tendency to congregate towards the
+noninformative parameter values.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/tcrs-dens-1} 
+
+}
+
+\caption{TCR densities. Dashed lines denote priors, solid lines denote posteriors. The grey shaded region denotes the IPCC "likely" TCR range of 1.0--2.5 °C.}\label{fig:tcrs-dens}
+\end{figure}
+
 Of course, the exact values of the regression parameters are themselves
 of somewhat limited interest. Rather, their primary usefulness is to
 enable the recovery of posterior beliefs about TCR. These are summarised
@@ -703,23 +747,25 @@ accordingly.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/tcrs-dens-1} 
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/recursive-1} 
 
 }
 
-\caption{TCR densities. Dashed lines denote priors, solid lines denote posteriors. The grey shaded region denotes the IPCC "likely" TCR range of 1.0--2.5 °C.}\label{fig:tcrs-dens}
+\caption{Recursive TCR estimates. In each panel, the resulting posterior TCR estimate from a sceptic prior is contrasted with the noninformative case (in black). Solid lines denote means, while shaded regions (or dashed lines) denote 95\% credible intervals. The recursive estimates are obtained by running regression eq. (\ref{eq:impliedtcr}) on an increasing fraction of the historical dataset, starting nearest to the present day and then iterating backwards in time. Each pass of the iteration adds another year of data to the sample and re-runs the regression to obtain an updated posterior TCR. This recursive process continues until the full historical dataset is encompassed.}\label{fig:recursive}
 \end{figure}
 
 Further insight into the updating behaviour of our stylised sceptics is
 provided by the recursive TCR estimates shown in Fig.
-\ref{fig:recursive}. It is apparent that stronger convictions about
-one's prior beliefs (in the form of a smaller prior variance) have a
-greater dampening effect on posterior outcomes than the prior mean. For
-example, the Moderate Denier converges more rapidly to the
-noninformative distribution than the Strong Lukewarmer. However, most
-sceptics will converge to the noninformative distribution only after
-``observing'\,' data from a number of decades. Note that this does not
-alter the conclusions that we are able to draw from our Bayesian
+\ref{fig:recursive}. Note these recursive estimates are run backwards in
+time, to mimic the perspective of present-day sceptic looking back over
+an increasing body of historical evidence. It is apparent that stronger
+convictions about one's prior beliefs (in the form of a smaller prior
+variance) have a greater dampening effect on posterior outcomes than the
+prior mean. For example, the Moderate Denier converges more rapidly to
+the noninformative distribution than the Strong Lukewarmer. However,
+most sceptics will converge to the noninformative distribution only
+after ``observing'\,' data from a number of decades. Note that this does
+not alter the conclusions that we are able to draw from our Bayesian
 analysis. As long as we have fully specified a prior that encapsulates a
 person's initial beliefs, then we should in principle treat the full
 historical dataset as new information for updating those
@@ -741,15 +787,6 @@ accurately reflect longer-term trends. For example, the relatively brief
 ``hiatus'' in warming that followed the exceptionally strong 1998 El
 Niño event (\cite{lewandowsky2016pause}).
 
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/recursive-1} 
-
-}
-
-\caption{Recursive TCR estimates. Solid lines denote means, shaded regions (or dashed lines) denote 95\% credible intervals. The recursive estimates are obtained by running the regression in eq. (\ref{eq:impliedtcr}) on an increasing subsample of the data. I start nearest to the present and move backwards in time, adding another year's worth of data at every iteration, until the full historical dataset is included. In each panel, the resulting posterior TCR estimate from a sceptic prior is contrasted with the noninformative case (in black).}\label{fig:recursive}
-\end{figure}
-
 Returning to the question posed at the beginning of this paper: How much
 evidence would it take to convince climate sceptics that they are wrong
 about global warming? One way to reframe this question is to think about
@@ -769,6 +806,15 @@ my original four-sceptic typology.) Each regression is estimated
 recursively, incrementing one year at a time, until I obtain a posterior
 TCR distribution that has a mean value equal to the relevant target.
 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/evidence-1} 
+
+}
+
+\caption{When do sceptic beliefs about TCR converge with mainstream estimates? Axes denote the means and standard deviations of a range of normally-distributed sceptic priors on TCR. Convergence is defined as occurring when the mean posterior TCR for a particular prior equals the relevant target value, i.e. (a) 1.3 °C or (b) 1.5 °C. The year of convergence assumes a starting date of 1866 to coincide with the common historical dataset. Blue shading indicates that convergence is feasible with historically available data. Red shading indicates that convergence can only occur once additional data has been accumulated in the future.}\label{fig:evidence}
+\end{figure}
+
 The results are shown in Fig. \ref{fig:evidence}. While the instrumental
 climate record constitutes enough data to convince many sceptics in this
 hypothetical pool, it does not suffice in all cases. Similarly, although
@@ -783,22 +829,13 @@ evidence over time will inexorably bring more sceptics into the
 mainstream fold. But the delay between each round of new converts is
 increasing.
 
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/evidence-1} 
-
-}
-
-\caption{When do sceptic beliefs about TCR converge with mainstream estimates? Axes denote the means and standard deviations of a range of normally-distributed sceptic priors on TCR. Convergence is defined as occurring when the mean posterior TCR for a particular prior equals the relevant target value, i.e. (a) 1.3 °C or (b) 1.5 °C. The year of convergence assumes a starting date of 1866 to coincide with the common historical dataset. Blue shading indicates that convergence is feasible with historically available data. Red shading indicates that convergence can only occur once additional data has been accumulated in the future.}\label{fig:evidence}
-\end{figure}
-
 An implication of this thought experiment is the following. If someone
 is unpersuaded of the human influence on climate today --- despite all
 of the available evidence --- then there is a high probability that they
 will remain unconvinced for many years hence. The extent to which these
 extreme sceptics constitute a meaningful voting block is an open
 empirical question. However, it is striking to think that such
-individuals are already out of reach from the perspective of
+individuals are perhaps already out of reach from the perspective of
 comprehensive climate policy. Even the accumulation of evidence over the
 next several decades may not be enough to convince them. Scientific
 communication efforts should be tailored appropriately, specifically
@@ -830,139 +867,25 @@ CO$_2$ & 1.7 (1.3, 2.0) & Separate CO$_2$ from other forcings.\\
 \end{tabular}
 \begin{tablenotes}[para]
 \item \textit{Notes:} 
-\item TCR means are given in °C, with 95\% credible intervals in parentheses. The estimates above are computed using noninformative priors only. Full distributions for all prior types across all sensitivity runs are provided in the Supplementary Material. See main text for additional details.
+\item TCR means are given in °C, with 95\% credible intervals in parentheses. The estimates above are computed using noninformative priors only. Full distributions for all prior types across all sensitivity runs are provided in the Supplementary Material.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-I consider a number of alternative specifications to test the
-sensitivity of my findings. Table \ref{tab:sensitivity} summarises the
-resulting posterior TCR distributions that obtain under noninformative
-priors --- see the Supplementary Material for full posterior
-distributions across all prior types. The general effect of these
-alternate specifications, regardless of prior, is to nudge the posterior
-TCR mean higher. We also see a widening of the posterior distributions,
-as some specifications explicitly introduce additional uncertainty into
-the estimation.
-
-A first sensitivity check is motivated by the fact that HadCRUT4 is
-known to suffer from potential coverage biases due to incomplete
-placement of \textit{in situ} thermometers. I therefore rerun the
-analysis with two alternate reconstructions of GMST.
-\cite{cowtan2014coverage}, hereafter CW14, correct for the gaps in the
-HadCRUT4 dataset by using an interpolation algorithm based on the
-``kriging'' method. Similarly, the NASA Goddard Institute for Space
-Studies uses an extrapolation algorithm to overcome coverage bias in
-GISTEMP, its own GMST reconstruction. Running the Bayesian regression
-model on these alternative series yields moderately higher TCR values
-compared to HadCRUT4. Under a noninformative prior, the posterior TCR
-means (and 95\% Bayesian credible intervals) are 1.6 °C (1.4--1.9 °C)
-for CW14 and 1.8 °C (1.5--2.0 °C) for GISTEMP. Given that the explicit
-goal of this paper is to evaluate policy options from the perspective of
-climate sceptics, I continue using the results from the HadCRUT4 series
-as a default. Yet, it should be noted that this is a conservative choice
-that may, at least marginally, understate the true level of warming.
-
-All three GMST reconstructions also provide estimates of measurement
-error. The Bayesian framework is ideally suited to incorporate such
-knowledge, since the nested model structure allows us to fully specify
-measurement error on the dependent variable within the regression model
-itself. Doing so in the present setup yields TCR estimates that are
-effectively identical to those presented in Table \ref{tab:regtab},
-namely 1.6 °C (1.4--1.8 °C). This is unsurprising once we recall that
-measurement error on the dependent variable is absorbed by the
-disturbance term of the regression model.\footnote{For example, see
-  p.~326 of \cite{greene2007econometric}. To illustrate with a simple
-  univariate case: The regression model can be written as
-  \(y_t \sim \mathcal{N}(\beta X_t, \sigma^2 + \omega_t^2)\), where
-  \(\sigma^2 = \mathop{\mathrm{Var}}(\epsilon)\) is the variance of the
-  error term and \(\omega_t^2 = \mathop{\mathrm{Var}}(\nu_t)\) is the
-  variance of the measurement error on \(y_t\). Together, \(\epsilon\)
-  and \(\nu_t\) make up the overall disturbance of the regression.}
-Since the Bayesian regression framework is primarily concerned with
-total model uncertainty, specifying the relative contribution of such
-measurement error to the overall disturbance doesn't meaningfully alter
-the analysis --- though it may be useful for incorporating known sources
-of heteroscedasticity.\footnote{See \cite{lewis2005edv} for a related
-  discussion in a frequentist setting.} The primary regression results
-already have GMST measurement error ``baked in'' to the estimation,
-regardless of whether we define it explicitly or not.
-
-The same could not be said for measurement error in the model
-explanatory variables --- radiative forcing, most importantly --- which
-needs to be accounted for explicitly. Fortunately, the Bayesian
-framework offers a natural way to incorporate this type of uncertainty.
-I conduct a Monte Carlo simulation using the 1,000-member ensemble of
-forcing estimates from \cite{dessler2018ecs}; hereafter DF18.
-Specifically, I run my Bayesian regression model on each member of the
-DF18 ensemble separately --- 1,000 different regressions with each
-taking their corresponding forcings as the true state of the world ---
-before aggregating the posterior results into a single meta-distribution
-at the end.\footnote{This probabilistic approach is the standard
-  Bayesian solution to dealing with measurement error in explanatory
-  variables. In contrast, deriving consistent regression estimators when
-  there is measurement error in explanatory variables can be a much more
-  complicated affair in frequentist settings
-  \cite{greene2007econometric}.} The resulting posterior is wider, as
-expected due to the additional uncertainty. But the TCR mean and 95\%
-credible interval of 1.4 °C (0.9--2.6 °C) are still well situated within
-the IPCC ``likely'' range.
-
-Thus far, I have assumed that the different physical drivers that make
-up total radiative forcing have the same per-unit effect on GMST.
-Forcing agents that yield a similar radiative imbalance in Wm\(^{-2}\)
-are expected to result in similar feedbacks and responses in GMST.
-However, recent research has suggested that the warming efficacy of
-different forcing agents can, in fact, vary with factors like geography.
-Aerosol emissions, for example, are primarily concentrated in the
-mid-to-high latitudes of the Northern Hemisphere. The disproportionately
-large land mass in this region causes aerosol forcing to exhibit
-stronger feedback effects and an accelerated temperature response than
-if it were uniformly distributed across the globe
-\cite{shindell2014tcr}. The implications of such forcing inhomogeneity
-on climate sensitivity estimates are more fully explored by
-\cite{marvel2016implications}, hereafter MEA16. I adapt their results to
-construct an adjusted series of total radiative forcing, where each
-forcing agent is pre-multiplied by an appropriate efficacy coefficients
-(see Supplementary Material). Specifically, I consider two approaches.
-The first takes MEA16's mean efficacy estimates as given and ignores all
-modeling uncertainty in their results. The second explicitly accounts
-for modeling uncertainty in much the same way that was used to account
-for explanatory variable measurement error above; i.e.~I conduct a Monte
-Carlo exercise that repeatedly samples from the \emph{t} distributions
-underlying each forcing efficacy estimate and then combines the
-posterior results from many regressions into a single meta-distribution
-at the end. Consistent with MEA16, both approaches lead to a pronounced
-increase in the posterior TCR mean, with the Monte Carlo sampling
-approach further yielding a much wider credible interval. However, MEA16
-note that data artefacts --- e.g.~small changes experienced by some
-forcing agents over their study period --- automatically induce large
-uncertainties in the associated efficacy estimates. Combined with the
-fact that MEA16 obtain their results from a single climate model rather
-than a multi-model ensemble, this means that the unusually wide credible
-intervals of the latter Monte Carlo approach should be regarded with
-caution.
-
-As final sensitivity test, I relax the constraint that all sources of
-radiative forcing have to be included in the regression model under the
-same composite \(RF\) term. Recall that this decision was motivated by
-the fact that the forcing agents in my dataset are all defined in
-Wm\(^{-2}\). Separating out individual forcings and then placing
-different priors on them will likely cause the model to become
-physically inconsistent.\footnote{For the anthropogenic forcings, the
-  use of a composite term also avoids introducing severe
-  multicollinearity into the econometric estimation.} Such admonishments
-notwithstanding, I implement two version of this unphysical model. The
-first separates out anthropogenic forcings (e.g.~GHGs) from natural
-forcings (e.g.~solar radiation). The second separates out CO\(_2\)
-forcing from all other sources. In both cases, the subjective priors
-from Table \ref{tab:sceppriors} are placed on the isolated anthropogenic
-component, while all other variables take noninformative priors. Both
-sets of regressions yield very similar results to the main,
-physically-correct specification. If anything, isolating CO\(_2\) on its
-own yields a higher posterior TCR for certain prior types. However, this
-latter implementation should be treated with caution for reasons
-previously described.
+I test the sensitivity of my findings to a variety of potential data
+issues and alternate model specifications. These range from the use of
+alternative GMST reconstructions, to analysing the impact of measurement
+error and uncertainty over forcing efficacies. A full discussion of the
+motivating context and technical details underlying each sensitivity run
+--- with results across all prior types --- is provided in the
+Supplementary Material. Unsurprisingly, I obtain wider posterior
+distributions under specifications that explicitly introduce additional
+forms of uncertainty into the estimation. However, the general effect of
+these alternate specifications is to nudge the posterior TCR mean
+slightly \textit{higher}. Table \ref{tab:sensitivity} summarises the
+posterior TCR distributions for various sensitivity runs when using
+noninformative priors. I am left to conclude that my primary data and
+modeling choices do not unduly bias the results.
 
 \hypertarget{sec:future}{%
 \subsection{Future temperatures}\label{sec:future}}
@@ -978,15 +901,24 @@ While the trajectory of future radiative forcings is subject to much
 uncertainty, some guidance is available in the form of the IPCC's
 Representative Concentration Pathways \cite{van2011rcp}. These so-called
 ``RCPs'' describe a family of emissions scenarios, where total
-anthropogenic forcings evolves according to various economic,
-demographic and technological assumptions. Each RCP includes a core
-component of atmospheric CO\(_2\) concentrations, while they all share a
-common prediction for radiative forcing due to solar activity. I take
-these series as the basis for constructing covariate vectors to predict
+anthropogenic forcings evolve according to various economic, demographic
+and technological assumptions. Each RCP includes a core component of
+atmospheric CO\(_2\) concentrations, while they all share a common
+prediction for radiative forcing due to solar activity. I take these
+series as the basis for constructing covariate vectors to predict
 temperatures until the year 2100. For the remaining explanatory
 variables --- stratospheric aerosols, SOI and AMO --- I take the mean
 historical values from my dataset. A summary of covariate vectors in
 2100 for each RCP scenario is provided in the Supplementary Material.
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/gmst-pred-1} 
+
+}
+
+\caption{Model fit and prediction: noninformative priors. Temperature anomaly relative to the 1871--1900 average. Shaded regions denote 95\% credible intervals. Note that predictions for RCPs 2.6 and 4.5 are potentially ill-conditioned and are included for reference purposes only. See text for details.}\label{fig:gmst-pred}
+\end{figure}
 
 Fig. \ref{fig:gmst-pred} shows the temperature evolution for each RCP
 under the noninformative case, which I again take as the benchmark. As
@@ -1006,15 +938,6 @@ narrative, the result is a reinforcement of commonly cited emissions
 targets such as 450 and 540 ppmv. On the other hand, we can expect to
 breech even 3 °C by the year 2100 if we continue along a truly
 unconstrained emissions path à la RCP 8.5.
-
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{/home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/gmst-pred-1} 
-
-}
-
-\caption{Model fit and prediction: noninformative priors. Temperature anomaly relative to the 1871--1900 average. Shaded regions denote 95\% credible intervals. Note that predictions for RCPs 2.6 and 4.5 are potentially ill-conditioned and are included for reference purposes only. See text for details.}\label{fig:gmst-pred}
-\end{figure}
 
 What of the predictions yielded by our group of climate sceptics? While
 it is straightforward to redraw Fig. \ref{fig:gmst-pred} for each prior
@@ -1144,12 +1067,14 @@ Taken together with the persistent scepticism that one sees in actual
 polling data (e.g.~\cite{saad2019americans}), it then becomes reasonable
 to ask whether real-life climate sceptics hold such extreme views? For
 that matter, are they numerous or vocal enough to prevent political
-action (\cite{lewandowsky2019influence})? Such considerations are
-reinforced by the idealized nature of the analysis until now.
-Irrespective of the scientific merit of working through such a set-up,
-normal people clearly do not update their priors in lockstep with a
-Bayesian regression model, supported by large dataset of time-series
-observations.
+action? Such considerations are reinforced by the idealized nature of
+the analysis until now. Irrespective of the scientific merit of working
+through such a set-up, normal people clearly do not update their priors
+in lockstep with a formal Bayesian regression model, supported by large
+dataset of time-series observations.\footnote{Which is not to say that
+  people fail to update rationally, or even heuristically, in a Bayesian
+  manner. For further discussion in the context of climate, see
+  \cite{lewandowsky2019influence}.}
 
 A natural starting point for thinking about these issues is to take a
 closer look at the mechanisms underlying posterior agreement formation.
@@ -1171,8 +1096,8 @@ that they assign to different sources of information about \(S\).
 
 Consider an example, which is closely adapted from a related discussion
 in \cite{jaynes2003probability}. Al, Bob and Christie hold different
-beliefs about climate change. Al is a ``warmist'', Bob is a
-``lukewarmer'' and Christie is a ``denier''. These labels are
+beliefs about climate change. Al is a ``warmist,'' Bob is a
+``lukewarmer'' and Christie is a ``denier.'' These labels are
 encapsulated by the prior probabilities that each person assigns to
 climate sensitivity \(S\), which we assume for simplicity is either high
 or low: \(S \in {S_L, S_H}\). Denote by \(I\) an individual's prior
@@ -1279,7 +1204,7 @@ noninformative case that serves as an objective reference point for this
 study. My primary regression specification yields a posterior TCR mean
 and 95\% credible interval of 1.6 °C (1.4--1.8 °C) under the
 noninformative prior. This distribution sits comfortably within the
-IPCC's ``likely'' TCR range of 1.0--2.5 °C and is robust to variety of
+IPCC's ``likely'' TCR range of 1.0--2.5 °C and is robust to a variety of
 sensitivity checks. Indeed, accounting for factors that could
 conceivably affect the results --- alternate data sources, adjusted
 forcing efficacies, measurement error, etc. --- tends to nudge the mean
@@ -1296,7 +1221,7 @@ strong prior beliefs to begin with, could embrace policy measures to
 constrain CO\(_2\) emissions once they have seen all of the available
 data. At the same time, perhaps the most salient finding of this paper
 is that belief convergence is a non-linear function of prior strength.
-Anyone that remains unconvinced by the available data today is unlikely
+Anyone who remains unconvinced by the available data today is unlikely
 to converge with the mainstream consensus for many years hence. Their
 implied priors are of such a strength that even decades more of
 accumulated evidence may not be enough to convince them. Fully
