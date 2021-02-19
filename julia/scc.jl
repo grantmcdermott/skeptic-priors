@@ -1,3 +1,11 @@
+## Activate project environment. NB: This assumes that you are running Julia
+## from the project root. If not, you'll need to adjust the activation path to 
+## the underlying .toml files accordingly. E.g. Use `Pkg.activate("..")` if you
+## are running this script directly from the `/julia` sub-directory.
+using Pkg
+Pkg.activate(".")
+
+## Packages and functions
 using MimiPAGE2009
 using Mimi
 import Mimi: EmpiricalDistribution 
@@ -6,7 +14,8 @@ using DataFrames
 using Distributions
 using CSVFiles
 
-# Get the social cost of carbon in year 2020 from the default MimiPAGE2009 model:
+# Example of how to get 10 draws of the SCC (in 2020 dollars) using the
+## MimiPAGE2009 model defaults:
 # scc = MimiPAGE2009.compute_scc(year = 2020, n = 10, seed = 1234)
 
 ## Extract the empirical TCR distributions from my Bayesian regressions. I'm
@@ -23,6 +32,10 @@ tcr = @rget(tcr)
 
 ## Get the list of priors to loop over
 priors = unique(tcr.prior)
+
+## Create empty `scc` array (not preallocating types and size, so not the most
+## efficient but doesn't make much different here)
+scc = []
 
 ## Calculate the SCC for each prior type. I'm using 2020 prices and exporting
 ## the results for each loop to the `results/scc` dir.
@@ -227,9 +240,15 @@ for p in priors
 
     ## Main function: Calculate the SCC for this priors's TCR distribution. I'll
     ## go ahead and put into a data frame for convenience.
-    scc = DataFrame(scc = MimiPAGE2009.compute_scc(year = 2020, n = N, seed = 1234))
-    scc[:prior] = p
+    scc_p = DataFrame(scc = MimiPAGE2009.compute_scc(year = 2020, n = N, seed = 1234))
+    scc_p[:prior] = p
 
-    ## Write to disk
-    save(joinpath(proj_dir, "results/scc", string(p, ".csv")), scc)
+    ## Push DF to parent SCC array
+    push!(scc, scc_p)
 end
+
+## Concatenate DFs by row
+scc = reduce(vcat, scc)
+
+## Write to disk
+save(joinpath(proj_dir, "results/scc/scc.csv"), scc)
