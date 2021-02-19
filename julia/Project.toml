@@ -1,0 +1,7 @@
+[deps]
+CSVFiles = "5d742f6a-9f54-50ce-8119-2520741973ca"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FstFileFormat = "01a6e8c0-b5b3-11e9-1fe6-8b3e5c2aa61e"
+Mimi = "e4e893b0-ee5e-52ea-8111-44b3bdec128c"
+MimiPAGE2009 = "e25d4f70-4200-11e9-37f3-3b45f1cef54f"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
