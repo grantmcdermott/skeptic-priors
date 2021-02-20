@@ -70,28 +70,24 @@ cmdstanr::install_cmdstan(cores = 2)
 
 #### Step 3: Install Julia and Julia libraries
 
-While most of the analysis is conducted in R, I use Julia for the social cost of carbon calculations. Julia too is free, open-source and available for download [here](https://julialang.org/) (I used version 1.5.0). 
+While most of the analysis is conducted in R, I use Julia (version 1.5.0) for the social cost of carbon calculations. Julia too is free, open-source and available for download [here](https://julialang.org/). 
 
-This part of code relies primarily on the [MimiPAGE2009.jl](https://github.com/anthofflab/MimiPAGE2009.jl) package, which is part of the Mimi framework for integrated assessment models (IAMs) in Julia. You will first need to register the Mimi family of models with your installation before proceeding. In Julia's "Pkg" REPL (i.e. open Julia and hit `]`), type in the following:
-
-```julia
-## Type "]" to enter pkg> first.
-pkg> registry add https://github.com/mimiframework/MimiRegistry.git
-```
-Once that's done, you should be able to use Julia's inbuilt [environment](https://docs.julialang.org/en/v1/stdlib/Pkg/) system to activate the project environment and instantiate/download all of necessary package versions. Navigate or open the Julia Pkg REPL at the root of this repo (i.e. where the `Project.toml` file is). Then simply type:
+This section of code relies primarily on the [MimiPAGE2009.jl](https://github.com/anthofflab/MimiPAGE2009.jl) package, which is itself part of the [Mimi framework](https://www.mimiframework.org/Mimi.jl/stable/) for integrated assessment models in Julia. You will first need to register the Mimi family of models with your Julia installation before installing the necessary packages. Simply open up a Julia terminal at the root level of the project (i.e. where the `Project.toml` file is located) and type in the following:
 
 ```julia
-## Again, assuming you are in the Julia Pkg REPL via "]"
+## Run these commands in Julia
 
-pkg> activate .
-#> Activating environment at `path/to/sceptic-priors/Project.toml`
+using Pkg  ## Or hit "]" to enter the Pkg REPL directly
 
-(sceptic-priors) pkg> instantiate
+Pkg.Registry.add("https://github.com/mimiframework/MimiRegistry.git")
+Pkg.activate(".")
+Pkg.instantiate()
 ```
+The above code chunk will activate and then instantiate the project's Julia environment, pulling in all of the necessary package versions.
 
 #### Step 4. Optional(ish)
 
-- As mentioned, I use a tiny bit of Python code to extract some [IDL 'save' data](https://pypi.org/project/IDLSave/) as part of the data prep process. Assuming that you have cloned my repo as-is and did not delete any of the data files, Make will automatically skip this section and the Python requirement will be moot. Failing that, however, you will need **SciPy**'s [File IO](https://docs.scipy.org/doc/scipy/reference/tutorial/io.html) module. Regular Python users will almost certainly have SciPy installed on their system already. If not, you can install it yourself, e.g. with PyPi or Conda. I strongly recommend that R users go through **reticulate** (see [here](https://rstudio.github.io/reticulate/articles/python_packages.html)). FWIW, I am using Python 3.8.5 and SciPy 1.5.1 at the time of writing.
+- I use a tiny bit of Python code to extract some [IDL 'save' data](https://pypi.org/project/IDLSave/) as part of the raw data prep process. Assuming that you have cloned my repo as-is and did not delete any of the data files, Make will automatically skip this section and the Python requirement will be moot. Failing that, however, you will need **SciPy**'s [File IO](https://docs.scipy.org/doc/scipy/reference/tutorial/io.html) module. Regular Python users will almost certainly have SciPy installed on their system already. If not, you can install it yourself, e.g. with PyPi or Conda. I strongly recommend that R users go through **reticulate** (see [here](https://rstudio.github.io/reticulate/articles/python_packages.html)). FWIW, I am using Python 3.8.5 and SciPy 1.5.1 at the time of writing.
 
 - The `extrafont` package is used to embed [Fira Sans](https://fonts.google.com/specimen/Fira+Sans) fonts in the figures. Please note that the Fira Sans font family must be installed separately on your system and also requires some minor setup before R recognizes it (instructions [here](https://github.com/wch/extrafont/blob/master/README.md)). However, you can also skip this setup if you want; R's default Arial fonts will be used if Fira Sans is unavailable.
 
