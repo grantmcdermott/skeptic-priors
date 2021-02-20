@@ -2,6 +2,7 @@
 rawdir = data/raw/
 datdir = data/
 rdir = R/
+juliadir = julia/
 standir = stan/
 resdir = results/
 figsdir = figs/
@@ -26,6 +27,7 @@ sensitivity: $(resdir)sensitivity/params-alt-gmst.csv $(resdir)sensitivity/tcr-a
  $(resdir)sensitivity/tcr-me-forcings.fst \
  $(resdir)sensitivity/tcr-eff1.fst $(resdir)sensitivity/tcr-eff2.fst \
  $(resdir)sensitivity/params-anthro.csv $(resdir)sensitivity/tcr-anthro.fst
+scc: $(resdir)scc/scc.csv
 paper: $(papdir)sceptic/sceptic.pdf $(papdir)SM/sceptic-SM.pdf
  
 clean:
@@ -138,6 +140,9 @@ $(resdir)sensitivity/tcr-anthro.fst &: $(rdir)05-sensitivity-anthro.R \
  $(standir)mod-anthro.stan $(datdir)climate.csv
 	Rscript $<
 
+## Social cost of carbon
+$(resdir)scc/scc.csv &: $(juliadir)scc.jl $(resdir)main/tcr.fst
+	julia $<
 
 ## Paper
 $(papdir)sceptic/sceptic.pdf &: $(papdir)sceptic/sceptic.Rmd \
@@ -145,12 +150,12 @@ $(papdir)sceptic/sceptic.pdf &: $(papdir)sceptic/sceptic.Rmd \
  $(resdir)main/params.csv $(resdir)main/tcr.fst \
  $(resdir)main/gmst-pred.csv $(resdir)main/gmst2100.fst \
  $(resdir)recursive/tcr-rec.csv $(resdir)evidence/evid.csv \
- $(resdir)PAGE09/scc.csv
+ $(resdir)scc/scc.csv
 	Rscript -e 'rmarkdown::render("$<")'
-$(papdir)SM/sceptic-SM.pdf: $(papdir)SM/sceptic-SM.Rmd $(resdir)PAGE09/scc.csv
+$(papdir)SM/sceptic-SM.pdf: $(papdir)SM/sceptic-SM.Rmd $(resdir)scc/scc.csv
 	Rscript -e 'rmarkdown::render("$<")'
 
 ## Helpers
-.PHONY: all clean dag data stan main recursive evidence sensitivity paper
+.PHONY: all clean dag data stan main recursive evidence sensitivity scc paper
 .DELETE_ON_ERROR:
 .SECONDARY:
