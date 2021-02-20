@@ -66,10 +66,10 @@ options: i) Manual configuration, or ii) Docker.
 
 #### Step 1. Install R and R libraries
 
-With the exception of a tiny bit of Python code, all of the analysis is
-conducted in the R programming environment. R is free, open-source and
-available for download [**here**](https://www.r-project.org/). The code
-has been tested against R version 4.0.2.
+The majority of the analysis is conducted in the R programming
+environment. R is free, open-source and available for download
+[**here**](https://www.r-project.org/). The code has been tested against
+R version 4.0.4.
 
 Once R is successfully set up on your system, you will need to install a
 number of external R libraries. I have used
@@ -97,7 +97,42 @@ have completed Step 1 above, run the following line from your R console:
 cmdstanr::install_cmdstan(cores = 2)
 ```
 
-#### Step 3. Optional(ish)
+#### Step 3: Install Julia and Julia libraries
+
+While most of the analysis is conducted in R, I use Julia for the social
+cost of carbon calculations. Julia too is free, open-source and
+available for download [here](https://julialang.org/) (I used version
+1.5.0).
+
+This part of code relies primarily on the
+[MimiPAGE2009.jl](https://github.com/anthofflab/MimiPAGE2009.jl)
+package, which is part of the Mimi framework for integrated assessment
+models (IAMs) in Julia. You will first need to register the Mimi family
+of models with your installation before proceeding. In Julia’s “Pkg”
+REPL (i.e. open Julia and hit `]`), type in the following:
+
+``` julia
+## Type "]" to enter pkg> first.
+pkg> registry add https://github.com/mimiframework/MimiRegistry.git
+```
+
+Once that’s done, you should be able to use Julia’s inbuilt
+[environment](https://docs.julialang.org/en/v1/stdlib/Pkg/) system to
+activate the project environment and instantiate/download all of
+necessary package versions. Navigate or open the Julia Pkg REPL at the
+root of this repo (i.e. where the `Project.toml` file is). Then simply
+type:
+
+``` julia
+## Again, assuming you are in the Julia Pkg REPL via "]"
+
+pkg> activate .
+#> Activating environment at `path/to/sceptic-priors/Project.toml`
+
+(sceptic-priors) pkg> instantiate
+```
+
+#### Step 4. Optional(ish)
 
 -   As mentioned, I use a tiny bit of Python code to extract some [IDL
     ‘save’ data](https://pypi.org/project/IDLSave/) as part of the data
