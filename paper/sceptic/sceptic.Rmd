@@ -4,7 +4,7 @@ title: Sceptic priors and climate consensus
 # titlerunning: Short form of title (if too long for head)
 # authorrunning: Short form of author list if too long for running head
 thanks: | 
-    Estimate word count: 9,275.
+    Estimate word count: 8,056.
     The data and source code for reproducing all of the results in this paper 
     can be found at the companion GitHub repository: 
     https://github.com/grantmcdermott/sceptic-priors
