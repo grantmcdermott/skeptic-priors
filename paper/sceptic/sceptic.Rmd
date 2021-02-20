@@ -153,7 +153,7 @@ gmst_pred = fread(here('results/main/gmst-pred.csv'))
 gmst2100 = read_fst(here('results/main/gmst2100.fst')); setDT(gmst2100)
 tcr_rec = fread(here('results/recursive/tcr-rec.csv'))
 evid = fread(here('results/evidence/evid.csv'))
-scc = fread(here('results/PAGE09/scc.csv'))
+scc = fread(here('results/scc/scc.csv'))
 ```
 
 
@@ -746,41 +746,39 @@ gmst2100_plot()
 
 Provided they consider enough data, we have seen that most climate sceptics should be able to agree that a 2 °C target requires limiting CO$_2$ concentrations to around 540 ppmv. However, whether someone actually subscribes to policy measures aimed at achieving the 2 °C goal is dependent on many things; their choice of discount rate, beliefs about the efficacy of policy, damage expectations, etc. Such issues are largely beyond the scope of this paper. Nonetheless, we may still gain a deeper insight into the welfare implications of our posterior TCR values by analysing their effect on the social cost of carbon (SCC). The SCC represents the economic costs associated with a marginal unit of CO$_2$ emissions. It can therefore be thought of as society's willingness to pay for the prevention of future damages associated with human-induced climate change.
 
-Obtaining SCC estimates generally requires the use of integrated assessment models (IAMs), which are able to solve for optimal climate policy along a dynamic path by simulating across economic and climate systems. The PAGE model (\cite{hope2011page09}, \cite{hope2011page09scc}) is ideally suited to our present needs. It is widely used as one of the major IAMs for evaluating climate policy (\cite{nordhaus2014scc}, \cite{iwg2016scc}). More importantly, PAGE accepts random variables as inputs and yields the type of probabilistic output that is consistent with the rest of this paper. I take the posterior TCR distributions yielded by my Bayesian regression model and use these as inputs for calculating the SCC. The PAGE defaults are used for the remaining parameters.
+Obtaining SCC estimates generally requires the use of integrated assessment models (IAMs), which are able to solve for optimal climate policy along a dynamic path by simulating across economic and climate systems. The PAGE model originally developed by \cite{hope2011page09}, is ideally suited to our present needs. It is widely used as one of the major IAMs for evaluating climate policy (\cite{nordhaus2014scc}, \cite{iwg2016scc}). More importantly, PAGE accepts random variables as inputs and yields the type of probabilistic output that is consistent with the rest of this paper. I take the posterior TCR distributions yielded by my Bayesian regression model and use these as inputs for calculating the SCC. The PAGE defaults are used for the remaining parameters.^[I use the open-source implementation of the model, MimiPAGE2009 (\cite{moore2018mimipage}), which has been re-written in the `Julia` programming language (\cite{julialang}).]
 
-Table \ref{tab:scc} summarizes the SCC distributions across all prior groups in 2005 US dollars. The full probability distributions are highly skewed and characterised by extremely long upper tails (see the Supplementary Material). This is largely due to the fact that PAGE allows for the possibility of major disruptions --- e.g. melting of the Greenland ice sheet --- at temperatures above 3 °C. Such low probability, high impact events would yield tremendous economic losses and result in some extreme SCC values as a consequence. Note too that the frequency of these events are more common in my adapted version of PAGE, since I replace the default triangular (i.e. bounded) TCR distribution with the posterior TCR distributions from my model. The latter are approximately normally distributed, thus permitting small but positive weight in the tails. For this reason, I provide both the mean and median SCC values alongside the 95\% probability interval.
+Table \ref{tab:scc} summarizes the SCC distributions across all prior groups in 2020 US dollars. The full probability distributions are highly skewed and characterised by extremely long upper tails (see the Supplementary Material). This is largely due to the fact that PAGE allows for the possibility of major disruptions --- e.g. melting of the Greenland ice sheet --- at temperatures above 3 °C. Such low probability, high impact events would yield tremendous economic losses and result in some extreme SCC values as a consequence. Note too that the frequency of these events are more common in my adapted version of PAGE, since I replace the default triangular (i.e. bounded) TCR distribution with the posterior TCR distributions from my model. The latter are approximately normally distributed, thus permitting small but positive weight in the tails. For this reason, I provide both the mean and median SCC values alongside the 95\% probability interval.
 
 ```{r scc_tab}
-scc_tab = melt(scc, measure.vars = colnames(scc), 
-							 variable.name = 'Prior', value.name = 'scc')
-scc_tab = scc_tab[,
-									.(Mean = sprintf('%.0f', mean(scc)),
-										Median = sprintf('%.0f', quantile(scc, .5)),
-										q025 = sprintf('%.0f',  quantile(scc, .025)),
-										q975 = sprintf('%.0f',  quantile(scc, .975))),
-									by = Prior]
+scc_tab = scc[,
+							.(Mean = sprintf('%.0f', mean(scc)),
+								Median = sprintf('%.0f', quantile(scc, .5)),
+								q025 = sprintf('%.0f',  quantile(scc, .025)),
+								q975 = sprintf('%.0f',  quantile(scc, .975))),
+							by = prior]
 ## Fix minor typographical annoyance
 scc_tab[, q025 := fifelse(q025=='-0', '0', q025)]
-## For text
-scc_mean_min = scc_tab[Prior!='denstrong', min(as.numeric(Mean))]
-scc_mean_max = scc_tab[Prior!='denstrong', max(as.numeric(Mean))]
-scc_q025_min = scc_tab[Prior!='denstrong', min(as.numeric(q025))]
-scc_q975_max = scc_tab[Prior!='denstrong', min(as.numeric(q975))]
+## For text (will round to nearest 10)
+scc_mean_min = scc_tab[prior!='denstrong', round(min(as.numeric(Median))/10)*10]
+scc_mean_max = scc_tab[prior!='denstrong', round(max(as.numeric(Median))/10)*10]
+scc_q025_min = scc_tab[prior!='denstrong', round(min(as.numeric(q025))/10)*10]
+scc_q975_max = scc_tab[prior!='denstrong', round(min(as.numeric(q975))/10)*10]
 ## Back to table
 scc_tab[, CI := paste0('(', q025, ', ', q975, ')')]
 scc_tab = scc_tab[, !c('q025', 'q975')]
-scc_tab[, Prior := factor(match_priors(Prior), levels = rev(prior_names))]
-setorder(scc_tab, Prior)
-setnames(scc_tab, c('Prior', 'CI'), c('', '95% Prob. Interval'))
+scc_tab[, prior := factor(match_priors(prior), levels = rev(prior_names))]
+setorder(scc_tab, prior)
+setnames(scc_tab, c('prior', 'CI'), c('', '95% Prob. Interval'))
 
 kbl(scc_tab, align = 'lcccc', booktabs = TRUE, format = 'latex',
-		caption = 'Social cost of carbon (US\\$2005 per ton). \\label{tab:scc}') %>%
-	footnote('Results for each agent type are obtained from 10,000 simulation runs of PAGE. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE model defaults.', 
+		caption = 'Social cost of carbon (US\\$2020 per ton). \\label{tab:scc}') %>%
+	footnote('Results for each prior type are obtained by simulating over the full posterior TCR distributions in Table \\\\ref{tab:reg} using PAGE (\\\\cite{hope2011page09}, \\\\cite{moore2018mimipage}). All remaining parameters are set to the PAGE model defaults.', 
 					 general_title = 'Notes:', footnote_as_chunk = TRUE,
 					 escape = FALSE, threeparttable = TRUE)
 ```
 
-Excepting the Strong Denier, the SCC for all prior types is comfortably larger than zero. The mean value ranges from \$`r scc_mean_min` to \$`r scc_mean_max` per ton (2005 prices), while the 95\% probability interval extends from around \$`r scc_q025_min` to upwards of \$`r scc_q975_max` per ton. These results are consistent with the SCC estimates found within the literature. For example, an influential synthesis review conducted by the United States government under the Obama administration established a mean SCC value of \$12--\$62 per tonne (2007 prices), depending on the preferred discount rate (\cite{iwg2016scc}). The encouraging point from a policy perspective is that such congruence exists despite the fact that the analysis proceeds from an initial position of scepticism.	Another way to frame the SCC estimates presented here is to imagine that each prior type represents an equal segment of a voting population. We would then expect to see broad support for a carbon tax of at least \$20--\$25.	While such a thought experiment clearly abstracts from the many complications that would arise from free-riding and so forth, again we see that nominal climate scepticism does not correspond to a mechanical dismissal of climate policy.
+Excepting the Strong Denier, the SCC for all prior types is comfortably larger than zero. The median value ranges from approximately \$`r scc_mean_min` to \$`r scc_mean_max` per ton (2020 prices), while the 95\% probability interval extends from \$`r scc_q025_min` to upwards of \$`r scc_q975_max` per ton. These results are consistent with the SCC estimates found within the literature. For example, an influential synthesis review conducted by the United States government under the Obama administration established a mean SCC value of \$12--\$62 per tonne (2007 prices), depending on the preferred discount rate (\cite{iwg2016scc}). The encouraging point from a policy perspective is that such congruence exists despite the fact that the analysis proceeds from an initial position of scepticism.	Another way to frame the SCC estimates presented here is to imagine that each prior type represents an equal segment of a voting population. We would then expect to see broad support for a carbon tax of at least \$20--\$25.	While such a thought experiment clearly abstracts from the many complications that would arise from free-riding and so forth, again we see that nominal climate scepticism does not correspond to a mechanical dismissal of climate policy.
 
 
 # Discussion {#sec:discussion}
