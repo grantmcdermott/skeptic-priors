@@ -983,18 +983,20 @@ human-induced climate change.
 Obtaining SCC estimates generally requires the use of integrated
 assessment models (IAMs), which are able to solve for optimal climate
 policy along a dynamic path by simulating across economic and climate
-systems. The PAGE model (\cite{hope2011page09},
-\cite{hope2011page09scc}) is ideally suited to our present needs. It is
-widely used as one of the major IAMs for evaluating climate policy
-(\cite{nordhaus2014scc}, \cite{iwg2016scc}). More importantly, PAGE
-accepts random variables as inputs and yields the type of probabilistic
-output that is consistent with the rest of this paper. I take the
-posterior TCR distributions yielded by my Bayesian regression model and
-use these as inputs for calculating the SCC. The PAGE defaults are used
-for the remaining parameters.
+systems. The PAGE model originally developed by \cite{hope2011page09},
+is ideally suited to our present needs. It is widely used as one of the
+major IAMs for evaluating climate policy (\cite{nordhaus2014scc},
+\cite{iwg2016scc}). More importantly, PAGE accepts random variables as
+inputs and yields the type of probabilistic output that is consistent
+with the rest of this paper. I take the posterior TCR distributions
+yielded by my Bayesian regression model and use these as inputs for
+calculating the SCC. The PAGE defaults are used for the remaining
+parameters.\footnote{I use the open-source implementation of the model,
+  MimiPAGE2009 (\cite{moore2018mimipage}), which has been re-written in
+  the \texttt{Julia} programming language (\cite{julialang}).}
 
 Table \ref{tab:scc} summarizes the SCC distributions across all prior
-groups in 2005 US dollars. The full probability distributions are highly
+groups in 2020 US dollars. The full probability distributions are highly
 skewed and characterised by extremely long upper tails (see the
 Supplementary Material). This is largely due to the fact that PAGE
 allows for the possibility of major disruptions --- e.g.~melting of the
@@ -1010,45 +1012,45 @@ and median SCC values alongside the 95\% probability interval.
 
 \begin{table}
 
-\caption{\label{tab:scc_tab}Social cost of carbon (US\$2005 per ton). \label{tab:scc}}
+\caption{\label{tab:scc_tab}Social cost of carbon (US\$2020 per ton). \label{tab:scc}}
 \centering
 \begin{threeparttable}
 \begin{tabular}[t]{lccc}
 \toprule
  & Mean & Median & 95\% Prob. Interval\\
 \midrule
-Noninformative & 79 & 41 & (12, 168)\\
-Moderate Lukewarmer & 65 & 39 & (11, 160)\\
-Strong Lukewarmer & 48 & 26 & (7, 107)\\
-Moderate Denier & 68 & 36 & (10, 149)\\
-Strong Denier & 2 & 1 & (0, 5)\\
+Noninformative & 99 & 56 & (17, 306)\\
+Moderate Lukewarmer & 85 & 53 & (16, 249)\\
+Strong Lukewarmer & 51 & 30 & (9, 134)\\
+Moderate Denier & 82 & 47 & (15, 224)\\
+Strong Denier & 1 & 1 & (0, 4)\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[para]
 \item \textit{Notes:} 
-\item Results for each agent type are obtained from 10,000 simulation runs of PAGE. Posterior TCR distributions serve as key inputs to the model, while the remaining parameters are set to the PAGE model defaults.
+\item Results for each prior type are obtained by simulating over the full posterior TCR distributions in Table \ref{tab:reg} using PAGE (\cite{hope2011page09}, \cite{moore2018mimipage}). All remaining parameters are set to the PAGE model defaults.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
 Excepting the Strong Denier, the SCC for all prior types is comfortably
-larger than zero. The mean value ranges from \$48 to \$79 per ton (2005
-prices), while the 95\% probability interval extends from around \$7 to
-upwards of \$107 per ton. These results are consistent with the SCC
-estimates found within the literature. For example, an influential
-synthesis review conducted by the United States government under the
-Obama administration established a mean SCC value of \$12--\$62 per
-tonne (2007 prices), depending on the preferred discount rate
-(\cite{iwg2016scc}). The encouraging point from a policy perspective is
-that such congruence exists despite the fact that the analysis proceeds
-from an initial position of scepticism. Another way to frame the SCC
-estimates presented here is to imagine that each prior type represents
-an equal segment of a voting population. We would then expect to see
-broad support for a carbon tax of at least \$20--\$25. While such a
-thought experiment clearly abstracts from the many complications that
-would arise from free-riding and so forth, again we see that nominal
-climate scepticism does not correspond to a mechanical dismissal of
-climate policy.
+larger than zero. The median value ranges from approximately \$30 to
+\$60 per ton (2020 prices), while the 95\% probability interval extends
+from \$10 to upwards of \$130 per ton. These results are consistent with
+the SCC estimates found within the literature. For example, an
+influential synthesis review conducted by the United States government
+under the Obama administration established a mean SCC value of
+\$12--\$62 per tonne (2007 prices), depending on the preferred discount
+rate (\cite{iwg2016scc}). The encouraging point from a policy
+perspective is that such congruence exists despite the fact that the
+analysis proceeds from an initial position of scepticism. Another way to
+frame the SCC estimates presented here is to imagine that each prior
+type represents an equal segment of a voting population. We would then
+expect to see broad support for a carbon tax of at least \$20--\$25.
+While such a thought experiment clearly abstracts from the many
+complications that would arise from free-riding and so forth, again we
+see that nominal climate scepticism does not correspond to a mechanical
+dismissal of climate policy.
 
 \hypertarget{sec:discussion}{%
 \section{Discussion}\label{sec:discussion}}

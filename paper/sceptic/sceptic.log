@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2021.2.1)  15 FEB 2021 15:27
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020/Arch Linux) (preloaded format=xelatex 2021.2.18)  19 FEB 2021 16:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -565,10 +565,7 @@ Graphic file (type pdf)
 File: /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/gmst2100-1.pdf G
 raphic file (type pdf)
 <use /home/grant/Documents/Papers/Sceptic/sceptic-priors/figs/gmst2100-1.pdf>
-[17]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-[18] [19] [20] [21] (./sceptic.bbl [22]
+[17] [18] [19] [20] [21] (./sceptic.bbl [22]
 Underfull \hbox (badness 10000) in paragraph at lines 59--66
 \TU/lmr/m/n/8 2019. Available: []$[][][][][] [] [] [] [][][][] [] [][][][][][] 
 [] [][][] [] [][][][] [] [][][][][][] [] [][][][][][][][][] [][] [][][][][][][]
@@ -604,7 +601,7 @@ Underfull \hbox (badness 3179) in paragraph at lines 380--387
  []
 
 
-Underfull \hbox (badness 1931) in paragraph at lines 413--418
+Underfull \hbox (badness 1931) in paragraph at lines 415--420
 \TU/lmr/m/n/8 ness, Cognitive Psychology \TU/lmr/bx/n/8 3\TU/lmr/m/n/8 (3), 430
  (1972).  DOI $[][][][] [] [] [] [][] [] [][][] [] [][][] [] [][] [] [][][][] [
 ]
@@ -615,10 +612,10 @@ Package rerunfilecheck Info: File `sceptic.out' has not changed.
 (rerunfilecheck)             Checksum: 18E7E27D04443A84AD5DB2348D88785D;376.
  ) 
 Here is how much of TeX's memory you used:
- 11679 strings out of 477299
- 166193 string characters out of 5838339
- 528778 words of memory out of 5000000
- 31085 multiletter control sequences out of 15000+600000
+ 11680 strings out of 477299
+ 166204 string characters out of 5838338
+ 527810 words of memory out of 5000000
+ 31086 multiletter control sequences out of 15000+600000
  411341 words of font info for 68 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  68i,19n,75p,1171b,491s stack positions out of 5000i,500n,10000p,200000b,80000s
