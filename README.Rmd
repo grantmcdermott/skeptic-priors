@@ -37,7 +37,9 @@ You can also limit the build to subsections of the project by passing Make a rel
 
 - `make data` will construct the dataset
 - `make main` will run the main analysis
-- `make sensitivity` will run all of the sensitivity analyses etc.
+- `make sensitivity` will run all of the sensitivity analyses
+- `make paper` will build the paper PDF and SM
+- etc.
 
 See the [Makefile](Makefile) to get a sense of the options. The associated DAG is [here](makefile-dag.png) (warning: it's complicated).
 
@@ -49,14 +51,15 @@ While the entire project can be reproduced via a single call to `make`, users mu
 
 #### Step 1. Install R and R libraries
 
-The majority of the analysis is conducted in the R programming environment. R is free, open-source and available for download [**here**](https://www.r-project.org/). The code has been tested against R version 4.0.4.
+The majority of the analysis is conducted in the R programming environment. R is free, open-source and available for download [**here**](https://www.r-project.org/). The code has been tested against R version 4.0.2.
 
-Once R is successfully set up on your system, you will need to install a number of external R libraries. I have used [**renv**](https://rstudio.github.io/renv/) to snapshot the project's R environment. To install all of the necessary R libraries, you need simply run the following command from your R console:
+Once R is successfully set up on your system, you will need to install a number of external R libraries. I have used [**renv**](https://rstudio.github.io/renv/) to snapshot the project's R environment. To install all of the necessary R libraries, simply open R at the project root (e.g. by clicking on the .Rproj file) and run the following commands:
 
 ```r
 ## Run these commands in R
-# renv::init()    ## Only necessary if you didn't clone/open the repo as an RStudio project
-renv::restore()  ## Enter "y" when prompted
+
+# renv::init()  ## Only necessary if you didn't clone/open the repo as an RStudio project
+renv::restore(confirm = FALSE)
 ```
 
 #### Step 2. Install CmdStan
@@ -65,23 +68,26 @@ The workhorse Bayesian regressions for this project are passed from R to [**CmdS
 
 ```r
 ## Run this command in R
-cmdstanr::install_cmdstan(cores = 2)
+
+cmdstanr::install_cmdstan(version = "2.25.0", cores = 2)
 ```
 
 #### Step 3: Install Julia and Julia libraries
 
-While most of the analysis is conducted in R, I use Julia (version 1.5.0) for the social cost of carbon calculations. Julia too is free, open-source and available for download [here](https://julialang.org/). 
+While most of the analysis is conducted in R, I use Julia (version 1.5.0) for the social cost of carbon calculations. Julia too is free, open-source and available for download [**here**](https://julialang.org/). 
 
-This section of code relies primarily on the [MimiPAGE2009.jl](https://github.com/anthofflab/MimiPAGE2009.jl) package, which is itself part of the [Mimi framework](https://www.mimiframework.org/Mimi.jl/stable/) for integrated assessment models in Julia. You will first need to register the Mimi family of models with your Julia installation before installing the necessary packages. Simply open up a Julia terminal at the root level of the project (i.e. where the `Project.toml` file is located) and type in the following:
+This section of code relies primarily on the [MimiPAGE2009.jl](https://github.com/anthofflab/MimiPAGE2009.jl) package, which is itself part of the [**Mimi framework**](https://www.mimiframework.org/Mimi.jl/stable/) for integrated assessment models in Julia. You will first need to register the Mimi family of models with your Julia installation before installing the necessary packages. Simply open up a Julia terminal at the root level of the project (i.e. where the `Project.toml` file is located) and type in the following:
 
 ```julia
 ## Run these commands in Julia
 
 using Pkg  ## Or hit "]" to enter the Pkg REPL directly
 
-Pkg.Registry.add("https://github.com/mimiframework/MimiRegistry.git")
+Pkg.Registry.add(RegistrySpec(url = "https://github.com/mimiframework/MimiRegistry.git"))
 Pkg.activate(".")
 Pkg.instantiate()
+
+exit()  ## Exit (optional)
 ```
 The above code chunk will activate and then instantiate the project's Julia environment, pulling in all of the necessary package versions.
 
@@ -98,13 +104,14 @@ For those of you who don't feel like configuring a manual setup, I also provide 
 
 ```sh
 ## Run these commands in the shell
-cd sceptic-priors
-docker build --tag sceptic:R4.0.2 .
+
+# cd sceptic-priors  ## Only if you aren't already in the project root
+docker build --tag sceptic:1.0.0 .
 ```
-This will take a couple of minutes to pull in all of the necessary packages, compile CmdStan etc. But, thereafter, the now-built container will be ready and waiting for immediate deployment whenever you want. Run it with:
+This will take a couple of minutes to pull in all of the necessary R and Julia packages, compile CmdStan etc. But, thereafter, the now-built container will be ready and waiting for immediate deployment whenever you want. Run it with:
 
 ```sh
-docker run -it --rm sceptic:R4.0.2
+docker run -it --rm sceptic:1.0.0
 ```
 
 You should see something like:
