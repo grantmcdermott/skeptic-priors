@@ -10,22 +10,22 @@ This repository contains code and data for my working paper, [“Sceptic
 priors and climate
 consensus”](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/sceptic/sceptic.pdf).
 
-> **Abstract:** How much evidence would it take to convince sceptics
-> that they are wrong about climate change? I explore this question
-> within a Bayesian framework. I consider a group of stylised sceptics
-> and examine how these individuals update their beliefs in the face of
-> current and continuing climate change. I find that available evidence
-> in the form of instrumental climate data tends to overwhelm all but
-> the most extreme priors. Most sceptics form updated beliefs about
-> climate sensitivity that correspond closely to estimates from the
-> scientific literature. However, belief convergence is a non-linear
-> function of prior strength. It becomes increasingly difficult to
-> convince the remaining pool of sceptics that they are wrong. I discuss
-> the necessary conditions for consensus formation under Bayesian
-> learning and show how apparent deviations from the Bayesian ideal
-> still be accommodated within the same conceptual framework. I argue
-> that a generalized Bayesian model thus provides a bridge between
-> competing theories of climate scepticism as a social phenomenon.
+> **Abstract:** How much evidence would it take to convince climate
+> sceptics that they are wrong? I explore this question within an
+> empirical Bayesian framework. I consider a group of stylised sceptics
+> and examine how these individuals rationally update their beliefs in
+> the face of ongoing climate change. I find that available evidence in
+> the form of instrumental climate data tends to overwhelm all but the
+> most extreme priors. Most sceptics form updated beliefs about climate
+> sensitivity that correspond closely to estimates from the scientific
+> literature. However, belief convergence is a non-linear function of
+> prior strength and it becomes increasingly difficult to convince the
+> remaining pool of dissenters. I discuss the necessary conditions for
+> consensus formation under Bayesian learning and show that apparent
+> deviations from the Bayesian ideal can still be accommodated within
+> the same conceptual framework. I argue that a generalized Bayesian
+> model provides a bridge between competing theories of climate
+> scepticism as a social phenomenon.
 
 Click on the green “Code” button above to clone or download the repo to
 your local computer. Alternately, click on the “fork” button at the very
@@ -62,7 +62,10 @@ associated DAG is [here](makefile-dag.png) (warning: it’s complicated).
 
 While the entire project can be reproduced via a single call to `make`,
 users must first satisfy various software dependencies. There are two
-options: i) Manual configuration, or ii) Docker.
+options:
+
+1.  [`Manual configuration`](#manual-configuration)
+2.  [`Docker`](#docker)
 
 ### Manual configuration
 
@@ -124,11 +127,14 @@ type in the following:
 
 using Pkg  ## Or hit "]" to enter the Pkg REPL directly
 
+Pkg.Registry.add("General")  ## Likely redundant, but just in case
 Pkg.Registry.add(RegistrySpec(url = "https://github.com/mimiframework/MimiRegistry.git"))
+
 Pkg.activate(".")
 Pkg.instantiate()
 
-exit()  ## Exit (optional)
+Pkg.precompile()  ## Optional
+exit()            ## Optional
 ```
 
 The above code chunk will activate and then instantiate the project’s
