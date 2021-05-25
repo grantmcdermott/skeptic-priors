@@ -11,20 +11,20 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Sceptic priors and climate consensus
+# Skeptic priors and climate consensus
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-This repository contains code and data for my working paper, ["Sceptic priors and climate consensus"](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/sceptic/sceptic.pdf). 
+This repository contains code and data for McDermott (2021), ["Skeptic priors and climate consensus"](https://doi.org/10.1007/s10584-021-03089-x). 
 
 > **Abstract:** 
-  How much evidence would it take to convince climate sceptics that they are 
+  How much evidence would it take to convince climate skeptics that they are 
   wrong? I explore this question within an empirical Bayesian framework. I 
-  consider a group of stylised sceptics and examine how these individuals 
+  consider a group of stylised skeptics and examine how these individuals 
   rationally update their beliefs in the face of ongoing climate change. I find 
   that available evidence in the form of instrumental climate data tends to 
-  overwhelm all but the most extreme priors. Most sceptics form updated beliefs 
+  overwhelm all but the most extreme priors. Most skeptics form updated beliefs 
   about climate sensitivity that correspond closely to estimates from the 
   scientific literature. However, belief convergence is a non-linear function of 
   prior strength and it becomes increasingly difficult to convince the 
@@ -32,7 +32,7 @@ This repository contains code and data for my working paper, ["Sceptic priors an
   formation under Bayesian learning and show that apparent deviations from the
   Bayesian ideal can still be accommodated within the same conceptual framework. 
   I argue that a generalized Bayesian model provides a bridge between 
-  competing theories of climate scepticism as a social phenomenon.
+  competing theories of climate skepticism as a social phenomenon.
 
 Click on the green "Code" button above to clone or download the repo to your local computer. Alternately, click on the "fork" button at the very top right of the page to create an independent copy of the repo within your own GitHub account.
 
@@ -42,8 +42,8 @@ I use [**Make**](https://www.gnu.org/software/make/) to automate the entire proj
 
 ```sh
 ## Run these commands in the shell
-git clone git@github.com:grantmcdermott/sceptic-priors.git
-cd sceptic-priors
+git clone git@github.com:grantmcdermott/skeptic-priors.git
+cd skeptic-priors
 make
 ```
 
@@ -125,19 +125,19 @@ For those of you who don't feel like configuring a manual setup, I also provide 
 ```sh
 ## Run these commands in the shell
 
-# cd sceptic-priors  ## Only if you aren't already in the project root
-docker build --tag sceptic:1.0.0 .
+# cd skeptic-priors  ## Only if you aren't already in the project root
+docker build --tag skeptic:1.0.0 .
 ```
 This will take a couple of minutes to pull in all of the necessary R and Julia packages, compile CmdStan etc. But, thereafter, the now-built container will be ready and waiting for immediate deployment whenever you want. Run it with:
 
 ```sh
-docker run -it --rm sceptic:1.0.0
+docker run -it --rm skeptic:1.0.0
 ```
 
 You should see something like:
 
 ```sh
-root@7400ee9f415f:/sceptic-priors# 
+root@7400ee9f415f:/skeptic-priors# 
 ```
 
 You should now be able to run all of the regular Make commands on the project (`make`, `make paper`, etc.), run the individual R scripts (in the `R/` subdir), or generally explore as you wish. 

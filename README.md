@@ -1,22 +1,22 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Sceptic priors and climate consensus
+# Skeptic priors and climate consensus
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-This repository contains code and data for my working paper, [“Sceptic
+This repository contains code and data for McDermott (2021), [“Skeptic
 priors and climate
-consensus”](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/sceptic/sceptic.pdf).
+consensus”](https://doi.org/10.1007/s10584-021-03089-x).
 
 > **Abstract:** How much evidence would it take to convince climate
-> sceptics that they are wrong? I explore this question within an
-> empirical Bayesian framework. I consider a group of stylised sceptics
+> skeptics that they are wrong? I explore this question within an
+> empirical Bayesian framework. I consider a group of stylised skeptics
 > and examine how these individuals rationally update their beliefs in
 > the face of ongoing climate change. I find that available evidence in
 > the form of instrumental climate data tends to overwhelm all but the
-> most extreme priors. Most sceptics form updated beliefs about climate
+> most extreme priors. Most skeptics form updated beliefs about climate
 > sensitivity that correspond closely to estimates from the scientific
 > literature. However, belief convergence is a non-linear function of
 > prior strength and it becomes increasingly difficult to convince the
@@ -25,7 +25,7 @@ consensus”](http://raw.githack.com/grantmcdermott/sceptic-priors/master/paper/
 > deviations from the Bayesian ideal can still be accommodated within
 > the same conceptual framework. I argue that a generalized Bayesian
 > model provides a bridge between competing theories of climate
-> scepticism as a social phenomenon.
+> skepticism as a social phenomenon.
 
 Click on the green “Code” button above to clone or download the repo to
 your local computer. Alternately, click on the “fork” button at the very
@@ -41,8 +41,8 @@ version for reproducing everything is:
 
 ``` sh
 ## Run these commands in the shell
-git clone git@github.com:grantmcdermott/sceptic-priors.git
-cd sceptic-priors
+git clone git@github.com:grantmcdermott/skeptic-priors.git
+cd skeptic-priors
 make
 ```
 
@@ -176,8 +176,8 @@ image locally:
 ``` sh
 ## Run these commands in the shell
 
-# cd sceptic-priors  ## Only if you aren't already in the project root
-docker build --tag sceptic:1.0.0 .
+# cd skeptic-priors  ## Only if you aren't already in the project root
+docker build --tag skeptic:1.0.0 .
 ```
 
 This will take a couple of minutes to pull in all of the necessary R and
@@ -186,13 +186,13 @@ container will be ready and waiting for immediate deployment whenever
 you want. Run it with:
 
 ``` sh
-docker run -it --rm sceptic:1.0.0
+docker run -it --rm skeptic:1.0.0
 ```
 
 You should see something like:
 
 ``` sh
-root@7400ee9f415f:/sceptic-priors# 
+root@7400ee9f415f:/skeptic-priors# 
 ```
 
 You should now be able to run all of the regular Make commands on the
